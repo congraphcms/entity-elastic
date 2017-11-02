@@ -1,0 +1,64 @@
+{
+    "name": "cookbook/entity-elastic",
+
+    "description": "",
+
+    "authors": [
+        {
+            "name": "Nikola Plavsic",
+            "email": "nikolaplavsic@gmail.com"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/database": "5.1.*",
+        "cookbook/core": "dev-master",
+        "cookbook/contracts": "dev-master",
+        "cookbook/filesystem": "dev-master",
+        "cookbook/locales": "dev-master",
+        "cookbook/workflows": "dev-master",
+        "cookbook/eav": "dev-master",
+        "elasticsearch/elasticsearch": "~5.0"
+    },
+
+    "repositories": [
+        {
+            "type": "git",
+            "url":  "git@bitbucket.org:cookbookcms/core.git"
+        },
+        {
+            "type": "git",
+            "url":  "git@bitbucket.org:cookbookcms/contracts.git"
+        },
+        {
+            "type": "git",
+            "url":  "git@bitbucket.org:cookbookcms/filesystem.git"
+        },
+        {
+            "type": "git",
+            "url":  "git@bitbucket.org:cookbookcms/locales.git"
+        },
+        {
+            "type": "git",
+            "url":  "git@bitbucket.org:cookbookcms/workflows.git"
+        },
+        {
+            "type": "git",
+            "url":  "git@bitbucket.org:cookbookcms/eav.git"
+        }
+    ],
+
+    "require-dev": {
+        "phpunit/phpunit": "4.5.*",
+        "orchestra/testbench": "3.1.*"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Cookbook\\EntityElastic\\": ""
+        }
+    },
+
+    "minimum-stability": "dev"
+}

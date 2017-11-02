@@ -1,0 +1,1 @@
+# Congraph Entity Elasticsearch Plugin
