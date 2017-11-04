@@ -110,6 +110,19 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         $this->client = $elasticClientBuilder->create()
                                             ->setHosts($hosts)
                                             ->build();
+        $indexParams = [
+            'index' => $this->indexName
+        ];
+
+        if(!$this->client->indices()->exists($indexParams))
+        {
+            $params = [
+                'index' => $this->indexName,
+                'body' => Config::get('cb.elastic.default_index_mappings')
+            ];
+            $this->client->indices()->create($params);
+            $this->refreshIndex();
+        }
     }
 
     public function onEntityCreated($command, $result)
@@ -149,12 +162,29 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         return $response;
     }
 
-    public function getIndex($indexName)
+    public function indexExists($indexName)
+    {
+        $params = [
+            'index' => $indexName
+        ];
+        return $this->client->indices()->exists($params);
+    }
+
+    public function getSettings($indexName)
     {
         $params = [
             'index' => $indexName
         ];
         $response = $this->client->indices()->getSettings($params);
+        return $response;
+    }
+
+    public function getMappings($indexName)
+    {
+        $params = [
+            'index' => $indexName
+        ];
+        $response = $this->client->indices()->getMapping($params);
         return $response;
     }
 
@@ -193,23 +223,21 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         $params['index'] = $this->indexName;
         $params['type'] = 'doc';
 
-        if(!($result instanceof Model))
-        {
-            throw new Exception("Model not provided for elasticsearch entity");
-        }
-        if(!is_integer($result->id) || empty($result->id))
-        {
-            throw new Exception("ID not provided for elasticsearch entity");
-            
-        }
-
-        // CHANGE THIS
-        // @TODO
-        $params['id'] = $result->id;
-        // ---------------------------------
-
         $body = [];
-        $body['id'] = $params['id'];
+
+        if(!($result instanceof Model) || !is_integer($result->id) || empty($result->id))
+        {
+            $body['created_at'] = date("Y-m-d H:i:s");
+            $body['updated_at'] = date("Y-m-d H:i:s");
+        }
+        else
+        {
+            $params['id'] = $result->id;
+            $body['id'] = $params['id'];
+            $body['created_at'] = $result->created_at->tz('UTC')->toDateTimeString();
+            $body['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
+        }
+        
         $body['fields'] = [];
         $body['status'] = [];
         $body['entity_type_id'] = $model['entity_type_id'];
@@ -296,8 +324,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         $entityType = MetaData::getEntityTypeById($model['entity_type_id']);
         $body['localized'] = !!$entityType->localized;
         $body['localized_workflow'] = !!$entityType->localized_workflow;
-        $body['created_at'] = $result->created_at->tz('UTC')->toDateTimeString();
-        $body['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
+        
 
         if (isset($status))
         {
@@ -356,11 +383,12 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
 
         $params['body'] = $body;
 
-        $this->client->index($params);
+        $response = $this->client->index($params);
+        // var_dump($response);
 
         Trunk::forgetType('entity');
 
-        $entity = $this->fetch($params['id'], [], $locale_id);
+        $entity = $this->fetch($response['_id'], [], $locale_id);
 
         return $entity;
     }
@@ -557,8 +585,14 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         if($changed)
         {
             // update updated_at
-            
-            $body['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
+            if(!($result instanceof Model) || !is_integer($result->id) || empty($result->id))
+            {
+                $body['updated_at'] = date("Y-m-d H:i:s");
+            }
+            else
+            {
+                $body['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
+            }
 
             // update data in elastic
             $params['body'] = [];
@@ -1104,7 +1138,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         $entity = new stdClass();
         $source = $result['_source'];
         $fields = $source['fields'];
-        $entity->id = intval($result['_id']);
+        $entity->id = (is_numeric($result['_id']))?intval($result['_id']):$result['_id'];
         // $entity->version = $result['_version'];
         $entity->type = 'entity';
         if (! is_null($locale) && $result['_source']['localized']) {

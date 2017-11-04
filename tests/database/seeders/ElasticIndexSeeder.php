@@ -40,72 +40,9 @@ class ElasticIndexSeeder {
 	    	'index' => $prefix . 'entities'
 	    ];
 
-	    if($this->client->indices()->exists($params)) {
-	    	$this->client->indices()->delete($params);
-	    }
-
-		$params = [
-	    	'index' => $prefix . 'entities',
-	    	'body' => [
-		        'settings' => [
-		            "index.mapping.single_type" => true
-		        ],
-		        'mappings' => [
-		            'doc' => [
-		                'properties' => [
-		                	'entity_type_id' => [
-		                        'type' => 'integer'
-		                    ],
-		                    'attribute_set_id' => [
-		                        'type' => 'integer'
-		                    ],
-		                    'localized' => [
-		                        'type' => 'boolean'
-		                    ],
-		                    'localized_workflow' => [
-		                        'type' => 'boolean'
-		                    ],
-		                    'status' => [
-		                        'type' => 'nested',
-		                        'properties' => [
-		                        	'locale' => [
-				                        'type' => 'keyword'
-				                    ],
-		                        	'status' => [
-				                        'type' => 'keyword'
-				                    ],
-		                        	'state' => [
-				                        'type' => 'keyword'
-				                    ],
-		                        	'created_at' => [
-		                        		"type" => "date",
-	          							"format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-		                        	],
-		                        	'updated_at' => [
-		                        		"type" => "date",
-	          							"format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-		                        	]
-		                        ]
-		                    ],
-		                    'created_at' => [
-	                    		"type" => "date",
-	  							"format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-	                    	],
-	                    	'updated_at' => [
-	                    		"type" => "date",
-	  							"format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-	                    	],
-	                    	'fields' => [
-		                        'type' => 'object'
-		                    ],
-		                ]
-		            ]
-		        ]
-		    ],
-		    
-		];
-
-		$this->client->indices()->create($params);
+	    // if($this->client->indices()->exists($params)) {
+	    // 	$this->client->indices()->delete($params);
+	    // }
 
 
 		$params = [

@@ -22,6 +22,63 @@ return array(
 	    ]
 	],
 
-	'index_prefix' => env('ELASTICSEARCH_INDEX_PREFIX', 'congraph_')
+	'index_prefix' => env('ELASTICSEARCH_INDEX_PREFIX', 'congraph_'),
+
+	'default_index_mappings' => [
+		'settings' => [
+            "index.mapping.single_type" => true
+        ],
+        'mappings' => [
+            'doc' => [
+                'properties' => [
+                    'entity_type_id' => [
+                        'type' => 'integer'
+                    ],
+                    'attribute_set_id' => [
+                        'type' => 'integer'
+                    ],
+                    'localized' => [
+                        'type' => 'boolean'
+                    ],
+                    'localized_workflow' => [
+                        'type' => 'boolean'
+                    ],
+                    'status' => [
+                        'type' => 'nested',
+                        'properties' => [
+                            'locale' => [
+                                'type' => 'keyword'
+                            ],
+                            'status' => [
+                                'type' => 'keyword'
+                            ],
+                            'state' => [
+                                'type' => 'keyword'
+                            ],
+                            'created_at' => [
+                                "type" => "date",
+                                "format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+                            ],
+                            'updated_at' => [
+                                "type" => "date",
+                                "format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+                            ]
+                        ]
+                    ],
+                    'created_at' => [
+                        "type" => "date",
+                        "format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+                    ],
+                    'updated_at' => [
+                        "type" => "date",
+                        "format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+                    ],
+                    'fields' => [
+                        'type' => 'object'
+                    ],
+                ]
+            ]
+        ]
+    ]
 
 );

@@ -68,9 +68,6 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
                                             ->build();
 
 		$this->elasticSeeder = new ElasticIndexSeeder($client);
-
-		$this->elasticSeeder->up();
-
 	}
 
 	public function tearDown()
@@ -160,15 +157,19 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		
 
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 		$this->assertTrue($repo instanceof Cookbook\EntityElastic\Repositories\EntityRepository);
+
+		$this->assertTrue($repo->indexExists(Config::get('cb.elastic.index_prefix') . 'entities'));
 	}
 
 	public function testFetch() {
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(1);
 
@@ -296,6 +297,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(133);
 	}
@@ -308,6 +310,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(1, [], null, 'sr_RS');
 
@@ -322,6 +325,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(2, [], null, 'trashed');
 
@@ -334,6 +338,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
 
@@ -357,6 +362,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
 
@@ -396,6 +402,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
 
@@ -448,7 +455,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
-
+		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 
 		$result = $repo->get(
@@ -473,6 +480,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
 
@@ -560,6 +568,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
 
@@ -756,6 +765,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
 
@@ -930,18 +940,19 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
 		$array = $result->toArray();
 		// $this->d->dump($array);
 
-		$this->assertTrue(is_int($result->id));
+		// $this->assertTrue(is_int($result->id));
 		$this->assertArraySubset([
 			"type" => "entity",
 			'entity_type_id' => 1,
 			'attribute_set_id' => 1,
-			'status' => 'public',
+			'status' => 'draft',
 			'fields' => [
 				'attribute1' => '234',
 				'attribute2' => '',
@@ -957,7 +968,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 			'entity_type_id' => 1,
 			'attribute_set_id' => 1,
 			'status' => [
-				'en_US' => 'public'
+				'en_US' => 'draft'
 			],
 			'fields' => [
 				'attribute1' => '234',
@@ -988,20 +999,21 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
 		$array = $result->toArray();
 		// $this->d->dump($array);
 
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
-		$this->assertTrue(is_int($result->id));
+		// $this->assertTrue(is_int($result->id));
 		$this->assertArraySubset([
 			"type" => "entity",
 			'entity_type_id' => 1,
 			'attribute_set_id' => 1,
 			'status' => [
-				'en_US' => 'public',
-				'fr_FR' => 'public'
+				'en_US' => 'draft',
+				'fr_FR' => 'draft'
 			],
 			'fields' => [
 				'attribute1' => '234',
@@ -1035,12 +1047,13 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
 		$array = $result->toArray();
 
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
-		$this->assertTrue(is_int($result->id));
+		// $this->assertTrue(is_int($result->id));
 		$this->assertArraySubset([
 			"type" => "entity",
 			'entity_type_id' => 1,
@@ -1084,12 +1097,13 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
 		$array = $result->toArray();
 
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
-		$this->assertTrue(is_int($result->id));
+		// $this->assertTrue(is_int($result->id));
 		$this->assertArraySubset([
 			"type" => "entity",
 			'entity_type_id' => 1,
@@ -1116,6 +1130,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$params = [
 			'fields' => [
@@ -1140,6 +1155,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$params = [
 			'locale' => 'en_US',
@@ -1160,6 +1176,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$params = [
 			'status' => 'trashed'
@@ -1183,6 +1200,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$params = [
 			'status' => [
@@ -1209,6 +1227,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$result = $repo->delete(1);
 
@@ -1224,6 +1243,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
 
@@ -1246,6 +1266,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
 
@@ -1286,6 +1307,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
 
@@ -1308,6 +1330,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
 
