@@ -45,8 +45,8 @@ class EntityElasticServiceProvider extends ServiceProvider {
 	 */
 	public function boot() {
 		$this->publishes([
-			__DIR__.'/config/config.php' => config_path('cb.elastic'),
-			__DIR__.'/config/eav.php' => config_path('cb.eav'),
+			__DIR__.'/config/config.php' => config_path('cb.elastic.php'),
+			__DIR__.'/config/eav.php' => config_path('cb.eav.php'),
 		]);
 	}
 
