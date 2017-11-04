@@ -23,7 +23,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Eav/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
@@ -129,7 +129,8 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 			'Cookbook\Locales\LocalesServiceProvider',
 			'Cookbook\Eav\EavServiceProvider',
 			'Cookbook\Filesystem\FilesystemServiceProvider',
-			'Cookbook\Workflows\WorkflowsServiceProvider'
+			'Cookbook\Workflows\WorkflowsServiceProvider',
+			'Cookbook\EntityElastic\EntityElasticServiceProvider'
 		];
 	}
 
@@ -153,7 +154,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -203,7 +204,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -253,7 +254,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -321,7 +322,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -389,7 +390,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -439,7 +440,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -489,7 +490,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -539,7 +540,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -633,7 +634,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -745,7 +746,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
@@ -839,7 +840,7 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\Eav\Repositories\EntityElasticRepository');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
 
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);

@@ -34,6 +34,7 @@ class EntityElasticServiceProvider extends ServiceProvider {
 	*/
 	public function register() {
 		$this->mergeConfigFrom(realpath(__DIR__ . '/config/config.php'), 'cb.elastic');
+		$this->mergeConfigFrom(realpath(__DIR__ . '/config/eav.php'), 'cb.eav');
 		$this->registerServiceProviders();
 	}
 
@@ -44,8 +45,8 @@ class EntityElasticServiceProvider extends ServiceProvider {
 	 */
 	public function boot() {
 		$this->publishes([
-			__DIR__.'/config/config.php' => config_path('cb.elastic.php'),
-			__DIR__.'/database/migrations' => database_path('/migrations'),
+			__DIR__.'/config/config.php' => config_path('cb.elastic'),
+			__DIR__.'/config/eav.php' => config_path('cb.eav'),
 		]);
 	}
 

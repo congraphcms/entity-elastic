@@ -114,32 +114,32 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
 
     public function onEntityCreated($command, $result)
     {
-
+        $this->create($command->params, $result);
     }
 
     public function onEntityUpdated($command, $result)
     {
-        
+        $this->update($command->id, $command->params, $result);   
     }
 
     public function onEntityDeleted($command, $result)
     {
-        
+        $this->delete($command->id);   
     }
 
     public function onAttributeDeleted($command, $result)
     {
-        
+        $this->deleteByAttribute($result);
     }
 
     public function onAttributeSetDeleted($command, $result)
     {
-        
+        $this->deleteByAttributeSet($result);
     }
 
     public function onEntityTypeDeleted($command, $result)
     {
-        
+        $this->deleteByEntityType($result);
     }
 
 
@@ -187,15 +187,25 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
      *
      * @throws Exception
      */
-    public function create($model, $id = null)
+    public function create($model, $result = null)
     {
         $params = [];
         $params['index'] = $this->indexName;
         $params['type'] = 'doc';
 
+        if(!($result instanceof Model))
+        {
+            throw new Exception("Model not provided for elasticsearch entity");
+        }
+        if(!is_integer($result->id) || empty($result->id))
+        {
+            throw new Exception("ID not provided for elasticsearch entity");
+            
+        }
+
         // CHANGE THIS
         // @TODO
-        $params['id'] = rand(100, 100000);
+        $params['id'] = $result->id;
         // ---------------------------------
 
         $body = [];
@@ -286,8 +296,8 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         $entityType = MetaData::getEntityTypeById($model['entity_type_id']);
         $body['localized'] = !!$entityType->localized;
         $body['localized_workflow'] = !!$entityType->localized_workflow;
-        $body['created_at'] = date("Y-m-d H:i:s");
-        $body['updated_at'] = $body['created_at'];
+        $body['created_at'] = $result->created_at->tz('UTC')->toDateTimeString();
+        $body['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
 
         if (isset($status))
         {
@@ -367,7 +377,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
      *
      * @todo enable attribute set change for entity
      */
-    public function update($id, $model)
+    public function update($id, $model, $result = null)
     {
         
         $params = [];
@@ -547,7 +557,8 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         if($changed)
         {
             // update updated_at
-            $body['updated_at'] = date("Y-m-d H:i:s");
+            
+            $body['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
 
             // update data in elastic
             $params['body'] = [];
@@ -1110,9 +1121,10 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
 
         $attributeSet = MetaData::getAttributeSetById($entity->attribute_set_id);
         $entity->attribute_set_code = $attributeSet->code;
+        $entity->primary_field = MetaData::getAttributeById($attributeSet->primary_attribute_id)->code;
 
-        $entity->localized = $source['localized'];
-        $entity->localized_workflow = $source['localized_workflow'];
+        $entity->localized = intval($source['localized']);
+        $entity->localized_workflow = intval($source['localized_workflow']);
 
         $timezone = (Config::get('app.timezone'))?Config::get('app.timezone'):'UTC';
 

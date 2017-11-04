@@ -87,62 +87,61 @@ class FieldsServiceProvider extends ServiceProvider {
 	protected function registerFieldHandlers() {
 
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Asset\AssetFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Asset\AssetFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Asset\AssetFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Boolean\BooleanFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Boolean\BooleanFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Boolean\BooleanFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Datetime\DatetimeFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Datetime\DatetimeFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Datetime\DatetimeFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Decimal\DecimalFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Decimal\DecimalFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Decimal\DecimalFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Integer\IntegerFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Integer\IntegerFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Integer\IntegerFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Relation\RelationFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Relation\RelationFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Relation\RelationFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager'),
-				$app->make('Cookbook\Eav\Repositories\EntityElasticRepository')
+				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Select\SelectFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Select\SelectFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Select\SelectFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Text\TextFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Text\TextFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Text\TextFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Textarea\TextareaFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Textarea\TextareaFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Textarea\TextareaFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
 		$this->app->singleton('Cookbook\EntityElastic\Fields\Location\LocationFieldHandler', function($app) {
-			return new \Cookbook\Eav\ElasticFields\Location\LocationFieldHandler(
+			return new \Cookbook\EntityElastic\Fields\Location\LocationFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);

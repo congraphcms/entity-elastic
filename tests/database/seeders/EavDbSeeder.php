@@ -41,7 +41,7 @@ class EavDbSeeder extends Seeder {
 				'multiple_sets' => 1,
 				'localized' => 1,
 				'workflow_id' => 2,
-				'default_point_id' => 1,
+				'default_point_id' => 3,
 				'localized_workflow' => 1,
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -598,6 +598,12 @@ class EavDbSeeder extends Seeder {
 				'attribute_set_id' => 4,
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
+			],
+			[
+				'entity_type_id' => 4,
+				'attribute_set_id' => 4,
+				'created_at' => date("Y-m-d H:i:s"),
+				'updated_at' => date("Y-m-d H:i:s")
 			]
 		]);
 
@@ -605,7 +611,7 @@ class EavDbSeeder extends Seeder {
 		DB::table('entity_statuses')->insert([
 			[
 				'entity_id' => 1,
-				'workflow_point_id' => 3,
+				'workflow_point_id' => 4,
 				'locale_id' => 1,
 				'state' => 'active',
 				'scheduled_at' => null,
@@ -614,7 +620,7 @@ class EavDbSeeder extends Seeder {
 			],
 			[
 				'entity_id' => 1,
-				'workflow_point_id' => 3,
+				'workflow_point_id' => 4,
 				'locale_id' => 2,
 				'state' => 'active',
 				'scheduled_at' => null,

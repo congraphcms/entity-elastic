@@ -63,11 +63,12 @@ class RepositoriesServiceProvider extends ServiceProvider {
 	 */
 	protected function registerListeners()
 	{
-		// $this->app['events']->listen('cb.after.entity.type.create', 'Cookbook\Eav\Repositories\EntityElasticRepository@onEntityTypeCreated');
-		// $this->app['events']->listen('cb.before.entity.type.update', 'Cookbook\Eav\Repositories\EntityElasticRepository@onBeforeEntityTypeUpdated');
-		// $this->app['events']->listen('cb.after.entity.type.update', 'Cookbook\Eav\Repositories\EntityElasticRepository@onEntityTypeUpdated');
-		// $this->app['events']->listen('cb.before.entity.type.delete', 'Cookbook\Eav\Repositories\EntityElasticRepository@onBeforeEntityTypeDeleted');
-		// $this->app['events']->listen('cb.after.entity.type.delete', 'Cookbook\Eav\Repositories\EntityElasticRepository@onEntityTypeDeleted');
+		$this->app['events']->listen('cb.after.entity.create', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityCreated');
+		$this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityUpdated');
+		$this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityDeleted');
+		$this->app['events']->listen('cb.after.attribute.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onAttributeDeleted');
+		$this->app['events']->listen('cb.after.attribute.set.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onAttributeSetDeleted');
+		$this->app['events']->listen('cb.after.entity.type.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityTypeDeleted');
 	}
 
 	/**
@@ -80,7 +81,7 @@ class RepositoriesServiceProvider extends ServiceProvider {
 			// var_dump('Contract for attribute repository resolving...');
 			return new EntityRepository(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\ElasticFields\FieldHandlerFactory'),
+				$app->make('Cookbook\EntityElastic\Fields\FieldHandlerFactory'),
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
