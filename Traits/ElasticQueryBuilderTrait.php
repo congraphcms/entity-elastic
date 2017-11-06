@@ -28,13 +28,21 @@ use stdClass;
 trait ElasticQueryBuilderTrait
 {
 
-	protected function parseFilterOperator($query, $key, $filter)
+	protected function parseFilterOperator($query, $key, $filter, $textValue = false)
     {
         foreach ($filter as $operator => $value) {
             switch (true) {
                 case ($operator === 'e'):
+                    if($textValue)
+                    {
+                        $key .= '.keyword';
+                    }
                     return $this->addTermQuery($query, $key, $value);
                 case ($operator === 'ne'):
+                    if($textValue)
+                    {
+                        $key .= '.keyword';
+                    }
                     return $this->addNotTermQuery($query, $key, $value);
                 case ($operator === 'lt'):
                     return $this->addRangeQuery($query, $key, $value, $operator);
@@ -45,10 +53,18 @@ trait ElasticQueryBuilderTrait
                 case ($operator === 'gte'):
                     return $this->addRangeQuery($query, $key, $value, $operator);
                 case ($operator === 'in'):
+                    if($textValue)
+                    {
+                        $key .= '.keyword';
+                    }
                     $value = $this->parseCommaValue($value);
                     return $this->addTermsQuery($query, $key, $value);
                 case ($operator === 'nin'):
                     $value = $this->parseCommaValue($value);
+                    if($textValue)
+                    {
+                        $key .= '.keyword';
+                    }
                     return $this->addNotTermsQuery($query, $key, $value);
                 default:
                     throw new BadRequestException(['Filter operator not supported.']);

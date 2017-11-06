@@ -880,7 +880,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
 
         $query = $this->queryStatus($query, $status, $locale, $localeCodes);
         $query = $this->queryPagination($query, $offset, $limit);
-        $query = $this->querySorting($query, $sort);
+        $query = $this->querySorting($query, $sort, $locale, $localeCodes);
         $query = $this->queryFiltering($query, $filter, $locale, $localeCodes);
 
         // var_dump($query);
@@ -958,7 +958,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         return $query;
     }
 
-    protected function querySorting($query, $sort)
+    protected function querySorting($query, $sort, $localeFilter, $localeCodes)
     {
         if (! empty($sort)) {
             $sort = (is_array($sort))? $sort: [$sort];
@@ -978,7 +978,22 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                     $attribute = MetaData::getAttributeByCode($code);
                     if(in_array($attribute->field_type, ['text', 'tags']))
                     {
-                        $sortCriteria = $sortCriteria . '.keyword';
+                        if(!$attribute->localized)
+                        {
+                            $sortCriteria = $sortCriteria . '.keyword';
+                        }
+                        else
+                        {
+                            if($localeFilter)
+                            {
+                                $sortCriteria = $sortCriteria . '__' . $localeFilter->code . '.keyword';
+                            }
+                            else
+                            {
+                                $sortCriteria = $sortCriteria . '__' . $localeCodes[0] . '.keyword';
+                            }
+                        }
+                        
                     }
 
                     $sortDirection = [

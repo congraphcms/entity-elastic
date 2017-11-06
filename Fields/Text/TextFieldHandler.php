@@ -43,4 +43,43 @@ class TextFieldHandler extends AbstractFieldHandler {
 		}
 		return $value;
 	}
+
+
+	/**
+	 * Add filters to query for field
+	 * 
+	 * @param object $query
+	 * @param object $attribute
+	 * @param $filter
+	 * 
+	 * @return boolean
+	 */
+	public function filterEntities($query, $attribute, $filter, $locale = null, $localeCodes = [])
+	{
+		$code = $attribute->code;
+
+		if($attribute->localized)
+		{
+			if($locale)
+			{
+				$code = $code . '__' . $locale->code;
+			}
+			else
+			{
+				$code = $code . '__*';
+			}
+		}
+
+		if( ! is_array($filter) )
+		{
+			$filter = $this->parseValue($filter, $attribute);
+			$query = $this->addTermQuery($query, 'fields.' . $code . '.keyword', $filter);
+		}
+		else
+		{
+			$query = $this->parseFilterOperator($query, 'fields.' . $code, $filter, true);
+		}
+
+		return $query;
+	}
 }

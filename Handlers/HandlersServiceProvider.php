@@ -90,10 +90,10 @@ class HandlersServiceProvider extends ServiceProvider {
 
 		// Entities
 		$this->app->bind('Cookbook\EntityElastic\Handlers\Commands\Entities\EntityFetchHandler', function($app){
-			return new EntityFetchHandler($app->make('Cookbook\Contracts\EntityElastic\EntityRepositoryContract'));
+			return new EntityFetchHandler($app->make('Cookbook\EntityElastic\Repositories\EntityRepository'));
 		});
 		$this->app->bind('Cookbook\EntityElastic\Handlers\Commands\Entities\EntityGetHandler', function($app){
-			return new EntityGetHandler($app->make('Cookbook\Contracts\EntityElastic\EntityRepositoryContract'));
+			return new EntityGetHandler($app->make('Cookbook\EntityElastic\Repositories\EntityRepository'));
 		});
 	}
 

@@ -80,18 +80,13 @@ class ValidatorsServiceProvider extends ServiceProvider {
 		
 		$this->app->bind('Cookbook\EntityElastic\Validators\Entities\EntityFetchValidator', function($app){
 			return new EntityFetchValidator(
-				$app->make('Cookbook\Contracts\Eav\EntityRepositoryContract'),
-				$app->make('Cookbook\Contracts\Locales\LocaleRepositoryContract')
+				$app->make('Cookbook\EntityElastic\Repositories\EntityRepository')
 			);
 		});
 		$this->app->bind('Cookbook\EntityElastic\Validators\Entities\EntityGetValidator', function($app){
 			return new EntityGetValidator(
 				$app->make('Cookbook\Eav\Managers\AttributeManager'),
-				$app->make('Cookbook\Contracts\Eav\FieldValidatorFactoryContract'),
-				$app->make('Cookbook\Contracts\Eav\EntityTypeRepositoryContract'),
-				$app->make('Cookbook\Contracts\Eav\AttributeSetRepositoryContract'),
-				$app->make('Cookbook\Contracts\Eav\AttributeRepositoryContract'),
-				$app->make('Cookbook\Contracts\Locales\LocaleRepositoryContract')
+				$app->make('Cookbook\Contracts\Eav\FieldValidatorFactoryContract')
 			);
 		});
 	}
