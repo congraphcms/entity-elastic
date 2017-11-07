@@ -944,10 +944,37 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
 
         if( ! empty($fulltextSearch) )
         {
-            $query = $this->parseFulltextSearch($query, $fulltextSearch, $locale);
+            $query = $this->parseFulltextSearch($query, $fulltextSearch, $localeFilter);
         }
 
         return $query;
+    }
+
+    protected function parseFulltextSearch($query, $fulltextSearch, $localeFilter)
+    {
+        $attributes = MetaData::getAttributes();
+        $fields = [];
+        foreach ($attributes as $attribute)
+        {
+            if(in_array($attribute->field_type, ['text', 'tags']))
+            {
+                if(!$attribute->localized)
+                {
+                    $fields[] = 'fields.' . $attribute->code;
+                    continue;
+                }
+
+                if($localeFilter)
+                {
+                    $fields[] = 'fields.' . $attribute->code . '__' . $localeFilter->code;
+                    continue;
+                }
+
+
+                $fields[] = 'fields.' . $attribute->code . '__*';
+            }
+        }
+        return $this->addMultiMatchQuery($query, $fields, $fulltextSearch, 'cross_fields');
     }
 
     protected function parseFieldFilter($query, $filter, $attribute, $localeFilter, $localeCodes)

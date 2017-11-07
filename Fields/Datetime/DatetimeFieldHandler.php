@@ -11,6 +11,7 @@
 namespace Cookbook\EntityElastic\Fields\Datetime;
 
 use Cookbook\EntityElastic\Fields\AbstractFieldHandler;
+use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 use stdClass;
 

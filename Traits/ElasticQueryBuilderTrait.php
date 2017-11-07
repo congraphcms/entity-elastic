@@ -10,25 +10,25 @@
 
 namespace Cookbook\EntityElastic\Traits;
 
+use Cookbook\Core\Exceptions\BadRequestException;
 use Exception;
 use Closure;
 use stdClass;
-
 /**
  * MapperTrait for mapping events/handlers/commands
  * 
  * Gives class ability to map events/handlers/commands
  * 
- * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
- * @since 		0.1.0-alpha
- * @version  	0.1.0-alpha
+ * @author      Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @copyright   Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @package     cookbook/entity-elastic
+ * @since       0.1.0-alpha
+ * @version     0.1.0-alpha
  */
 trait ElasticQueryBuilderTrait
 {
 
-	protected function parseFilterOperator($query, $key, $filter, $textValue = false)
+    protected function parseFilterOperator($query, $key, $filter, $textValue = false)
     {
         foreach ($filter as $operator => $value) {
             switch (true) {
@@ -66,6 +66,17 @@ trait ElasticQueryBuilderTrait
                         $key .= '.keyword';
                     }
                     return $this->addNotTermsQuery($query, $key, $value);
+                case ($operator === 'm'):
+                    $words = explode(' ', $value);
+                    foreach ($words as $word)
+                    {
+                        if($textValue)
+                        {
+                            $termKey = $key . '.keyword';
+                        }
+                        $query = $this->addShouldTermQuery($query, $termKey, $word, 0);
+                    }
+                    return $this->addMatchQuery($query, $key, $value);
                 default:
                     throw new BadRequestException(['Filter operator not supported.']);
                     break;
@@ -88,7 +99,7 @@ trait ElasticQueryBuilderTrait
         return $value;
     }
 
-	protected function querySorting($query, $sort)
+    protected function querySorting($query, $sort)
     {
         if (! empty($sort)) {
             $sort = (is_array($sort))? $sort: [$sort];
@@ -163,7 +174,7 @@ trait ElasticQueryBuilderTrait
         ];
     }
 
-	protected function createNestedQuery($path)
+    protected function createNestedQuery($path)
     {
         return [ 'nested' => [ 'path' => $path, 'query' => [] ] ];
     }
@@ -200,6 +211,36 @@ trait ElasticQueryBuilderTrait
         $exists['field'] = $field;
 
         $query[$parentKey]['query']['bool']['filter'][] = ['exists' => $exists];
+        return $query;
+    }
+
+    protected function addMatchQuery($query, $field, $filter)
+    {
+        $parentKey = $this->getQueryParentKey($query);
+
+        $query = $this->createMustQuery($query);
+        $match = [];
+        $match[$field] = $filter;
+
+        $query[$parentKey]['query']['bool']['must'][] = ['match' => $match];
+        return $query;
+    }
+
+    protected function addMultiMatchQuery($query, $fields, $filter, $type = false)
+    {
+        $parentKey = $this->getQueryParentKey($query);
+
+        $query = $this->createMustQuery($query);
+        $match = [];
+        $match['query'] = $filter;
+        $match['fields'] = $fields;
+
+        if($type)
+        {
+            $match['type'] = $type;
+        }
+
+        $query[$parentKey]['query']['bool']['must'][] = ['multi_match' => $match];
         return $query;
     }
 
@@ -255,11 +296,11 @@ trait ElasticQueryBuilderTrait
         return $query;
     }
 
-    protected function addShouldTermQuery($query, $field, $filter)
+    protected function addShouldTermQuery($query, $field, $filter, $minimum_should_match = 1)
     {
         $parentKey = $this->getQueryParentKey($query);
 
-        $query = $this->createShouldQuery($query);
+        $query = $this->createShouldQuery($query, $minimum_should_match);
         $term = [];
         $term[$field] = $filter;
 
@@ -298,7 +339,7 @@ trait ElasticQueryBuilderTrait
         return $query;
     }
 
-    protected function createShouldQuery($query)
+    protected function createShouldQuery($query, $minimum_should_match = 1)
     {
         $parentKey = $this->getQueryParentKey($query);
 
@@ -307,7 +348,7 @@ trait ElasticQueryBuilderTrait
         if(!isset($query[$parentKey]['query']['bool']['should']))
         {
             $query[$parentKey]['query']['bool']['should'] = [];
-            $query[$parentKey]['query']['bool']['minimum_should_match'] = 1;
+            $query[$parentKey]['query']['bool']['minimum_should_match'] = $minimum_should_match;
         }
 
         return $query;
