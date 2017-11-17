@@ -35,7 +35,7 @@ class SelectFieldHandler extends AbstractFieldHandler {
 	 * 
 	 * @return boolean
 	 */
-	public function parseValue($value, $attribute)
+	public function parseValue($value, $attribute, $locale, $params, $entity)
 	{
 		foreach ($attribute->options as $option)
 		{

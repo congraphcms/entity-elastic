@@ -17,6 +17,7 @@ use Cookbook\Core\Bus\RepositoryCommand;
 use Cookbook\Core\Exceptions\BadRequestException;
 use Cookbook\Core\Exceptions\NotFoundException;
 use Cookbook\Core\Validation\Validator;
+use Carbon\Carbon;
 
 
 /**
@@ -100,7 +101,13 @@ class EntityGetValidator extends Validator
 			'entity_type_id'		=> ['e', 'ne', 'in', 'nin'],
 			'attribute_set'			=> ['e', 'ne', 'in', 'nin'],
 			'attribute_set_id'		=> ['e', 'ne', 'in', 'nin'],
-			'created_at'			=> ['lt', 'lte', 'gt', 'gte']
+			'created_at'			=> ['lt', 'lte', 'gt', 'gte'],
+			'updated_at'			=> ['lt', 'lte', 'gt', 'gte'],
+		];
+
+		$this->dateFields = [
+			'created_at',
+			'updated_at'
 		];
 
 		$this->defaultSorting = ['-created_at'];
@@ -428,6 +435,10 @@ class EntityGetValidator extends Validator
 				if($field == 's')
 				{
 					$filter = strval($filter);
+					if(empty($filter))
+					{
+						unset($filters[$field]);
+					}
 					continue;
 				}
 
@@ -470,11 +481,29 @@ class EntityGetValidator extends Validator
 						throw $e;
 					}
 
+					if(in_array($field, $this->dateFields))
+					{
+						$value = Carbon::parse(strval($value))->tz('UTC')->toDateTimeString();
+					}
+
 					if($operation == 'in' || $operation == 'nin')
 					{
 						if( ! is_array($value) )
 						{
 							$value = explode(',', strval($value));
+						}
+						foreach ($value as $index => &$item)
+						{
+							$item = ltrim(rtrim(strval($item)));
+							if(empty($item))
+							{
+								unset($value[$index]);
+							}
+						}
+						$value = array_values($value);
+						if(empty($value))
+						{
+							unset($filter[$operation]);
 						}
 					}
 					else

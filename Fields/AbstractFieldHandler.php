@@ -84,7 +84,7 @@ abstract class AbstractFieldHandler
 	 * 
 	 * @return boolean
 	 */
-	public function parseValue($value, $attribute)
+	public function parseValue($value, $attribute, $locale, $params, $entity)
 	{
 		return $value;
 	}
@@ -102,7 +102,22 @@ abstract class AbstractFieldHandler
 		return $value;
 	}
 
-	public function prepareForElastic($value, $attribute)
+	/**
+	 * Parse filter for database use
+	 * 
+	 * @param mixed $value
+	 * @param object $attribute
+	 * 
+	 * @return boolean
+	 */
+	public function parseFilter($filter, $attribute)
+	{
+		return $this->parseValue($filter, $attribute, null, null, null);
+	}
+
+
+
+	public function prepareForElastic($value, $attribute, $locale, $params, $entity)
 	{
 		$attributeSettings = $this->attributeManager->getFieldTypes()[$attribute->field_type];
 
@@ -120,13 +135,13 @@ abstract class AbstractFieldHandler
 
 			foreach ($value as &$item)
 			{
-				$item = $this->parseValue($item, $attribute);
+				$item = $this->parseValue($item, $attribute, $locale, $params, $entity);
 			}
 
 			return $value;
 		}
 		
-		return $value = $this->parseValue($value, $attribute);
+		return $value = $this->parseValue($value, $attribute, $locale, $params, $entity);
 	}
 
 	/**
@@ -156,7 +171,7 @@ abstract class AbstractFieldHandler
 
 		if( ! is_array($filter) )
 		{
-			$filter = $this->parseValue($filter, $attribute);
+			$filter = $this->parseFilter($filter, $attribute);
 			$query = $this->addTermQuery($query, 'fields.' . $code, $filter);
 		}
 		else

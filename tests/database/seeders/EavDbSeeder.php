@@ -99,6 +99,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => true,
 				'filterable' => false,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'system_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -112,6 +114,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => false,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -125,6 +129,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => true,
 				'required' => false,
 				'filterable' => false,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -138,6 +144,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -151,6 +159,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => true,
 				'filterable' => false,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'system_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -164,6 +174,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => false,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -177,6 +189,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'system_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -190,6 +204,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -204,6 +220,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -217,6 +235,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -231,6 +251,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -244,6 +266,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -257,6 +281,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -270,6 +296,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -283,6 +311,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -296,6 +326,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => false,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -309,6 +341,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -322,6 +356,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -335,6 +371,8 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -349,6 +387,131 @@ class EavDbSeeder extends Seeder {
 				'unique' => false,
 				'required' => false,
 				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
+				'status' => 'user_defined',
+				'created_at' => date("Y-m-d H:i:s"),
+				'updated_at' => date("Y-m-d H:i:s")
+			],
+			[
+				'code' => 'test_compound_text1_attribute',
+				'field_type' => 'text',
+				'table' => 'attribute_values_text',
+				'localized' => false,
+				'default_value' => null,
+				'unique' => false,
+				'required' => false,
+				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
+				'status' => 'user_defined',
+				'created_at' => date("Y-m-d H:i:s"),
+				'updated_at' => date("Y-m-d H:i:s")
+			],
+			[
+				'code' => 'test_compound_text2_attribute',
+				'field_type' => 'text',
+				'table' => 'attribute_values_text',
+				'localized' => false,
+				'default_value' => null,
+				'unique' => false,
+				'required' => false,
+				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
+				'status' => 'user_defined',
+				'created_at' => date("Y-m-d H:i:s"),
+				'updated_at' => date("Y-m-d H:i:s")
+			],
+			[
+				'code' => 'test_compound_attribute',
+				'field_type' => 'compound',
+				'table' => 'attribute_values_text',
+				'localized' => false,
+				'default_value' => null,
+				'unique' => false,
+				'required' => false,
+				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([
+					'expected_value' => 'string',
+					'inputs' => [
+						[
+							'type' => 'field',
+							'value' => 21,
+						],
+						[
+							'type' => 'operator',
+							'value' => 'CONCAT',
+						],
+						[
+							'type' => 'literal',
+							'value' => ' ',
+						],
+						[
+							'type' => 'operator',
+							'value' => 'CONCAT',
+						],
+						[
+							'type' => 'field',
+							'value' => 22,
+						],
+					]
+				]),
+				'status' => 'user_defined',
+				'created_at' => date("Y-m-d H:i:s"),
+				'updated_at' => date("Y-m-d H:i:s")
+			],
+			[
+				'code' => 'test_compound_localized_text_attribute',
+				'field_type' => 'text',
+				'table' => 'attribute_values_text',
+				'localized' => true,
+				'default_value' => null,
+				'unique' => false,
+				'required' => false,
+				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
+				'status' => 'user_defined',
+				'created_at' => date("Y-m-d H:i:s"),
+				'updated_at' => date("Y-m-d H:i:s")
+			],
+			[
+				'code' => 'test_localized_compound_attribute',
+				'field_type' => 'compound',
+				'table' => 'attribute_values_text',
+				'localized' => true,
+				'default_value' => null,
+				'unique' => false,
+				'required' => false,
+				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([
+					'expected_value' => 'string',
+					'inputs' => [
+						[
+							'type' => 'field',
+							'value' => 21,
+						],
+						[
+							'type' => 'operator',
+							'value' => 'CONCAT',
+						],
+						[
+							'type' => 'literal',
+							'value' => ' ',
+						],
+						[
+							'type' => 'operator',
+							'value' => 'CONCAT',
+						],
+						[
+							'type' => 'field',
+							'value' => 24,
+						],
+					]
+				]),
 				'status' => 'user_defined',
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
@@ -560,6 +723,31 @@ class EavDbSeeder extends Seeder {
 				'attribute_set_id' => 4,
 				'attribute_id' => 20,
 				'sort_order' => 12
+			],
+			[
+				'attribute_set_id' => 4,
+				'attribute_id' => 21,
+				'sort_order' => 13
+			],
+			[
+				'attribute_set_id' => 4,
+				'attribute_id' => 22,
+				'sort_order' => 14
+			],
+			[
+				'attribute_set_id' => 4,
+				'attribute_id' => 23,
+				'sort_order' => 152
+			],
+			[
+				'attribute_set_id' => 4,
+				'attribute_id' => 24,
+				'sort_order' => 16
+			],
+			[
+				'attribute_set_id' => 4,
+				'attribute_id' => 25,
+				'sort_order' => 17
 			],
 			[
 				'attribute_set_id' => 5,

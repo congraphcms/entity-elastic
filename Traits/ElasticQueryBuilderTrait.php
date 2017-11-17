@@ -226,21 +226,32 @@ trait ElasticQueryBuilderTrait
         return $query;
     }
 
-    protected function addMultiMatchQuery($query, $fields, $filter, $type = false)
+    protected function addMultiMatchQuery($query, $fields, $filter, $type = false, $should = false, $boost = 1)
     {
         $parentKey = $this->getQueryParentKey($query);
 
-        $query = $this->createMustQuery($query);
+        if(!$should)
+        {
+            $query = $this->createMustQuery($query);
+        }
+        else
+        {
+            $query = $this->createShouldQuery($query, 0);
+        }
+        
         $match = [];
         $match['query'] = $filter;
         $match['fields'] = $fields;
+        $match['boost'] = $boost;
 
         if($type)
         {
             $match['type'] = $type;
         }
 
-        $query[$parentKey]['query']['bool']['must'][] = ['multi_match' => $match];
+        $operator = ($should)?'should':'must';
+
+        $query[$parentKey]['query']['bool'][$operator][] = ['multi_match' => $match];
         return $query;
     }
 

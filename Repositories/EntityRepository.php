@@ -284,7 +284,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                     $value = $attribute->default_value;
                 }
 
-                $value = $fieldHandler->prepareForElastic($value, $attribute);
+                $value = $fieldHandler->prepareForElastic($value, $attribute, $locale_id, $model, null);
                 $body['fields'][$code] = $value;
                 continue;
             }
@@ -296,13 +296,13 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                     if($locale->id == $l->id)
                     {
                         $value = (array_key_exists($code, $fields))?$fields[$code]:$attribute->default_value;
-                        $value = $fieldHandler->prepareForElastic($value, $attribute);
+                        $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
                         $body['fields'][$code . '__' . $l->code] = $value;
                         continue;
                     }
                     
                     $value = $attribute->default_value;
-                    $value = $fieldHandler->prepareForElastic($value, $attribute);
+                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
                     $body['fields'][$code . '__' . $l->code] = $value;
                     continue;
                 }
@@ -310,13 +310,13 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                 if (array_key_exists($code, $fields) && array_key_exists($l->code, $fields[$code]))
                 {
                     $value = $fields[$code][$l->code];
-                    $value = $fieldHandler->prepareForElastic($value, $attribute);
+                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
                     $body['fields'][$code . '__' . $l->code] = $value;
                     continue;
                 }
 
                 $value = $attribute->default_value;
-                $value = $fieldHandler->prepareForElastic($value, $attribute);
+                $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
                 $body['fields'][$code . '__' . $l->code] = $value;
             }
         }
@@ -462,8 +462,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                 {
                     $fieldName .= '__' . $locale->code;
                 }
-
-                $value = $fieldHandler->prepareForElastic($fields[$code], $attribute);
+                $value = $fieldHandler->prepareForElastic($fields[$code], $attribute, $locale_id, $model, $rawDocument);
                 if($value === $body['fields'][$fieldName])
                 {
                     continue;
@@ -483,7 +482,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                     continue;
                 }
 
-                $value = $fieldHandler->prepareForElastic($fields[$code][$l->code], $attribute);
+                $value = $fieldHandler->prepareForElastic($fields[$code][$l->code], $attribute, $l->id, $model, $rawDocument);
                 if($value === $body['fields'][$fieldName])
                 {
                     continue;
@@ -880,8 +879,12 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
 
         $query = $this->queryStatus($query, $status, $locale, $localeCodes);
         $query = $this->queryPagination($query, $offset, $limit);
-        $query = $this->querySorting($query, $sort, $locale, $localeCodes);
-        $query = $this->queryFiltering($query, $filter, $locale, $localeCodes);
+        list($query, $doSorting) = $this->queryFiltering($query, $filter, $locale, $localeCodes);
+        if($doSorting)
+        {
+            $query = $this->querySorting($query, $sort, $locale, $localeCodes);
+        }
+        
 
         // var_dump($query);
 
@@ -902,6 +905,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         $status = null;
         $public = false;
         $fulltextSearch = null;
+        $doSorting = true;
         
 
 
@@ -911,6 +915,12 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
             {
                 $fulltextSearch = strval($filter);
                 continue;
+            }
+
+            if ($key == 'entity_type' || $key == 'type')
+            {
+                $key = 'entity_type_id';
+                $filter = $this->castCodesToIDs($filter, 'entityType');
             }
 
 
@@ -945,9 +955,79 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         if( ! empty($fulltextSearch) )
         {
             $query = $this->parseFulltextSearch($query, $fulltextSearch, $localeFilter);
+            $doSorting = false;
         }
 
-        return $query;
+        return [$query, $doSorting];
+    }
+
+    protected function castCodesToIDs($codes, $type)
+    {
+        if(!is_array($codes))
+        {
+            $object = $this->getObjectByTypeAndCode($type, $codes);
+            if(!$object)
+            {
+                throw new BadRequestException("Invalid " . $type . " code:" . $codes);
+            }
+            return $object->id;
+        }
+
+        foreach ($codes as $operator => &$value)
+        {
+            if($operator === 'in' || $operator === 'nin')
+            {
+                if(!is_array($value))
+                {
+                    $value = explode(',', $value);
+                }
+
+                foreach ($value as &$item)
+                {
+                    $item = ltrim(rtrim($item));
+
+                    $object = $this->getObjectByTypeAndCode($type, $item);
+                    if(!$object)
+                    {
+                        throw new BadRequestException("Invalid " . $type . " code:" . $item);
+                    }
+                    $item = $object->id;
+                }
+                continue;
+            }
+
+            $value = ltrim(rtrim($value));
+
+            $object = $this->getObjectByTypeAndCode($type, $value);
+            if(!$object)
+            {
+                throw new BadRequestException("Invalid " . $type . " code:" . $value);
+            }
+            $value = $object->id;
+        }
+
+        return $codes;
+    }
+
+    protected function getObjectByTypeAndCode($type, $code)
+    {
+        switch ($type) {
+            case 'attribute':
+                return MetaData::getAttributeByCode($code);
+                break;
+            case 'attributeSet':
+                return MetaData::getAttributeSetByCode($code);
+                break;
+            case 'entityType':
+                return MetaData::getEntityTypeByCode($code);
+                break;
+            case 'locale':
+                return MetaData::getLocaleByCode($code);
+                break;
+            default:
+                throw new BadRequestException("Invalid type: " . $type);
+                break;
+        }
     }
 
     protected function parseFulltextSearch($query, $fulltextSearch, $localeFilter)
@@ -974,7 +1054,12 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                 $fields[] = 'fields.' . $attribute->code . '__*';
             }
         }
-        return $this->addMultiMatchQuery($query, $fields, $fulltextSearch, 'cross_fields');
+        $query = $this->addMultiMatchQuery($query, $fields, $fulltextSearch, 'cross_fields', false, 1);
+        $query = $this->addMultiMatchQuery($query, $fields, $fulltextSearch, 'phrase', true, 3);
+        $query = $this->addMultiMatchQuery($query, $fields, $fulltextSearch, 'phrase_prefix', true, 2);
+
+        return $query;
+
     }
 
     protected function parseFieldFilter($query, $filter, $attribute, $localeFilter, $localeCodes)
