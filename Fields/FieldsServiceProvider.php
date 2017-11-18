@@ -62,6 +62,8 @@ class FieldsServiceProvider extends ServiceProvider {
 	{
 		$this->app['events']->listen('cb.after.file.delete', 'Cookbook\EntityElastic\Fields\Asset\AssetFieldHandler@onFileDelete');
 		$this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Fields\Relation\RelationFieldHandler@onEntityDelete');
+		$this->app['events']->listen('cb.before.entity.update', 'Cookbook\EntityElastic\Fields\Compound\CompoundFieldHandler@onBeforeEntityUpdate');
+		$this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Fields\Compound\CompoundFieldHandler@onAfterEntityUpdate');
 	}
 
 	/**

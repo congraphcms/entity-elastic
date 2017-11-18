@@ -72,7 +72,7 @@ class TextFieldHandler extends AbstractFieldHandler {
 
 		if( ! is_array($filter) )
 		{
-			$filter = $this->parseValue($filter, $attribute);
+			$filter = $this->parseFilter($filter, $attribute);
 			$query = $this->addTermQuery($query, 'fields.' . $code . '.keyword', $filter);
 		}
 		else

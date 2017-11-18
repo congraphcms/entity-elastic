@@ -476,19 +476,23 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
             foreach (MetaData::getLocales() as $l)
             {
                 $fieldName = $code . '__' . $l->code;
+                // var_dump($rawDocument);
 
                 if(!array_key_exists($l->code, $fields[$code]))
                 {
                     continue;
                 }
+                // var_dump('updating field - ' . $fieldName);
 
                 $value = $fieldHandler->prepareForElastic($fields[$code][$l->code], $attribute, $l->id, $model, $rawDocument);
+                // var_dump($value);
+                // var_dump($body['fields'][$fieldName]);
                 if($value === $body['fields'][$fieldName])
                 {
                     continue;
                 }
 
-                $body['fields'][$fieldName] = $fields[$code][$l->code];
+                $body['fields'][$fieldName] = $value;
                 $changed = true;
             }
         }
@@ -596,7 +600,6 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
             // update data in elastic
             $params['body'] = [];
             $params['body']['doc'] = $body;
-
             $this->client->update($params);
         }
 

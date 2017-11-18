@@ -16,11 +16,12 @@ use Cookbook\EntityElastic\Fields\AbstractFieldHandler;
 use Illuminate\Support\Facades\Config;
 use Cookbook\Eav\Managers\AttributeManager;
 use Cookbook\Contracts\Eav\AttributeRepositoryContract;
-use Cookbook\Contracts\Eav\EntityRepositoryContract;
+use Cookbook\EntityElastic\Repositories\EntityRepository;
 use Illuminate\Database\Connection;
 use Cookbook\Core\Exceptions\BadRequestException;
 use Cookbook\Eav\Facades\MetaData;
 use Illuminate\Support\Facades\Event;
+use Elasticsearch\ClientBuilder;
 use \Exception;
 
 /**
@@ -43,9 +44,9 @@ class CompoundFieldHandler extends AbstractFieldHandler {
 	/**
 	 * Repository for entities
 	 * 
-	 * @var Cookbook\Contracts\Eav\EntityRepositoryContract
+	 * @var Cookbook\Contracts\Eav\EntityRepository
 	 */
-	// public $entityRepository;
+	public $entityRepository;
 
 
 	/**
@@ -57,21 +58,25 @@ class CompoundFieldHandler extends AbstractFieldHandler {
 	 *  
 	 * @return void
 	 */
-	// public function __construct(
-	// 	Connection $db, 
-	// 	AttributeManager $attributeManager, 
-	// 	AttributeRepositoryContract $attributeRepository, 
-	// 	EntityRepositoryContract $entityRepository)
-	// {
-	// 	// Inject dependencies
-	// 	$this->db = $db;
-	// 	$this->attributeManager = $attributeManager;
-	// 	$this->attributeRepository = $attributeRepository;
-	// 	$this->entityRepository = $entityRepository;
+	public function __construct(
+		ClientBuilder $elasticClientBuilder, 
+		AttributeManager $attributeManager,
+		EntityRepository $entityRepository)
+	{
+		// Inject dependencies
+		$this->attributeManager = $attributeManager;
+		$this->entityRepository = $entityRepository;
+		// Init empty MessagBag object for errors
+		$this->setErrors();
 
-	// 	// Init empty MessagBag object for errors
-	// 	$this->setErrors();
-	// }
+		$hosts = Config::get('cb.elastic.hosts');
+        $prefix = Config::get('cb.elastic.index_prefix');
+        $this->indexName = $prefix . 'entities';
+
+        $this->client = $elasticClientBuilder->create()
+                                            ->setHosts($hosts)
+                                            ->build();
+	}
 
 	
 	
@@ -113,7 +118,10 @@ class CompoundFieldHandler extends AbstractFieldHandler {
 					// somewhat sketchy (locales and stuff)
 					
 					// get field value
-					$code = MetaData::getAttributeById($input->value)->code;
+					$attribute = MetaData::getAttributeById($input->value);
+					$code = $attribute->code;
+					$localized = $attribute->localized;
+
 					$fieldValue = null;
 					$takeFromEntity = true;
 					if(array_key_exists('fields', $params) && is_array($params['fields']) && array_key_exists($code, $params['fields']))
@@ -135,25 +143,19 @@ class CompoundFieldHandler extends AbstractFieldHandler {
 						
 					}
 
-					if ($entity && $takeFromEntity && array_key_exists($code, $entity['_source']['fields']))
+					if ($entity && $takeFromEntity)
 					{
 						// var_dump('calculate from entity - ' . $localeCode . ' - ' . $locale);
-						// var_dump($entity->fields->$code);
-						if($localeCode && is_array($entity['_source']['fields'][$code]))
+						if($localized && $localeCode)
 						{
-							// var_dump('localized entity');
-							if(array_key_exists($localeCode, $entity['_source']['fields'][$code]))
-							{
-								$fieldValue = ($entity['_source']['fields'][$code])[$localeCode];
-							}
+							$code = $code . '__' . $localeCode;
 						}
-						else
+						if(array_key_exists($code, $entity['_source']['fields']))
 						{
-							// var_dump('flat entity');
 							$fieldValue = $entity['_source']['fields'][$code];
 						}
-						
 					}
+
 					$provisionalValue = $fieldValue;
 					break;
 				case 'operator':
@@ -274,9 +276,6 @@ class CompoundFieldHandler extends AbstractFieldHandler {
 
 	public function onAfterEntityUpdate($command, $result)
 	{
-		var_dump("COMPUND onAfterEntityUpdate");
-		var_dump(self::$waitingForMultiLocaleUpdate);
-		return;
 		if(!self::$waitingForMultiLocaleUpdate)
 		{
 			return;
@@ -284,9 +283,23 @@ class CompoundFieldHandler extends AbstractFieldHandler {
 
 		self::$waitingForMultiLocaleUpdate = false;
 
-		$updateParams = [
-			'fields' => []
-		];
+		$query = [
+            'index' => $this->indexName,
+            'type' => 'doc',
+            'id' => $command->id
+        ];
+
+        try
+        {
+            $entity = $this->client->get($query);
+        }
+        catch(\Elasticsearch\Common\Exceptions\Missing404Exception $e)
+        {
+            throw new NotFoundException(['Entity not found.']);
+        }
+
+        $body = $entity['_source'];
+
 		$locales = MetaData::getLocales();
 		$attributeSet = MetaData::getAttributeSetById($result->attribute_set_id);
 		foreach ($attributeSet->attributes as $setAttribute)
@@ -319,19 +332,28 @@ class CompoundFieldHandler extends AbstractFieldHandler {
 				continue;
 			}
 
-			$updateParams['fields'][$attribute->code] = [];
 			foreach ($locales as $locale)
 			{
-				$updateParams['fields'][$attribute->code][$locale->code] = null;
+				$body['fields'][$attribute->code . '__' . $locale->code] = $this->parseValue(null, $attribute, $locale->id, [], $entity);
 			}
 		}
 
-		if(empty($updateParams['fields']))
+		if($body == $entity['_source'])
 		{
 			return;
 		}
-		// var_dump("COMPUND UPDATE");
-		$this->entityRepository->update($result->id, $updateParams);
+
+		$params = [
+            'index' => $this->indexName,
+            'type' => 'doc',
+            'id' => $command->id
+        ];
+
+	 	$params['body'] = [];
+        $params['body']['doc'] = $body;
+        $this->client->update($params);
+
+		// // var_dump("COMPUND UPDATE");
 		$result = $this->entityRepository->fetch($result->id, [], $result->locale);
 
 		return $result;
