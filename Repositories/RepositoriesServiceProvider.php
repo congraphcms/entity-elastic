@@ -82,7 +82,8 @@ class RepositoriesServiceProvider extends ServiceProvider {
 			return new EntityRepository(
 				$app->make('Elasticsearch\ClientBuilder'),
 				$app->make('Cookbook\EntityElastic\Fields\FieldHandlerFactory'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Cookbook\Eav\Managers\AttributeManager'),
+				$app->make('Cookbook\EntityElastic\Services\EntityFormater')
 			);
 		});
 	}

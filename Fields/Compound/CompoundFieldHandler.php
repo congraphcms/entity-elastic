@@ -208,7 +208,7 @@ class CompoundFieldHandler extends AbstractFieldHandler {
 	 * 
 	 * @return boolean
 	 */
-	public function formatValue($value, $attribute)
+	public function formatValue($value, $attribute, $status, $locale, $localeCodes)
 	{
 		return $this->getExpectedValue($value, $attribute);
 	}

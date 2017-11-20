@@ -516,6 +516,21 @@ class EavDbSeeder extends Seeder {
 				'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")
 			],
+			[
+				'code' => 'test_node_attribute',
+				'field_type' => 'node',
+				'table' => 'attribute_values_integer',
+				'localized' => false,
+				'default_value' => null,
+				'unique' => false,
+				'required' => false,
+				'filterable' => true,
+				'searchable' => false,
+				'data' => json_encode([]),
+				'status' => 'user_defined',
+				'created_at' => date("Y-m-d H:i:s"),
+				'updated_at' => date("Y-m-d H:i:s")
+			],
 			
 		]);
 
@@ -748,6 +763,12 @@ class EavDbSeeder extends Seeder {
 				'attribute_set_id' => 4,
 				'attribute_id' => 25,
 				'sort_order' => 17
+			],
+
+			[
+				'attribute_set_id' => 4,
+				'attribute_id' => 26,
+				'sort_order' => 18
 			],
 			[
 				'attribute_set_id' => 5,

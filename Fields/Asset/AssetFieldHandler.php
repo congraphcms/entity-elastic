@@ -55,7 +55,7 @@ class AssetFieldHandler extends AbstractFieldHandler {
 	 * 
 	 * @return boolean
 	 */
-	public function formatValue($value, $attribute)
+	public function formatValue($value, $attribute, $status, $locale, $localeCodes)
 	{
 		if(empty($value))
 		{

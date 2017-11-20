@@ -8,19 +8,20 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Fields\Relation;
+namespace Cookbook\EntityElastic\Fields\Node;
 
 use Cookbook\EntityElastic\Fields\AbstractFieldHandler;
 use Cookbook\Eav\Managers\AttributeManager;
+use Cookbook\EntityElastic\Services\EntityFormater;
 use Elasticsearch\ClientBuilder;
 use Cookbook\Eav\Facades\MetaData;
 use Cookbook\Core\Facades\Trunk;
 use stdClass;
 
 /**
- * RelationFieldHandler class
+ * NodeFieldHandler class
  * 
- * Responsible for handling relation field types
+ * Responsible for handling node field types
  * 
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
@@ -29,7 +30,34 @@ use stdClass;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-class RelationFieldHandler extends AbstractFieldHandler {
+class NodeFieldHandler extends AbstractFieldHandler {
+
+	/**
+     * Service for formating entities
+     *
+     * @var \Cookbook\EntityElastic\Services\EntityFormater
+     */
+    protected $formater;
+
+	/**
+	 * Create new AbstractAttributeHandler
+	 * 
+	 * @param Illuminate\Database\Connection 			$db
+	 * @param Cookbook\Eav\Managers\AttributeManager 	$attributeManager
+	 * @param string 									$table
+	 *  
+	 * @return void
+	 */
+	public function __construct (
+		ClientBuilder $elasticClientBuilder, 
+		AttributeManager $attributeManager,
+        EntityFormater $entityFormater
+	)
+	{
+		parent::__construct($elasticClientBuilder, $attributeManager);
+		$this->formater = $entityFormater;
+	}
+
 
 	/**
 	 * Parse value for database input
@@ -55,13 +83,81 @@ class RelationFieldHandler extends AbstractFieldHandler {
 
 			$rawRelation = $this->client->get($params);
 			$source = $rawRelation['_source'];
-			$data = [
-				'id' => intval($value['id']),
-				'type' => 'entity',
-				'attribute_set_id' => $source['attribute_set_id'],
-				'entity_type_id' => $source['entity_type_id']
-			];
-			$value = $data;
+
+			$attributes = MetaData::getAttributes();
+
+			foreach ($attributes as $nestedAttribute)
+			{
+				if(!in_array($nestedAttribute, ['node', 'node_collection']))
+				{
+					continue;
+				}
+
+				if(!$nestedAttribute->localized)
+				{
+					$code = $nestedAttribute->code;
+					if(empty($source['fields'][$code]))
+					{
+						continue;
+					}
+
+					if($nestedAttribute->field_type == 'node')
+					{
+						$source['fields'][$code] = [
+							'id' => $source['fields'][$code]['id'],
+							'type' => 'entity',
+							'attribute_set_id' => $source['fields'][$code]['attribute_set_id'],
+							'entity_type_id' => $source['fields'][$code]['entity_type_id']
+						];
+						continue;
+					}
+
+					foreach ($source['fields'][$code] as &$node)
+					{
+						$node = [
+							'id' => $node['id'],
+							'type' => 'entity',
+							'attribute_set_id' => $node['attribute_set_id'],
+							'entity_type_id' => $node['entity_type_id']
+						];
+					}
+					continue;
+				}
+
+				$locales = MetaData::getLocales();
+				foreach ($locales as $locale)
+				{
+					$code = $nestedAttribute->code . '__' . $locale->code;
+					if(empty($source['fields'][$code]))
+					{
+						continue;
+					}
+
+					if($nestedAttribute->field_type == 'node')
+					{
+						$source['fields'][$code] = [
+							'id' => $source['fields'][$code]['id'],
+							'type' => 'entity',
+							'attribute_set_id' => $source['fields'][$code]['attribute_set_id'],
+							'entity_type_id' => $source['fields'][$code]['entity_type_id']
+						];
+						continue;
+					}
+
+					foreach ($source['fields'][$code] as &$node)
+					{
+						$node = [
+							'id' => $node['id'],
+							'type' => 'entity',
+							'attribute_set_id' => $node['attribute_set_id'],
+							'entity_type_id' => $node['entity_type_id']
+						];
+					}
+					continue;
+
+				}
+			}
+			$value = $source;
 		}
 		
 		return $value;
@@ -75,15 +171,22 @@ class RelationFieldHandler extends AbstractFieldHandler {
 	 * 
 	 * @return boolean
 	 */
-	public function formatValue($value, $attribute, $status, $locale, $localeCodes)
+	public function formatValue($value, $attribute, $status, $locale, $localeCodes, $nested = false)
 	{
 		if(empty($value))
 		{
 			return null;
 		}
-		$relation = new stdClass();
-		$relation->id = $value['id'];
-		$relation->type = 'entity';
+
+		if($nested)
+		{
+			$relation = new stdClass();
+			$relation->id = $value['id'];
+			$relation->type = 'entity';
+			return $relation;
+		}
+
+		$relation = $this->formater->formatEntity($value, $status, $locale, $localeCodes, true, true);
 		return $relation;
 	}
 

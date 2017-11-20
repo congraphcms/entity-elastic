@@ -239,7 +239,40 @@ class ElasticIndexSeeder {
 			    	'attribute1' => 'bcd',
 			    	'attribute2' => 'value2',
 			    	'attribute3__en_US' => 'value3-en',
-			    	'attribute3__fr_FR' => 'value3-fr'
+			    	'attribute3__fr_FR' => 'value3-fr',
+			    	'test_node_field' => [ 
+				    	'id' => 4,
+				    	'entity_type_id' => 1,
+				    	'attribute_set_id' => 1,
+				    	'localized' => true,
+				    	'localized_workflow' => true,
+				    	'status' => [
+				    		[
+				    			'status' => 'published',
+				    			'locale' => 'en_US',
+				    			'state' => 'active',
+				    			'scheduled_at' => null,
+				    			'created_at' => date("Y-m-d H:i:s"),
+				    			'updated_at' => date("Y-m-d H:i:s")
+				    		],
+				    		[
+				    			'status' => 'published',
+				    			'locale' => 'fr_FR',
+				    			'state' => 'active',
+				    			'scheduled_at' => null,
+				    			'created_at' => date("Y-m-d H:i:s"),
+				    			'updated_at' => date("Y-m-d H:i:s")
+				    		],
+				    	],
+				    	'fields' => [
+					    	'attribute1' => 'abc',
+					    	'attribute2' => 'value2',
+					    	'attribute3__en_US' => 'value3-en',
+					    	'attribute3__fr_FR' => 'value3-fr'
+					    ],
+					    'created_at' => date("Y-m-d H:i:s"),
+						'updated_at' => date("Y-m-d H:i:s")
+				    ]
 			    ],
 			    'created_at' => date("Y-m-d H:i:s"),
 				'updated_at' => date("Y-m-d H:i:s")

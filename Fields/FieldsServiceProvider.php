@@ -148,6 +148,13 @@ class FieldsServiceProvider extends ServiceProvider {
 				$app->make('Cookbook\Eav\Managers\AttributeManager')
 			);
 		});
+		$this->app->singleton('Cookbook\EntityElastic\Fields\Node\NodeFieldHandler', function($app) {
+			return new \Cookbook\EntityElastic\Fields\Node\NodeFieldHandler(
+				$app->make('Elasticsearch\ClientBuilder'),
+				$app->make('Cookbook\Eav\Managers\AttributeManager'),
+				$app->make('Cookbook\EntityElastic\Services\EntityFormater')
+			);
+		});
 	}
 	/**
 	 * Get the services provided by the provider.

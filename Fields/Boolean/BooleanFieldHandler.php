@@ -44,17 +44,4 @@ class BooleanFieldHandler extends AbstractFieldHandler {
 		$value = !!intval($value);
 		return $value;
 	}
-
-	/**
-	 * Format value for output
-	 * 
-	 * @param mixed $value
-	 * @param object $attribute
-	 * 
-	 * @return boolean
-	 */
-	public function formatValue($value, $attribute)
-	{
-		return $value;
-	}
 }

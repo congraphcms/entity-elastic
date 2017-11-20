@@ -73,6 +73,10 @@ class EntityElasticServiceProvider extends ServiceProvider {
 		// -----------------------------------------------------------------------------
 		$this->app->register('Cookbook\EntityElastic\Repositories\RepositoriesServiceProvider');
 
+		// Services
+		// -----------------------------------------------------------------------------
+		$this->app->register('Cookbook\EntityElastic\Services\ServicesServiceProvider');
+
 		
 
 		
