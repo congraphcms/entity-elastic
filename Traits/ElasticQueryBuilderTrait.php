@@ -236,7 +236,7 @@ trait ElasticQueryBuilderTrait
         }
         else
         {
-            $query = $this->createShouldQuery($query, 0);
+            $query = $this->createShouldQuery($query, 1);
         }
         
         $match = [];

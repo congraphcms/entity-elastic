@@ -1048,29 +1048,95 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
     {
         $attributes = MetaData::getAttributes();
         $fields = [];
+        $nodes = [];
+        $nodeFields = [];
+
         foreach ($attributes as $attribute)
         {
-            if(in_array($attribute->field_type, ['text', 'tags']))
+            if(in_array($attribute->field_type, ['node', 'node_collection']))
             {
+                $nodes[] = $attribute;
+                $nodeFields[strval($attribute->search_boost)] = [];
+            }
+        }
+
+
+        foreach ($attributes as $attribute)
+        {
+            // var_dump($attribute->search_boost);
+            if(in_array($attribute->field_type, ['text', 'tags', 'compound']) && $attribute->searchable)
+            {
+                $boostKey = strval($attribute->search_boost);
+                if(!isset($fields[$boostKey]))
+                {
+                    $fields[$boostKey] = [];
+                }
+                foreach ($nodes as $node)
+                {
+                    $nodeBoostKey = strval($node->search_boost * $attribute->search_boost);
+                    if(!isset($nodeFields[$nodeBoostKey]))
+                    {
+                        $nodeFields[$nodeBoostKey] = [];
+                    }
+                }
+                
+
                 if(!$attribute->localized)
                 {
-                    $fields[] = 'fields.' . $attribute->code;
+                    $fields[$boostKey][] = 'fields.' . $attribute->code;
+                    foreach ($nodes as $node)
+                    {
+                        $nodeBoostKey = strval($node->search_boost * $attribute->search_boost);
+                        $nodeFields[$nodeBoostKey][] = 'fields.' . $node->code . '.fields.' . $attribute->code;
+                    }
                     continue;
                 }
 
                 if($localeFilter)
                 {
-                    $fields[] = 'fields.' . $attribute->code . '__' . $localeFilter->code;
+                    $fields[$boostKey][] = 'fields.' . $attribute->code . '__' . $localeFilter->code;
+                    foreach ($nodes as $node)
+                    {
+                        $nodeBoostKey = strval($node->search_boost * $attribute->search_boost);
+                        $nodeFields[$nodeBoostKey][] = 'fields.' . $node->code . '.fields.' . $attribute->code . '__' . $localeFilter->code;
+                    }
                     continue;
                 }
 
 
-                $fields[] = 'fields.' . $attribute->code . '__*';
+                $fields[$boostKey][] = 'fields.' . $attribute->code . '__*';
+                foreach ($nodes as $node)
+                {
+                    $nodeBoostKey = strval($node->search_boost * $attribute->search_boost);
+                    $nodeFields[$nodeBoostKey][] = 'fields.' . $node->code . '.fields.' . $attribute->code . '__*';
+                }
             }
         }
-        $query = $this->addMultiMatchQuery($query, $fields, $fulltextSearch, 'cross_fields', false, 1);
-        $query = $this->addMultiMatchQuery($query, $fields, $fulltextSearch, 'phrase', true, 3);
-        $query = $this->addMultiMatchQuery($query, $fields, $fulltextSearch, 'phrase_prefix', true, 2);
+        foreach ($fields as $boostKey => $values)
+        {
+            $boost = floatval($boostKey);
+            if(!empty($values))
+            {
+                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'cross_fields', true, $boost * 1);
+                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
+                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase', true, $boost * 3);
+            }
+        }
+
+        foreach ($nodeFields as $boostKey => $values)
+        {
+            $boost = floatval($boostKey);
+            if(!empty($values))
+            {
+                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'cross_fields', true, $boost * 1);
+                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
+                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase', true, $boost * 3);
+            }
+        }
+        // var_dump($nodeFields);
+        // var_dump($nodes);
+
+        // var_dump($query);
 
         return $query;
 
