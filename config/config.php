@@ -14,15 +14,26 @@ return array(
 	'hosts' => [
 	    // This is effectively equal to: "https://username:password!#$?*abc@foo.com:9200/"
 	    [
-	        'host' => env('ELASTICSEARCH_HOST', 'localhost'),
-	        'port' => env('ELASTICSEARCH_PORT', '9200'),
-	        'scheme' => env('ELASTICSEARCH_SCHEME', 'http'),
-	        'user' => env('ELASTICSEARCH_USER', 'elastic'),
-	        'pass' => env('ELASTICSEARCH_PASSWORD', 'changeme')
+	        'host' => env('ES_HOST', 'localhost'),
+	        'port' => env('ES_PORT', '9200'),
+	        'scheme' => env('ES_SCHEME', 'http'),
+	        'user' => env('ES_USER', 'elastic'),
+	        'pass' => env('ES_PASSWORD', 'changeme')
 	    ]
 	],
 
-	'index_prefix' => env('ELASTICSEARCH_INDEX_PREFIX', 'congraph_'),
+	'index_prefix' => env('ES_INDEX_PREFIX', 'congraph_'),
+
+    'use_date_relevance' => env('ES_USE_DATE_RELEVANCE', true),
+
+    // how often should the difference be made (in days)
+    'date_relevance_interval' => env('ES_DATE_RELEVANCE_INTERVAL', 30),
+
+    // how long in the past should relevance reach (count * interval)
+    'date_relevance_interval_count' => env('ES_DATE_RELEVANCE_INTERVAL_COUNT', 6),
+
+    // how much boost should each interval have
+    'date_relevance_boost_step' => env('ES_DATE_RELEVANCE_BOOST_STEP', 5),
 
 	'default_index_mappings' => [
 		'settings' => [

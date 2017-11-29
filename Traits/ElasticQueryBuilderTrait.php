@@ -190,15 +190,23 @@ trait ElasticQueryBuilderTrait
         return $query;
     }
 
-    protected function addRangeQuery($query, $field, $filter, $operator)
+    protected function addRangeQuery($query, $field, $filter, $operator, $should = false, $boost = 1)
     {
         $parentKey = $this->getQueryParentKey($query);
-
-        $query = $this->createFilterQuery($query);
         $range = [];
-        $range[$field] = [ $operator => $filter ];
+        $range[$field] = [ $operator => $filter, 'boost' => $boost];
 
-        $query[$parentKey]['query']['bool']['filter'][] = ['range' => $range];
+        if(!$should)
+        {
+            $query = $this->createFilterQuery($query);
+            $query[$parentKey]['query']['bool']['filter'][] = ['range' => $range];
+        }
+        else
+        {
+            $query = $this->createShouldQuery($query);
+            $query[$parentKey]['query']['bool']['should'][] = ['range' => $range];
+        }
+        
         return $query;
     }
 

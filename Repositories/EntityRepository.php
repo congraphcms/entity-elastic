@@ -385,8 +385,8 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                 'locale' => $lc,
                 'state' => 'active',
                 'scheduled_at' => null,
-                'created_at' => date("Y-m-d H:i:s"),
-                'updated_at' => date("Y-m-d H:i:s")
+                'created_at' => $body['created_at'],
+                'updated_at' => $body['updated_at']
             ];
 
             $body['status'][] = $statusObj;
@@ -585,10 +585,18 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                     'status' => $s,
                     'locale' => $lc,
                     'state' => 'active',
-                    'scheduled_at' => null,
-                    'created_at' => date("Y-m-d H:i:s"),
-                    'updated_at' => date("Y-m-d H:i:s")
+                    'scheduled_at' => null
                 ];
+
+                // update updated_at
+                if(!($result instanceof Model) || !is_integer($result->id) || empty($result->id))
+                {
+                    $statusObj['created_at'] = $statusObj['updated_at'] = date("Y-m-d H:i:s");
+                }
+                else
+                {
+                    $statusObj['created_at'] = $statusObj['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
+                }
 
                 $body['status'][] = $statusObj;
             }
@@ -1133,6 +1141,27 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                 $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase', true, $boost * 3);
             }
         }
+
+        // account for date relevance
+        $useDateRelevance = Config::get('cb.elastic.use_date_relevance');
+        if(!$useDateRelevance)
+        {
+            return $query;
+        }
+
+        $dateRelevanceInterval = Config::get('cb.elastic.date_relevance_interval');
+        $dateRelevanceIntervalCount = Config::get('cb.elastic.date_relevance_interval_count');
+        $dateRelevanceBoostStep = Config::get('cb.elastic.date_relevance_boost_step');
+
+        for ($i = 1; $i <= $dateRelevanceIntervalCount; $i++) {
+            $dif = $i * $dateRelevanceInterval;
+            $boost = ($dateRelevanceIntervalCount + 1 - $i) * $dateRelevanceBoostStep;
+
+            $date = new \DateTime("-$dif day");
+
+            $query = $this->addRangeQuery($query, 'created_at', $date->getTimestamp(), 'gte', true, $boost);
+        }
+
         // var_dump($nodeFields);
         // var_dump($nodes);
 
