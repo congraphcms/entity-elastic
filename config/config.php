@@ -26,7 +26,37 @@ return array(
 
 	'default_index_mappings' => [
 		'settings' => [
-            "index.mapping.single_type" => true
+            "index.mapping.single_type" => true,
+            "analysis" => [
+                "analyzer" => [
+                    "default" => [
+                        "tokenizer" => "standard",
+                        "filter" => ["standard", "my_ascii_folding", "lowercase"],
+                        "char_filter" => [
+                          "small_dj",
+                          "big_dj"
+                        ]
+                    ]
+                ],
+                "filter" => [
+                    "my_ascii_folding" => [
+                        "type" => "asciifolding",
+                        "preserve_original" => true
+                    ]
+                ],
+                "char_filter" => [
+                  "small_dj" => [
+                    "type" => "pattern_replace",
+                    "pattern" => "(\\S*)(đ)(\\S*)",
+                    "replacement" => "$0 $1dj$3"
+                  ],
+                  "big_dj" => [
+                    "type" => "pattern_replace",
+                    "pattern" => "(\\S*)(Đ)(\\S*)",
+                    "replacement" => "$0 $1Dj$3"
+                  ]
+                ]
+            ]
         ],
         'mappings' => [
             'doc' => [

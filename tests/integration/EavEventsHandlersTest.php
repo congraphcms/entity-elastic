@@ -194,6 +194,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		}
 		catch(\Exception $e)
 		{
+			var_dump($e->getMessage());
 			$this->d->dump($e->getErrors());
 		}
 		

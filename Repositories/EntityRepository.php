@@ -1168,7 +1168,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                 {
                     $code = substr($sortCriteria, 7);
                     $attribute = MetaData::getAttributeByCode($code);
-                    if(in_array($attribute->field_type, ['text', 'tags']))
+                    if(in_array($attribute->field_type, ['text', 'tags', 'compound']))
                     {
                         if(!$attribute->localized)
                         {
