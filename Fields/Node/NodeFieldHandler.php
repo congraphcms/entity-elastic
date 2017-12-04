@@ -185,8 +185,10 @@ class NodeFieldHandler extends AbstractFieldHandler {
 			$relation->type = 'entity';
 			return $relation;
 		}
-
-		$relation = $this->formater->formatEntity($value, $status, $locale, $localeCodes, true, true);
+		// @TODO 
+		// WE NEED SOME PROTECTION FOR STATUS IN NODE RELATOINS
+		// $relation = $this->formater->formatEntity($value, $status, $locale, $localeCodes, true, true);
+		$relation = $this->formater->formatEntity($value, null, $locale, $localeCodes, true, true);
 		return $relation;
 	}
 

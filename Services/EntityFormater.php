@@ -40,7 +40,7 @@ use stdClass;
 class EntityFormater
 {
 
-	/**
+    /**
      * Factory for field handlers,
      * makes appropriate field handler depending on attribute data type
      *
@@ -56,7 +56,7 @@ class EntityFormater
      */
     protected $attributeManager;
 
-	/**
+    /**
      * Create new EntityFormater
      *
      * @param Cookbook\Eav\Handlers\AttributeHandlerFactoryContract $attributeHandlerFactory
@@ -97,7 +97,7 @@ class EntityFormater
         if(!$source)
         {
             $id = $result['_id'];
-        	$result = $result['_source'];
+            $result = $result['_source'];
             $result['id'] = $id;
         }
 
@@ -188,7 +188,8 @@ class EntityFormater
 
             if(!is_array($statusFilter) )
             {
-                if($status['status'] == $statusFilter) {
+                if($status['status'] == $statusFilter)
+                {
                     $validStatuses[] = $status;
                 }
 

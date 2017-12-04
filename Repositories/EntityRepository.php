@@ -908,9 +908,14 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         }
         
 
-        // var_dump($query);
+        
 
         $result = $this->client->search($query);
+        // foreach ($result['hits']['hits'] as $value) {
+        //     var_dump($value['_source']);
+        // }
+        // echo json_encode([$query, $result]);
+        // die();
 
         $total = $result['hits']['total'];
 
@@ -1238,6 +1243,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
             if(!empty($localeFilter))
             {
                 $nested = $this->addTermQuery($nested, 'status.locale', $localeFilter->code);
+                $nested = $this->addTermQuery($nested, 'status.state', 'active');
                 return $this->addNestedQuery($query, $nested);
             }
 
@@ -1247,6 +1253,8 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
         if(!is_array($statusFilter))
         {
             $nested = $this->addTermQuery($nested, 'status.status', $statusFilter);
+            $nested = $this->addTermQuery($nested, 'status.state', 'active');
+            $nested = $this->addLocaleQuery($nested, $localeFilter);
             return $this->addNestedQuery($query, $nested);
         } 
         else 
@@ -1255,18 +1263,22 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                 switch (true) {
                     case ($operator === 'e'):
                         $nested = $this->addTermQuery($nested, 'status.status', $value);
+                        $nested = $this->addTermQuery($nested, 'status.state', 'active');
                         $nested = $this->addLocaleQuery($nested, $localeFilter);
                         return $this->addNestedQuery($query, $nested);
                     case ($operator === 'ne'):
                         $nested = $this->addNotTermQuery($nested, 'status.status', $value);
+                        $nested = $this->addTermQuery($nested, 'status.state', 'active');
                         $nested = $this->addLocaleQuery($nested, $localeFilter);
                         return $this->addNestedQuery($query, $nested);
                     case ($operator === 'in'):
                         $nested = $this->addTermsQuery($nested, 'status.status', $value);
+                        $nested = $this->addTermQuery($nested, 'status.state', 'active');
                         $nested = $this->addLocaleQuery($nested, $localeFilter);
                         return $this->addNestedQuery($query, $nested);
                     case ($operator === 'nin'):
                         $nested = $this->addNotTermsQuery($nested, 'status.status', $value);
+                        $nested = $this->addTermQuery($nested, 'status.state', 'active');
                         $nested = $this->addLocaleQuery($nested, $localeFilter);
                         return $this->addNestedQuery($query, $nested);
                     default:
