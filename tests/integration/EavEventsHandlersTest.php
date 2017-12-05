@@ -261,6 +261,129 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		$this->assertArraySubset($resultArray, $documentArray);
 	}
 
+
+	public function testUpdateEntityStatus()
+	{
+		fwrite(STDOUT, __METHOD__ . "\n");
+
+		$app = $this->createApplication();
+		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
+		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+
+		$params = [
+			'status' => 'draft'
+		];
+		
+		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
+		
+		
+		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue(is_int($result->id));
+		foreach ($result->status as $key => $value)
+		{
+			$this->assertEquals($value, 'draft');
+		}
+		
+		// $this->d->dump($result->toArray());
+		
+		$document = $repo->fetch($result->id, [], null);
+
+		// $this->d->dump($result->toArray());
+		// $this->d->dump($document->toArray());
+
+		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertEquals($result->id, $document->id);
+
+		$resultArray = $result->toArray();
+		$documentArray = $result->toArray();
+		$this->assertArraySubset($resultArray, $documentArray);
+
+		$params = [
+			'status' => 'published'
+		];
+		
+		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
+		
+		
+		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue(is_int($result->id));
+		foreach ($result->status as $key => $value)
+		{
+			$this->assertEquals($value, 'published');
+		}
+		
+		// $this->d->dump($result->toArray());
+		
+		$document = $repo->fetch($result->id, [], null);
+
+		// $this->d->dump($result->toArray());
+		// $this->d->dump($document->toArray());
+
+		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertEquals($result->id, $document->id);
+
+		$resultArray = $result->toArray();
+		$documentArray = $result->toArray();
+		$this->assertArraySubset($resultArray, $documentArray);
+
+
+		// for single locale
+		// 
+		// 
+		$params = [
+			'status' => 'draft',
+			'locale' => 'en_US'
+		];
+		
+		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
+		
+		
+		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue(is_int($result->id));
+		$this->assertEquals($result->status, 'draft');
+		
+		// $this->d->dump($result->toArray());
+		
+		$document = $repo->fetch($result->id, [], 'en_US');
+
+		// $this->d->dump($result->toArray());
+		// $this->d->dump($document->toArray());
+
+		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertEquals($result->id, $document->id);
+
+		$resultArray = $result->toArray();
+		$documentArray = $result->toArray();
+		$this->assertArraySubset($resultArray, $documentArray);
+
+
+		$params = [
+			'status' => 'published',
+			'locale' => 'en_US'
+		];
+		
+		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
+		
+		
+		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue(is_int($result->id));
+		$this->assertEquals($result->status, 'published');
+		
+		// $this->d->dump($result->toArray());
+		
+		$document = $repo->fetch($result->id, [], 'en_US');
+
+		// $this->d->dump($result->toArray());
+		// $this->d->dump($document->toArray());
+
+		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertEquals($result->id, $document->id);
+
+		$resultArray = $result->toArray();
+		$documentArray = $result->toArray();
+		$this->assertArraySubset($resultArray, $documentArray);
+	}
+
 	public function testDeleteEntity()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
