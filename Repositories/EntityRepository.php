@@ -566,7 +566,7 @@ class EntityRepository implements EntityRepositoryContract//, UsesCache
                 foreach ($body['status'] as &$oldStatus)
                 {
                     if($oldStatus['state'] == 'active' 
-                        && $oldStatus['locale'] = $lc 
+                        && $oldStatus['locale'] == $lc 
                         && $oldStatus['status'] !== $s)
                     {
                         $oldStatus['state'] = 'history';
