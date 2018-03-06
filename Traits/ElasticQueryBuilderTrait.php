@@ -74,6 +74,10 @@ trait ElasticQueryBuilderTrait
                         {
                             $termKey = $key . '.keyword';
                         }
+                        else
+                        {
+                            $termKey = $key;
+                        }
                         $query = $this->addShouldTermQuery($query, $termKey, $word, 0);
                     }
                     return $this->addMatchQuery($query, $key, $value);
