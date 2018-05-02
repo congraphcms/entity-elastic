@@ -369,9 +369,12 @@ class NodeFieldHandler extends AbstractFieldHandler
                     continue;
                 }
 
-                if (array_key_exists('id', $value) && $value['id'] == $command->id) {
-                    $value = $newValue;
-                    $changed = true;
+                if (array_key_exists('id', $value)) {
+                    if ($value['id'] == $command->id) {
+                        $value = $newValue;
+                        $changed = true;
+                    }
+                    
                     continue;
                 }
 

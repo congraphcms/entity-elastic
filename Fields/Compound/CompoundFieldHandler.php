@@ -47,7 +47,6 @@ class CompoundFieldHandler extends AbstractFieldHandler
 	 */
 	public $entityRepository;
 
-
 	/**
 	 * Create new CompoundFieldHandler
 	 *
@@ -62,10 +61,10 @@ class CompoundFieldHandler extends AbstractFieldHandler
 		AttributeManager $attributeManager,
 		EntityRepository $entityRepository
 	) {
-        // Inject dependencies
+		// Inject dependencies
 		$this->attributeManager = $attributeManager;
 		$this->entityRepository = $entityRepository;
-        // Init empty MessagBag object for errors
+		// Init empty MessagBag object for errors
 		$this->setErrors();
 
 		$hosts = Config::get('cb.elastic.hosts');
@@ -89,7 +88,7 @@ class CompoundFieldHandler extends AbstractFieldHandler
 	 */
 	public function parseValue($value, $attribute, $locale, $params, $entity)
 	{
-        // var_dump([$value, $params]);
+		// var_dump([$value, $params]);
 		$inputs = $attribute->data->inputs;
 		$value = $this->calculate($inputs, $locale, $params, $entity);
 		$value = $this->getExpectedValue($value, $attribute);
@@ -111,9 +110,9 @@ class CompoundFieldHandler extends AbstractFieldHandler
 					$provisionalValue = $input->value;
 					break;
 				case 'field':
-                    // somewhat sketchy (locales and stuff)
-                    
-                    // get field value
+					// somewhat sketchy (locales and stuff)
+					
+					// get field value
 					$attribute = MetaData::getAttributeById($input->value);
 					$code = $attribute->code;
 					$localized = $attribute->localized;
@@ -121,21 +120,21 @@ class CompoundFieldHandler extends AbstractFieldHandler
 					$fieldValue = null;
 					$takeFromEntity = true;
 					if (array_key_exists('fields', $params) && is_array($params['fields']) && array_key_exists($code, $params['fields'])) {
-                        // var_dump('calculate from params - ' . $localeCode . ' - ' . $locale);
-                        // var_dump($params['fields'][$code]);
+						// var_dump('calculate from params - ' . $localeCode . ' - ' . $locale);
+						// var_dump($params['fields'][$code]);
 						if ($localeCode && is_array($params['fields'][$code]) && array_key_exists($localeCode, $params['fields'][$code])) {
-                            // var_dump('localized params');
+							// var_dump('localized params');
 							$fieldValue = $params['fields'][$code][$localeCode];
 							$takeFromEntity = false;
 						} else {
-                            // var_dump('flat params');
+							// var_dump('flat params');
 							$fieldValue = $params['fields'][$code];
 							$takeFromEntity = false;
 						}
 					}
 
 					if ($entity && $takeFromEntity) {
-                        // var_dump('calculate from entity - ' . $localeCode . ' - ' . $locale);
+						// var_dump('calculate from entity - ' . $localeCode . ' - ' . $locale);
 						if ($localized && $localeCode) {
 							$code = $code . '__' . $localeCode;
 						}
@@ -151,9 +150,9 @@ class CompoundFieldHandler extends AbstractFieldHandler
 						case 'CONCAT':
 							$remainingInputs = array_slice($inputs, 0, count($inputs) - 1 - $key);
 							$fieldValue = $this->calculate($remainingInputs, $locale, $params, $entity);
-                            // var_dump('CONCAT values');
-                            // var_dump($fieldValue);
-                            // var_dump($provisionalValue);
+							// var_dump('CONCAT values');
+							// var_dump($fieldValue);
+							// var_dump($provisionalValue);
 							return $fieldValue . $provisionalValue;
 							break;
 
@@ -210,7 +209,7 @@ class CompoundFieldHandler extends AbstractFieldHandler
 		try {
 			$entity = $this->client->get($query);
 		} catch (\Elasticsearch\Common\Exceptions\Missing404Exception $e) {
-            // throw new NotFoundException(['Entity not found.']);
+			// throw new NotFoundException(['Entity not found.']);
 			return;
 		}
 
@@ -317,7 +316,7 @@ class CompoundFieldHandler extends AbstractFieldHandler
 		$params['body']['doc'] = $body;
 		$this->client->update($params);
 
-        // // var_dump("COMPUND UPDATE");
+		// // var_dump("COMPUND UPDATE");
 		$result = $this->entityRepository->fetch($result->id, [], $result->locale);
 
 		return $result;
