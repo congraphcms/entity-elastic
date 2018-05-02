@@ -62,12 +62,12 @@ class FieldsServiceProvider extends ServiceProvider
     */
     protected function registerListeners()
     {
-        $this->app['events']->listen('cb.after.file.delete', 'Cookbook\EntityElastic\Fields\Asset\AssetFieldHandler@onFileDelete');
-        $this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Fields\Relation\RelationFieldHandler@onEntityDelete');
-        $this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Fields\Node\NodeFieldHandler@onEntityUpdate');
-        $this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Fields\Node\NodeFieldHandler@onEntityDelete');
-        $this->app['events']->listen('cb.before.entity.update', 'Cookbook\EntityElastic\Fields\Compound\CompoundFieldHandler@onBeforeEntityUpdate');
-        $this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Fields\Compound\CompoundFieldHandler@onAfterEntityUpdate');
+        $this->app['events']->listen('cb.after.file.delete', 'Cookbook\EntityElastic\Fields\Asset\AssetFieldHandler@onFileDelete', 10);
+        $this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Fields\Relation\RelationFieldHandler@onEntityDelete', 10);
+        $this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Fields\Node\NodeFieldHandler@onEntityUpdate', 10);
+        $this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Fields\Node\NodeFieldHandler@onEntityDelete', 10);
+        $this->app['events']->listen('cb.before.entity.update', 'Cookbook\EntityElastic\Fields\Compound\CompoundFieldHandler@onBeforeEntityUpdate', 10);
+        $this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Fields\Compound\CompoundFieldHandler@onAfterEntityUpdate', 10);
     }
 
     /**

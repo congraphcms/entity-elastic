@@ -20,6 +20,7 @@ use Cookbook\Eav\Managers\AttributeManager;
 use Cookbook\Eav\Facades\MetaData;
 
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use stdClass;
 
@@ -67,8 +68,7 @@ class EntityFormater
     public function __construct(
         FieldHandlerFactoryContract $fieldHandlerFactory,
         AttributeManager $attributeManager
-    )
-    {
+    ) {
 
         // Inject dependencies
         $this->fieldHandlerFactory = $fieldHandlerFactory;
@@ -81,27 +81,29 @@ class EntityFormater
         $entities = [];
 
 
-        foreach ($result['hits']['hits'] as $entity) {
-            $entity = $this->formatEntity($entity, $status, $locale, $localeCodes);
+        foreach ($result['hits']['hits'] as $rawEntity) {
+            try {
+                $entity = $this->formatEntity($rawEntity, $status, $locale, $localeCodes, false, false, true);
+            } catch (NotFoundException $e) {
+                continue;
+            }
+            
             $entities[] = $entity;
         }
 
         return $entities;
     }
 
-    public function formatEntity($result, $status, $locale, $localeCodes, $nested = false, $source = false)
+    public function formatEntity($result, $status, $locale, $localeCodes, $nested = false, $source = false, $multiple = false)
     {
-        
-
         $entity = new stdClass();
-        if(!$source)
-        {
+        if (!$source) {
             $id = $result['_id'];
             $result = $result['_source'];
             $result['id'] = $id;
         }
 
-        $result['status'] = $this->getValidStatuses($result, $status, $localeCodes);
+        $result['status'] = $this->getValidStatuses($result, $status, $localeCodes, !$multiple);
         $fields = $result['fields'];
         $entity->id = (is_numeric($result['id']))?intval($result['id']):$result['id'];
         // $entity->version = $result['_version'];
@@ -141,20 +143,16 @@ class EntityFormater
     {
         $parsed = null;
 
-        if(empty($locale))
-        {
+        if (empty($locale)) {
             $parsed = [];
         }
 
-        foreach ($statuses as $status)
-        {
-            if(!in_array($status['locale'], $localeCodes))
-            {
+        foreach ($statuses as $status) {
+            if (!in_array($status['locale'], $localeCodes)) {
                 continue;
             }
 
-            if(!empty($locale) || $status['locale'] === null)
-            {
+            if (!empty($locale) || $status['locale'] === null) {
                 $parsed = $status['status'];
                 continue;
             }
@@ -165,31 +163,25 @@ class EntityFormater
         return $parsed;
     }
 
-    protected function getValidStatuses($entity, $statusFilter, &$localeCodes)
+    protected function getValidStatuses($entity, $statusFilter, &$localeCodes, $updateLocaleCodes = true)
     {
         $validStatuses = [];
-        foreach ($entity['status'] as $status)
-        {
-            if(!in_array($status['locale'], $localeCodes))
-            {
+        foreach ($entity['status'] as $status) {
+            if (!in_array($status['locale'], $localeCodes)) {
                 continue;
             }
 
-            if($status['state'] !== 'active')
-            {
+            if ($status['state'] !== 'active') {
                 continue;
             }
 
-            if(empty($statusFilter))
-            {
+            if (empty($statusFilter)) {
                 $validStatuses[] = $status;
                 continue;
             }
 
-            if(!is_array($statusFilter) )
-            {
-                if($status['status'] == $statusFilter)
-                {
+            if (!is_array($statusFilter)) {
+                if ($status['status'] == $statusFilter) {
                     $validStatuses[] = $status;
                 }
 
@@ -199,22 +191,22 @@ class EntityFormater
             foreach ($statusFilter as $operator => $value) {
                 switch ($operator) {
                     case 'e':
-                        if($status['status'] == $value) {
+                        if ($status['status'] == $value) {
                             $validStatuses[] = $status;
                         }
                         break;
                     case 'ne':
-                        if($status['status'] != $value) {
+                        if ($status['status'] != $value) {
                             $validStatuses[] = $status;
                         }
                         break;
                     case 'in':
-                        if(in_array($status['status'], $value)) {
+                        if (in_array($status['status'], $value)) {
                             $validStatuses[] = $status;
                         }
                         break;
                     case 'nin':
-                        if(!in_array($status['status'], $value)) {
+                        if (!in_array($status['status'], $value)) {
                             $validStatuses[] = $status;
                         }
                         break;
@@ -226,25 +218,22 @@ class EntityFormater
             }
         }
 
-        if(empty($validStatuses))
-        {
+        if (empty($validStatuses)) {
             throw new NotFoundException(['Entity not found.']);
         }
-        if($entity['localized_workflow'])
-        {
+        if ($entity['localized_workflow']) {
             $availableLocaleCodes = [null];
-            foreach ($validStatuses as $status)
-            {
-                foreach ($localeCodes as $code)
-                {
-                    if($status['locale'] == $code)
-                    {
+            foreach ($validStatuses as $status) {
+                foreach ($localeCodes as $code) {
+                    if ($status['locale'] == $code) {
                         $availableLocaleCodes[] = $code;
                     }
                 }
             }
 
-            $localeCodes = $availableLocaleCodes;
+            if ($updateLocaleCodes) {
+                $localeCodes = $availableLocaleCodes;
+            }
         }
         
 
@@ -260,20 +249,17 @@ class EntityFormater
         $fieldHandlers = [];
         $fields = new stdClass();
 
-        if(!$entityType || !$attributeSet)
-        {
+        if (!$entityType || !$attributeSet) {
             return false;
         }
 
-        foreach ($attributeSet->attributes as $attr)
-        {
+        foreach ($attributeSet->attributes as $attr) {
             $attribute = MetaData::getAttributeById($attr->id);
             $settings = $attributeSettings[$attribute->field_type];
             $code = $attribute->code;
 
-            if(!$attribute->localized)
-            {
-                $value = (isset($source['fields'][$code])) ? 
+            if (!$attribute->localized) {
+                $value = (isset($source['fields'][$code])) ?
                             $source['fields'][$code] :
                             null;
                 $formattedValue = $this->formatValue($value, $attribute, $status, $locale, $localeCodes, $settings, $nested);
@@ -281,9 +267,8 @@ class EntityFormater
                 continue;
             }
 
-            if($locale)
-            {
-                $value = (isset($source['fields'][$code . '__' . $locale->code])) ? 
+            if ($locale) {
+                $value = (isset($source['fields'][$code . '__' . $locale->code])) ?
                             $source['fields'][$code . '__' . $locale->code] :
                             null;
                 $formattedValue = $this->formatValue($value, $attribute, $status, $locale, $localeCodes, $settings, $nested);
@@ -292,15 +277,13 @@ class EntityFormater
             }
 
             $fields->$code = new stdClass();
-            foreach (MetaData::getLocales() as $l)
-            {
+            foreach (MetaData::getLocales() as $l) {
                 $localeCode = $l->code;
-                if(!in_array($localeCode, $localeCodes))
-                {
+                if (!in_array($localeCode, $localeCodes)) {
                     continue;
                 }
 
-                $value = (isset($source['fields'][$code . '__' . $localeCode])) ? 
+                $value = (isset($source['fields'][$code . '__' . $localeCode])) ?
                             $source['fields'][$code . '__' . $localeCode] :
                             null;
                 $fields->$code->$localeCode = $this->formatValue($value, $attribute, $status, $locale, $localeCodes, $settings, $nested);
@@ -316,15 +299,12 @@ class EntityFormater
         $hasMultipleValues = $settings['has_multiple_values'];
         $fieldHandler = $this->fieldHandlerFactory->make($attribute->field_type);
 
-        if($hasMultipleValues)
-        {
+        if ($hasMultipleValues) {
             $formattedValue = [];
-            if($value == null)
-            {
+            if ($value == null) {
                 return $formattedValue;
             }
-            foreach ($value as $valueItem)
-            {
+            foreach ($value as $valueItem) {
                 $formattedValue[] = $fieldHandler->formatValue($valueItem, $attribute, $status, $locale, $localeCodes, $nested);
             }
 

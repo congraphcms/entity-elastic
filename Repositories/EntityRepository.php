@@ -30,6 +30,8 @@ use Cookbook\Eav\Facades\MetaData;
 
 use Elasticsearch\ClientBuilder;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+
 use stdClass;
 
 /**
@@ -139,11 +141,23 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
     public function onEntityUpdated($command, $result)
     {
+        try {
+            $result = $this->fetchRaw($command->id);
+        } catch (NotFoundException $e) {
+            $this->create($command->params, $result);
+            return;
+        }
         $this->update($command->id, $command->params, $result);
     }
 
     public function onEntityDeleted($command, $result)
     {
+        try {
+            $res = $this->fetchRaw($command->id);
+        } catch (NotFoundException $e) {
+            return;
+        }
+        
         $this->delete($command->id);
     }
 
@@ -235,22 +249,23 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         if (!($result instanceof Model) || !is_integer($result->id) || empty($result->id)) {
             $body['created_at'] = date("Y-m-d H:i:s");
             $body['updated_at'] = date("Y-m-d H:i:s");
+            $body['entity_type_id'] = $model['entity_type_id'];
+            $body['attribute_set_id'] = $model['attribute_set_id'];
+            if (! empty($model['fields']) && is_array($model['fields'])) {
+                $fields = $model['fields'];
+            }
         } else {
             $params['id'] = $result->id;
             $body['id'] = $params['id'];
             $body['created_at'] = $result->created_at->tz('UTC')->toDateTimeString();
             $body['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
+            $body['entity_type_id'] = $result->entity_type_id;
+            $body['attribute_set_id'] = $result->attribute_set_id;
+            $fields = $result->toArray()['fields'];
         }
         
         $body['fields'] = [];
         $body['status'] = [];
-        $body['entity_type_id'] = $model['entity_type_id'];
-        $body['attribute_set_id'] = $model['attribute_set_id'];
-
-        $fields = array();
-        if (! empty($model['fields']) && is_array($model['fields'])) {
-            $fields = $model['fields'];
-        }
 
         $locale = false;
         $localeCodes = [null];
@@ -267,7 +282,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         }
 
         $attributeSet = MetaData::getAttributeSetById($body['attribute_set_id']);
-
+        
         foreach ($attributeSet['attributes'] as $setAttribute) {
             $attribute = MetaData::getAttributeById($setAttribute->id);
             $code = $attribute->code;
@@ -313,7 +328,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             }
         }
 
-        $entityType = MetaData::getEntityTypeById($model['entity_type_id']);
+        $entityType = MetaData::getEntityTypeById($body['entity_type_id']);
         $body['localized'] = !!$entityType->localized;
         $body['localized_workflow'] = !!$entityType->localized_workflow;
         
@@ -418,6 +433,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         if (! empty($model['status'])) {
             $status = $model['status'];
         }
+
         // update fields
         $attributeSet = MetaData::getAttributeSetById($body['attribute_set_id']);
         foreach ($attributeSet['attributes'] as $setAttribute) {
@@ -428,6 +444,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             if (!array_key_exists($code, $fields)) {
                 continue;
             }
+            
             if (!$attribute->localized || $locale) {
                 $fieldName = $code;
                 if ($attribute->localized) {
@@ -442,7 +459,6 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
                 $changed = true;
                 continue;
             }
-            
 
             foreach (MetaData::getLocales() as $l) {
                 $fieldName = $code . '__' . $l->code;
@@ -467,6 +483,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
         $entityType = MetaData::getEntityTypeById($body['entity_type_id']);
         // update status
+
         if (isset($status)) {
             if (is_array($status)) {
                 $point = [];
@@ -504,6 +521,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
                 }
 
                 $statusChanged = false;
+                $statusExists = false;
 
                 foreach ($body['status'] as &$oldStatus) {
                     if ($oldStatus['state'] == 'active'
@@ -511,15 +529,20 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
                         && $oldStatus['status'] !== $s) {
                         $oldStatus['state'] = 'history';
                         $statusChanged = true;
+                        $statusExists = true;
                         $changed = true;
                         continue;
                     }
+                    if ($oldStatus['state'] == 'active' && $oldStatus['locale'] == $lc) {
+                        $statusExists = true;
+                    }
                 }
 
-                if (!$statusChanged) {
+                if (!$statusChanged && $statusExists) {
                     continue;
                 }
 
+                $changed = true;
                 $statusObj = [
                     'status' => $s,
                     'locale' => $lc,

@@ -63,12 +63,12 @@ class RepositoriesServiceProvider extends ServiceProvider
      */
     protected function registerListeners()
     {
-        $this->app['events']->listen('cb.after.entity.create', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityCreated');
-        $this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityUpdated');
-        $this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityDeleted');
-        $this->app['events']->listen('cb.after.attribute.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onAttributeDeleted');
-        $this->app['events']->listen('cb.after.attribute.set.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onAttributeSetDeleted');
-        $this->app['events']->listen('cb.after.entity.type.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityTypeDeleted');
+        $this->app['events']->listen('cb.after.entity.create', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityCreated', 100);
+        $this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityUpdated', 100);
+        $this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityDeleted', 100);
+        $this->app['events']->listen('cb.after.attribute.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onAttributeDeleted', 100);
+        $this->app['events']->listen('cb.after.attribute.set.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onAttributeSetDeleted', 100);
+        $this->app['events']->listen('cb.after.entity.type.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityTypeDeleted', 100);
     }
 
     /**

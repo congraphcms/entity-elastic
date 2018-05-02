@@ -16,6 +16,8 @@ use Cookbook\EntityElastic\Services\EntityFormater;
 use Elasticsearch\ClientBuilder;
 use Cookbook\Eav\Facades\MetaData;
 use Cookbook\Core\Facades\Trunk;
+use Cookbook\Core\Exceptions\NotFoundException;
+use Illuminate\Support\Facades\Log;
 use stdClass;
 
 /**
@@ -171,17 +173,20 @@ class NodeFieldHandler extends AbstractFieldHandler
             return null;
         }
 
+        $relation = new stdClass();
+        $relation->id = $value['id'];
+        $relation->type = 'entity';
+
         if ($nested) {
-            $relation = new stdClass();
-            $relation->id = $value['id'];
-            $relation->type = 'entity';
             return $relation;
         }
-        // @TODO
-        // WE NEED SOME PROTECTION FOR STATUS IN NODE RELATOINS
-        // $relation = $this->formater->formatEntity($value, $status, $locale, $localeCodes, true, true);
-        $relation = $this->formater->formatEntity($value, null, $locale, $localeCodes, true, true);
-        return $relation;
+
+        try {
+            $formattedRelation = $this->formater->formatEntity($value, null, $locale, $localeCodes, true, true);
+            return $formattedRelation;
+        } catch (NotFoundException $e) {
+            return $relation;
+        }
     }
 
     /**
@@ -373,7 +378,7 @@ class NodeFieldHandler extends AbstractFieldHandler
                 $itemsToUpdate = [];
 
                 foreach ($value as &$item) {
-                    if (array_key_exists('id', $item) && $item['id'] == $command->id) {
+                    if (is_array($item) && array_key_exists('id', $item) && $item['id'] == $command->id) {
                         $itemsToUpdate[] = $item;
                         $changed = true;
                         continue;
