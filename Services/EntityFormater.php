@@ -277,16 +277,19 @@ class EntityFormater
             }
 
             $fields->$code = new stdClass();
-            foreach (MetaData::getLocales() as $l) {
-                $localeCode = $l->code;
-                if (!in_array($localeCode, $localeCodes)) {
+            $lcls = MetaData::getLocales();
+            for ($i = 0; $i < count($lcls); $i++) {
+                $l = $lcls[$i];
+                $lc = $l->code;
+                if (!in_array($lc, $localeCodes)) {
                     continue;
                 }
 
-                $value = (isset($source['fields'][$code . '__' . $localeCode])) ?
-                            $source['fields'][$code . '__' . $localeCode] :
-                            null;
-                $fields->$code->$localeCode = $this->formatValue($value, $attribute, $status, $locale, $localeCodes, $settings, $nested);
+                $value = (isset($source['fields'][$code . '__' . $lc])) ?
+                    $source['fields'][$code . '__' . $lc] :
+                    null;
+
+                $fields->$code->$lc = $this->formatValue($value, $attribute, $status, $locale, $localeCodes, $settings, $nested);
             }
         }
 
@@ -295,7 +298,7 @@ class EntityFormater
 
     protected function formatValue($value, $attribute, $status, $locale, $localeCodes, $settings, $nested = false)
     {
-        $handlerName = $settings['handler'];
+        $handlerName = $settings['elastic_handler'];
         $hasMultipleValues = $settings['has_multiple_values'];
         $fieldHandler = $this->fieldHandlerFactory->make($attribute->field_type);
 
@@ -304,7 +307,7 @@ class EntityFormater
             if ($value == null) {
                 return $formattedValue;
             }
-            foreach ($value as $valueItem) {
+            foreach ($value as $index => $valueItem) {
                 $formattedValue[] = $fieldHandler->formatValue($valueItem, $attribute, $status, $locale, $localeCodes, $nested);
             }
 
