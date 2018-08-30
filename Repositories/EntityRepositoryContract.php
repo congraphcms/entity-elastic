@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,18 +8,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Repositories;
+namespace Congraph\EntityElastic\Repositories;
 
-use Cookbook\Contracts\Core\RepositoryContract;
+use Congraph\Contracts\Core\RepositoryContract;
 
 /**
  * Interface for elasticsearch Entity Repository class
  *
- * @uses  Cookbook\Contracts\Core\RepositoryContract
+ * @uses  Congraph\Contracts\Core\RepositoryContract
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */

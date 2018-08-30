@@ -1,6 +1,6 @@
 <?php
 
-use Cookbook\Core\Exceptions\ValidationException;
+use Congraph\Core\Exceptions\ValidationException;
 use Illuminate\Support\Debug\Dumper;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -23,22 +23,22 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Eav/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Eav/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Filesystem/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Filesystem/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Locales/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Locales/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Workflows/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Workflows/database/migrations'),
 		]);
 
 		$this->artisan('db:seed', [
@@ -96,7 +96,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 			'driver'   	=> 'mysql',
 			'host'      => '127.0.0.1',
 			'port'		=> '3306',
-			'database'	=> 'cookbook_testbench',
+			'database'	=> 'congraph_testbench',
 			'username'  => 'root',
 			'password'  => '',
 			'charset'   => 'utf8',
@@ -122,12 +122,12 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	protected function getPackageProviders($app)
 	{
 		return [
-			'Cookbook\Core\CoreServiceProvider',
-			'Cookbook\Locales\LocalesServiceProvider',
-			'Cookbook\Eav\EavServiceProvider',
-			'Cookbook\Filesystem\FilesystemServiceProvider',
-			'Cookbook\Workflows\WorkflowsServiceProvider',
-			'Cookbook\EntityElastic\EntityElasticServiceProvider'
+			'Congraph\Core\CoreServiceProvider',
+			'Congraph\Locales\LocalesServiceProvider',
+			'Congraph\Eav\EavServiceProvider',
+			'Congraph\Filesystem\FilesystemServiceProvider',
+			'Congraph\Workflows\WorkflowsServiceProvider',
+			'Congraph\EntityElastic\EntityElasticServiceProvider'
 		];
 	}
 
@@ -159,8 +159,8 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		$app = $this->createApplication();
 		
 
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
-		$this->assertTrue($repo instanceof Cookbook\EntityElastic\Repositories\EntityRepository);
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		$this->assertTrue($repo instanceof Congraph\EntityElastic\Repositories\EntityRepository);
 
 		$this->assertTrue($repo->indexExists(Config::get('cb.elastic.index_prefix') . 'entities'));
 	}
@@ -168,12 +168,12 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	public function testFetch() {
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(1);
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals('1', $result->id);
 		$this->assertArrayHasKey('entity_type_id', $result->toArray());
 		$this->assertArrayHasKey('attribute_set_id', $result->toArray());
@@ -206,7 +206,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$result = $repo->fetch(1, [], 'en_US');
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals('1', $result->id);
 		$this->assertArrayHasKey('entity_type_id', $result->toArray());
 		$this->assertArrayHasKey('attribute_set_id', $result->toArray());
@@ -232,7 +232,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$result = $repo->fetch(2, [], null, 'public');
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals('2', $result->id);
 		$this->assertArrayHasKey('entity_type_id', $result->toArray());
 		$this->assertArrayHasKey('attribute_set_id', $result->toArray());
@@ -258,7 +258,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		$result = $repo->fetch(3, [], null, 'published');
 		// $this->d->dump($result->toArray());
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals('3', $result->id);
 		$this->assertArrayHasKey('entity_type_id', $result->toArray());
 		$this->assertArrayHasKey('attribute_set_id', $result->toArray());
@@ -290,26 +290,26 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	}
 
 	/**
-	 * @expectedException \Cookbook\Core\Exceptions\NotFoundException
+	 * @expectedException \Congraph\Core\Exceptions\NotFoundException
 	 */
 	public function testFetchFailOnUnknownID()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(133);
 	}
 
 	/**
-	 * @expectedException \Cookbook\Core\Exceptions\NotFoundException
+	 * @expectedException \Congraph\Core\Exceptions\NotFoundException
 	 */
 	public function testFetchFailOnLocale()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(1, [], null, 'sr_RS');
@@ -318,13 +318,13 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	}
 
 	/**
-	 * @expectedException \Cookbook\Core\Exceptions\NotFoundException
+	 * @expectedException \Congraph\Core\Exceptions\NotFoundException
 	 */
 	public function testFetchFailOnStatus()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(2, [], null, 'trashed');
@@ -337,7 +337,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -353,7 +353,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		);
 
 		// $this->d->dump($result->toArray());
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertTrue(!empty($result->toArray()));
 	}
 
@@ -361,7 +361,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -377,7 +377,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		);
 		$array = $result->toArray();
 		// $this->d->dump($array);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertTrue($array[0]['fields']['attribute1'] < $array[count($array) - 1]['fields']['attribute1']);
 
 		$result = $repo->get(
@@ -393,7 +393,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		$array = $result->toArray();
 
 		// $this->d->dump($array);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertTrue($array[0]['entity_type_id'] > $array[count($array) - 1]['entity_type_id']);
 	}
 
@@ -401,7 +401,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -417,7 +417,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		);
 		$array = $result->toArray();
 		// $this->d->dump($array);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertEquals(2, $array[0]['id']);
 
 		$result = $repo->get(
@@ -431,7 +431,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		);
 		$array = $result->toArray();
 		// $this->d->dump($array);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertEquals(2, count($array));
 
 		$result = $repo->get(
@@ -445,7 +445,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		);
 		$array = $result->toArray();
 		// $this->d->dump($array);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertEquals(2, $array[0]['id']);
 		$this->assertEquals(2, count($array));
 	}
@@ -454,7 +454,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 
@@ -469,7 +469,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		);
 		$array = $result->toArray();
 		// $this->d->dump($array);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertEquals('en_US', $array[0]['locale']);
 		$this->assertTrue(is_string($array[0]['status']));
 		$this->assertEquals('value3-en', $array[0]['fields']['attribute3']);
@@ -479,7 +479,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -495,7 +495,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		);
 		$array = $result->toArray();
 		// $this->d->dump($array);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		foreach ($array as $entity)
 		{
 			if(is_string($entity['status']))
@@ -521,7 +521,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		);
 		$array = $result->toArray();
 		// $this->d->dump($array);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		foreach ($array as $entity)
 		{
 			if(is_string($entity['status']))
@@ -547,7 +547,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		);
 		$array = $result->toArray();
 		// $this->d->dump($array);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		foreach ($array as $entity)
 		{
 			if(is_string($entity['status']))
@@ -567,7 +567,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -764,7 +764,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -939,11 +939,11 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$array = $result->toArray();
 		// $this->d->dump($array);
 
@@ -961,7 +961,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		], $array);
 
 		$result = $repo->fetch($result->id);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$array = $result->toArray();
 		$this->assertArraySubset([
 			"type" => "entity",
@@ -998,14 +998,14 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
 		$array = $result->toArray();
 		// $this->d->dump($array);
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		// $this->assertTrue(is_int($result->id));
 		$this->assertArraySubset([
 			"type" => "entity",
@@ -1046,13 +1046,13 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
 		$array = $result->toArray();
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		// $this->assertTrue(is_int($result->id));
 		$this->assertArraySubset([
 			"type" => "entity",
@@ -1096,13 +1096,13 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
 		$array = $result->toArray();
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		// $this->assertTrue(is_int($result->id));
 		$this->assertArraySubset([
 			"type" => "entity",
@@ -1129,7 +1129,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$params = [
@@ -1144,7 +1144,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		// $this->d->dump($result->toArray());
 		
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
 		$this->assertEquals('changed value', $result->fields->attribute3->fr_FR);
 	}
@@ -1154,7 +1154,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$params = [
@@ -1163,7 +1163,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		];
 		
 		$result = $repo->update(1, $params);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$array = $result->toArray();
 		
 		$this->assertEquals('trashed', $result->status);
@@ -1175,7 +1175,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$params = [
@@ -1183,7 +1183,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		];
 		
 		$result = $repo->update(1, $params);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$array = $result->toArray();
 		
 		$this->assertTrue(is_array($result->status));
@@ -1199,7 +1199,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$params = [
@@ -1210,7 +1210,7 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		];
 		
 		$result = $repo->update(1, $params);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$array = $result->toArray();
 		
 		$this->assertTrue(is_array($result->status));
@@ -1226,12 +1226,12 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->delete(1);
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals(1, $result->id);
 		
 
@@ -1242,12 +1242,12 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
 
-		$attribute = $bus->dispatch( new Cookbook\Eav\Commands\Attributes\AttributeFetchCommand([], 1));
+		$attribute = $bus->dispatch( new Congraph\Eav\Commands\Attributes\AttributeFetchCommand([], 1));
 
 		$result = $repo->deleteByAttribute($attribute);
 		$repo->refreshIndex();
@@ -1265,14 +1265,14 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
 
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
 
-		$attribute = $bus->dispatch( new Cookbook\Eav\Commands\Attributes\AttributeFetchCommand([], 3));
+		$attribute = $bus->dispatch( new Congraph\Eav\Commands\Attributes\AttributeFetchCommand([], 3));
 
 		$result = $repo->deleteByAttribute($attribute);
 
@@ -1306,12 +1306,12 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
 
-		$attributeSet = $bus->dispatch( new Cookbook\Eav\Commands\AttributeSets\AttributeSetFetchCommand([], 1));
+		$attributeSet = $bus->dispatch( new Congraph\Eav\Commands\AttributeSets\AttributeSetFetchCommand([], 1));
 
 		$result = $repo->deleteByAttributeSet($attributeSet);
 		$repo->refreshIndex();
@@ -1329,12 +1329,12 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
 
-		$entityType = $bus->dispatch( new Cookbook\Eav\Commands\EntityTypes\EntityTypeFetchCommand([], 1));
+		$entityType = $bus->dispatch( new Congraph\Eav\Commands\EntityTypes\EntityTypeFetchCommand([], 1));
 
 		$result = $repo->deleteByEntityType($entityType);
 		$repo->refreshIndex();

@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Services;
+namespace Congraph\EntityElastic\Services;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -21,7 +21,7 @@ use Illuminate\Support\ServiceProvider;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -63,7 +63,7 @@ class ServicesServiceProvider extends ServiceProvider {
 	 */
 	protected function registerListeners()
 	{
-		// $this->app['events']->listen('cb.after.entity.create', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityCreated');
+		// $this->app['events']->listen('cb.after.entity.create', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityCreated');
 	}
 
 	/**
@@ -72,11 +72,11 @@ class ServicesServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function registerServices() {
-		$this->app->singleton('Cookbook\EntityElastic\Services\EntityFormater', function($app) {
+		$this->app->singleton('Congraph\EntityElastic\Services\EntityFormater', function($app) {
 			// var_dump('Contract for attribute repository resolving...');
 			return new EntityFormater(
-				$app->make('Cookbook\EntityElastic\Fields\FieldHandlerFactory'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\EntityElastic\Fields\FieldHandlerFactory'),
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
 	}
@@ -89,7 +89,7 @@ class ServicesServiceProvider extends ServiceProvider {
 	public function provides()
 	{
 		return [
-			'Cookbook\EntityElastic\Services\EntityFormater',
+			'Congraph\EntityElastic\Services\EntityFormater',
 		];
 	}
 

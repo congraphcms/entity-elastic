@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,15 +8,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Fields\Node;
+namespace Congraph\EntityElastic\Fields\Node;
 
-use Cookbook\EntityElastic\Fields\AbstractFieldHandler;
-use Cookbook\Eav\Managers\AttributeManager;
-use Cookbook\EntityElastic\Services\EntityFormater;
+use Congraph\EntityElastic\Fields\AbstractFieldHandler;
+use Congraph\Eav\Managers\AttributeManager;
+use Congraph\EntityElastic\Services\EntityFormater;
 use Elasticsearch\ClientBuilder;
-use Cookbook\Eav\Facades\MetaData;
-use Cookbook\Core\Facades\Trunk;
-use Cookbook\Core\Exceptions\NotFoundException;
+use Congraph\Eav\Facades\MetaData;
+use Congraph\Core\Facades\Trunk;
+use Congraph\Core\Exceptions\NotFoundException;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 
@@ -28,7 +28,7 @@ use stdClass;
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -38,7 +38,7 @@ class NodeFieldHandler extends AbstractFieldHandler
     /**
      * Service for formating entities
      *
-     * @var \Cookbook\EntityElastic\Services\EntityFormater
+     * @var \Congraph\EntityElastic\Services\EntityFormater
      */
     protected $formater;
 
@@ -46,7 +46,7 @@ class NodeFieldHandler extends AbstractFieldHandler
      * Create new AbstractAttributeHandler
      *
      * @param Illuminate\Database\Connection 			$db
-     * @param Cookbook\Eav\Managers\AttributeManager 	$attributeManager
+     * @param Congraph\Eav\Managers\AttributeManager 	$attributeManager
      * @param string 									$table
      *
      * @return void

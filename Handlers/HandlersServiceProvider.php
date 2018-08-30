@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,12 +8,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Handlers;
+namespace Congraph\EntityElastic\Handlers;
 
 use Illuminate\Support\ServiceProvider;
 
-use Cookbook\EntityElastic\Handlers\Commands\Entities\EntityFetchHandler;
-use Cookbook\EntityElastic\Handlers\Commands\Entities\EntityGetHandler;
+use Congraph\EntityElastic\Handlers\Commands\Entities\EntityFetchHandler;
+use Congraph\EntityElastic\Handlers\Commands\Entities\EntityGetHandler;
 
 /**
  * HandlersServiceProvider service provider for handlers
@@ -24,7 +24,7 @@ use Cookbook\EntityElastic\Handlers\Commands\Entities\EntityGetHandler;
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -37,8 +37,8 @@ class HandlersServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        // 'Cookbook\Eav\Events\AttributeSets\AfterAttributeSetFetch' => [
-        // 	'Cookbook\Eav\Handlers\Events\AttributeSets\AfterAttributeSetFetchHandler',
+        // 'Congraph\Eav\Events\AttributeSets\AfterAttributeSetFetch' => [
+        // 	'Congraph\Eav\Handlers\Events\AttributeSets\AfterAttributeSetFetchHandler',
         // ],
     ];
 
@@ -74,10 +74,10 @@ class HandlersServiceProvider extends ServiceProvider
         $mappings = [
             
             // Entities
-            'Cookbook\EntityElastic\Commands\Entities\EntityFetchCommand' =>
-                'Cookbook\EntityElastic\Handlers\Commands\Entities\EntityFetchHandler@handle',
-            'Cookbook\EntityElastic\Commands\Entities\EntityGetCommand' =>
-                'Cookbook\EntityElastic\Handlers\Commands\Entities\EntityGetHandler@handle',
+            'Congraph\EntityElastic\Commands\Entities\EntityFetchCommand' =>
+                'Congraph\EntityElastic\Handlers\Commands\Entities\EntityFetchHandler@handle',
+            'Congraph\EntityElastic\Commands\Entities\EntityGetCommand' =>
+                'Congraph\EntityElastic\Handlers\Commands\Entities\EntityGetHandler@handle',
             
         ];
 
@@ -93,11 +93,11 @@ class HandlersServiceProvider extends ServiceProvider
     {
 
         // Entities
-        $this->app->bind('Cookbook\EntityElastic\Handlers\Commands\Entities\EntityFetchHandler', function ($app) {
-            return new EntityFetchHandler($app->make('Cookbook\EntityElastic\Repositories\EntityRepositoryContract'));
+        $this->app->bind('Congraph\EntityElastic\Handlers\Commands\Entities\EntityFetchHandler', function ($app) {
+            return new EntityFetchHandler($app->make('Congraph\EntityElastic\Repositories\EntityRepositoryContract'));
         });
-        $this->app->bind('Cookbook\EntityElastic\Handlers\Commands\Entities\EntityGetHandler', function ($app) {
-            return new EntityGetHandler($app->make('Cookbook\EntityElastic\Repositories\EntityRepositoryContract'));
+        $this->app->bind('Congraph\EntityElastic\Handlers\Commands\Entities\EntityGetHandler', function ($app) {
+            return new EntityGetHandler($app->make('Congraph\EntityElastic\Repositories\EntityRepositoryContract'));
         });
     }
 
@@ -111,8 +111,8 @@ class HandlersServiceProvider extends ServiceProvider
     {
         return [
             
-            'Cookbook\EntityElastic\Handlers\Commands\Entities\EntityFetchHandler',
-            'Cookbook\EntityElastic\Handlers\Commands\Entities\EntityGetHandler',
+            'Congraph\EntityElastic\Handlers\Commands\Entities\EntityFetchHandler',
+            'Congraph\EntityElastic\Handlers\Commands\Entities\EntityGetHandler',
         ];
     }
 }

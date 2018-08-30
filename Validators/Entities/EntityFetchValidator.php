@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,13 +8,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Validators\Entities;
+namespace Congraph\EntityElastic\Validators\Entities;
 
-use Cookbook\EntityElastic\Repositories\EntityRepository;
-use Cookbook\Eav\Facades\MetaData;
-use Cookbook\Core\Bus\RepositoryCommand;
-use Cookbook\Core\Exceptions\ValidationException;
-use Cookbook\Core\Validation\Validator;
+use Congraph\EntityElastic\Repositories\EntityRepository;
+use Congraph\Eav\Facades\MetaData;
+use Congraph\Core\Bus\RepositoryCommand;
+use Congraph\Core\Exceptions\ValidationException;
+use Congraph\Core\Validation\Validator;
 
 /**
  * EntityFetchValidator class
@@ -24,7 +24,7 @@ use Cookbook\Core\Validation\Validator;
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -34,14 +34,14 @@ class EntityFetchValidator extends Validator
 	/**
 	 * Repository for entities
 	 * 
-	 * @var Cookbook\EntityElastic\Repositories\EntityRepository
+	 * @var Congraph\EntityElastic\Repositories\EntityRepository
 	 */
 	protected $entityRepository;
 
 	/**
 	 * Repository for locales
 	 * 
-	 * @var Cookbook\Contracts\Locales\LocaleRepositoryContract
+	 * @var Congraph\Contracts\Locales\LocaleRepositoryContract
 	 */
 	protected $localeRepository;
 
@@ -63,7 +63,7 @@ class EntityFetchValidator extends Validator
 	/**
 	 * Validate RepositoryCommand
 	 *
-	 * @param Cookbook\Core\Bus\RepositoryCommand $command
+	 * @param Congraph\Core\Bus\RepositoryCommand $command
 	 *
 	 * @todo  Create custom validation for all db related checks (DO THIS FOR ALL VALIDATORS)
 	 * @todo  Check all db rules | make validators on repositories

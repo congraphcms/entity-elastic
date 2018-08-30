@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,12 +8,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Validators;
+namespace Congraph\EntityElastic\Validators;
 
 use Illuminate\Support\ServiceProvider;
 
-use Cookbook\EntityElastic\Validators\Entities\EntityFetchValidator;
-use Cookbook\EntityElastic\Validators\Entities\EntityGetValidator;
+use Congraph\EntityElastic\Validators\Entities\EntityFetchValidator;
+use Congraph\EntityElastic\Validators\Entities\EntityGetValidator;
 
 /**
  * ValidatorsServiceProvider service provider for validators
@@ -24,7 +24,7 @@ use Cookbook\EntityElastic\Validators\Entities\EntityGetValidator;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -59,10 +59,10 @@ class ValidatorsServiceProvider extends ServiceProvider {
 		$mappings = [
 			
 			// Entities
-			'Cookbook\EntityElastic\Commands\Entities\EntityFetchCommand' => 
-				'Cookbook\EntityElastic\Validators\Entities\EntityFetchValidator@validate',
-			'Cookbook\EntityElastic\Commands\Entities\EntityGetCommand' => 
-				'Cookbook\EntityElastic\Validators\Entities\EntityGetValidator@validate',
+			'Congraph\EntityElastic\Commands\Entities\EntityFetchCommand' => 
+				'Congraph\EntityElastic\Validators\Entities\EntityFetchValidator@validate',
+			'Congraph\EntityElastic\Commands\Entities\EntityGetCommand' => 
+				'Congraph\EntityElastic\Validators\Entities\EntityGetValidator@validate',
 		];
 
 		$this->app->make('Illuminate\Contracts\Bus\Dispatcher')->mapValidators($mappings);
@@ -78,15 +78,15 @@ class ValidatorsServiceProvider extends ServiceProvider {
 
 		// Entities
 		
-		$this->app->bind('Cookbook\EntityElastic\Validators\Entities\EntityFetchValidator', function($app){
+		$this->app->bind('Congraph\EntityElastic\Validators\Entities\EntityFetchValidator', function($app){
 			return new EntityFetchValidator(
-				$app->make('Cookbook\EntityElastic\Repositories\EntityRepository')
+				$app->make('Congraph\EntityElastic\Repositories\EntityRepository')
 			);
 		});
-		$this->app->bind('Cookbook\EntityElastic\Validators\Entities\EntityGetValidator', function($app){
+		$this->app->bind('Congraph\EntityElastic\Validators\Entities\EntityGetValidator', function($app){
 			return new EntityGetValidator(
-				$app->make('Cookbook\Eav\Managers\AttributeManager'),
-				$app->make('Cookbook\Contracts\Eav\FieldValidatorFactoryContract')
+				$app->make('Congraph\Eav\Managers\AttributeManager'),
+				$app->make('Congraph\Contracts\Eav\FieldValidatorFactoryContract')
 			);
 		});
 	}
@@ -102,8 +102,8 @@ class ValidatorsServiceProvider extends ServiceProvider {
 		return [
 
 			// Entities
-			'Cookbook\EntityElastic\Validators\Entities\EntityFetchValidator',
-			'Cookbook\EntityElastic\Validators\Entities\EntityGetValidator'
+			'Congraph\EntityElastic\Validators\Entities\EntityFetchValidator',
+			'Congraph\EntityElastic\Validators\Entities\EntityGetValidator'
 
 		];
 	}

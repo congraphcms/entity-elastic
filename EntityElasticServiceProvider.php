@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic;
+namespace Congraph\EntityElastic;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -21,7 +21,7 @@ use Illuminate\Support\ServiceProvider;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/eav
+ * @package 	congraph/eav
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -59,23 +59,23 @@ class EntityElasticServiceProvider extends ServiceProvider {
 
 		// Fields
 		// -----------------------------------------------------------------------------
-		$this->app->register('Cookbook\EntityElastic\Fields\FieldsServiceProvider');
+		$this->app->register('Congraph\EntityElastic\Fields\FieldsServiceProvider');
 
 		// Handlers
 		// -----------------------------------------------------------------------------
-		$this->app->register('Cookbook\EntityElastic\Handlers\HandlersServiceProvider');
+		$this->app->register('Congraph\EntityElastic\Handlers\HandlersServiceProvider');
 
 		// Validators
 		// -----------------------------------------------------------------------------
-		$this->app->register('Cookbook\EntityElastic\Validators\ValidatorsServiceProvider');
+		$this->app->register('Congraph\EntityElastic\Validators\ValidatorsServiceProvider');
 
 		// Repositories
 		// -----------------------------------------------------------------------------
-		$this->app->register('Cookbook\EntityElastic\Repositories\RepositoriesServiceProvider');
+		$this->app->register('Congraph\EntityElastic\Repositories\RepositoriesServiceProvider');
 
 		// Services
 		// -----------------------------------------------------------------------------
-		$this->app->register('Cookbook\EntityElastic\Services\ServicesServiceProvider');
+		$this->app->register('Congraph\EntityElastic\Services\ServicesServiceProvider');
 
 		
 

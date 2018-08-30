@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Fields;
+namespace Congraph\EntityElastic\Fields;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -21,7 +21,7 @@ use Illuminate\Support\ServiceProvider;
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -62,12 +62,12 @@ class FieldsServiceProvider extends ServiceProvider
 	 */
 	protected function registerListeners()
 	{
-		$this->app['events']->listen('cb.after.file.delete', 'Cookbook\EntityElastic\Fields\Asset\AssetFieldHandler@onFileDelete', 10);
-		$this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Fields\Relation\RelationFieldHandler@onEntityDelete', 10);
-		$this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Fields\Node\NodeFieldHandler@onEntityUpdate', 10);
-		$this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Fields\Node\NodeFieldHandler@onEntityDelete', 10);
-		$this->app['events']->listen('cb.before.entity.update', 'Cookbook\EntityElastic\Fields\Compound\CompoundFieldHandler@onBeforeEntityUpdate', 10);
-		$this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Fields\Compound\CompoundFieldHandler@onAfterEntityUpdate', 10);
+		$this->app['events']->listen('cb.after.file.delete', 'Congraph\EntityElastic\Fields\Asset\AssetFieldHandler@onFileDelete', 10);
+		$this->app['events']->listen('cb.after.entity.delete', 'Congraph\EntityElastic\Fields\Relation\RelationFieldHandler@onEntityDelete', 10);
+		$this->app['events']->listen('cb.after.entity.update', 'Congraph\EntityElastic\Fields\Node\NodeFieldHandler@onEntityUpdate', 10);
+		$this->app['events']->listen('cb.after.entity.delete', 'Congraph\EntityElastic\Fields\Node\NodeFieldHandler@onEntityDelete', 10);
+		$this->app['events']->listen('cb.before.entity.update', 'Congraph\EntityElastic\Fields\Compound\CompoundFieldHandler@onBeforeEntityUpdate', 10);
+		$this->app['events']->listen('cb.after.entity.update', 'Congraph\EntityElastic\Fields\Compound\CompoundFieldHandler@onAfterEntityUpdate', 10);
 	}
 
 	/**
@@ -78,10 +78,10 @@ class FieldsServiceProvider extends ServiceProvider
 	protected function registerFactories()
 	{
 		$this->app
-			->singleton('Cookbook\EntityElastic\Fields\FieldHandlerFactory', function ($app) {
+			->singleton('Congraph\EntityElastic\Fields\FieldHandlerFactory', function ($app) {
 				return new FieldHandlerFactory(
 					$app['app'],
-					$app->make('Cookbook\Eav\Managers\AttributeManager')
+					$app->make('Congraph\Eav\Managers\AttributeManager')
 				);
 			});
 	}
@@ -93,71 +93,71 @@ class FieldsServiceProvider extends ServiceProvider
 	 */
 	protected function registerFieldHandlers()
 	{
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Asset\AssetFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Asset\AssetFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Asset\AssetFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Asset\AssetFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Boolean\BooleanFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Boolean\BooleanFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Boolean\BooleanFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Boolean\BooleanFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Datetime\DatetimeFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Datetime\DatetimeFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Datetime\DatetimeFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Datetime\DatetimeFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Decimal\DecimalFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Decimal\DecimalFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Decimal\DecimalFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Decimal\DecimalFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Integer\IntegerFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Integer\IntegerFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Integer\IntegerFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Integer\IntegerFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Relation\RelationFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Relation\RelationFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Relation\RelationFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Relation\RelationFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Select\SelectFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Select\SelectFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Select\SelectFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Select\SelectFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Text\TextFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Text\TextFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Text\TextFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Text\TextFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Textarea\TextareaFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Textarea\TextareaFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Textarea\TextareaFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Textarea\TextareaFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Location\LocationFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Location\LocationFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Location\LocationFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Location\LocationFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
-		$this->app->singleton('Cookbook\EntityElastic\Fields\Node\NodeFieldHandler', function ($app) {
-			return new \Cookbook\EntityElastic\Fields\Node\NodeFieldHandler(
+		$this->app->singleton('Congraph\EntityElastic\Fields\Node\NodeFieldHandler', function ($app) {
+			return new \Congraph\EntityElastic\Fields\Node\NodeFieldHandler(
 				$app->make('Elasticsearch\ClientBuilder'),
-				$app->make('Cookbook\Eav\Managers\AttributeManager'),
-				$app->make('Cookbook\EntityElastic\Services\EntityFormater')
+				$app->make('Congraph\Eav\Managers\AttributeManager'),
+				$app->make('Congraph\EntityElastic\Services\EntityFormater')
 			);
 		});
 	}
@@ -169,7 +169,7 @@ class FieldsServiceProvider extends ServiceProvider
 	public function provides()
 	{
 		$provides = [
-			'Cookbook\EntityElastic\Fields\FieldHandlerFactory'
+			'Congraph\EntityElastic\Fields\FieldHandlerFactory'
 		];
 
 		$field_types = $this->app['config']->get('cb.eav');

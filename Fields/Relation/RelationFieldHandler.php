@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,13 +8,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Fields\Relation;
+namespace Congraph\EntityElastic\Fields\Relation;
 
-use Cookbook\EntityElastic\Fields\AbstractFieldHandler;
-use Cookbook\Eav\Managers\AttributeManager;
+use Congraph\EntityElastic\Fields\AbstractFieldHandler;
+use Congraph\Eav\Managers\AttributeManager;
 use Elasticsearch\ClientBuilder;
-use Cookbook\Eav\Facades\MetaData;
-use Cookbook\Core\Facades\Trunk;
+use Congraph\Eav\Facades\MetaData;
+use Congraph\Core\Facades\Trunk;
 use stdClass;
 
 /**
@@ -25,7 +25,7 @@ use stdClass;
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */

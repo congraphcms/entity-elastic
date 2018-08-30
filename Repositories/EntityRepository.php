@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,24 +8,24 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Repositories;
+namespace Congraph\EntityElastic\Repositories;
 
 use Carbon\Carbon;
-use Cookbook\Contracts\Eav\FieldHandlerFactoryContract;
-use Cookbook\Core\Exceptions\Exception;
-use Cookbook\Core\Exceptions\NotFoundException;
-use Cookbook\Core\Exceptions\BadRequestException;
-use Cookbook\Core\Facades\Trunk;
-// use Cookbook\Core\Repositories\AbstractRepository;
-use Cookbook\Core\Repositories\Collection;
-use Cookbook\Core\Repositories\Model;
-use Cookbook\Core\Repositories\UsesCache;
-use Cookbook\Eav\Managers\AttributeManager;
+use Congraph\Contracts\Eav\FieldHandlerFactoryContract;
+use Congraph\Core\Exceptions\Exception;
+use Congraph\Core\Exceptions\NotFoundException;
+use Congraph\Core\Exceptions\BadRequestException;
+use Congraph\Core\Facades\Trunk;
+// use Congraph\Core\Repositories\AbstractRepository;
+use Congraph\Core\Repositories\Collection;
+use Congraph\Core\Repositories\Model;
+use Congraph\Core\Repositories\UsesCache;
+use Congraph\Eav\Managers\AttributeManager;
 
-use Cookbook\EntityElastic\Traits\ElasticQueryBuilderTrait;
-use Cookbook\EntityElastic\Services\EntityFormater;
+use Congraph\EntityElastic\Traits\ElasticQueryBuilderTrait;
+use Congraph\EntityElastic\Services\EntityFormater;
 
-use Cookbook\Eav\Facades\MetaData;
+use Congraph\Eav\Facades\MetaData;
 
 
 use Elasticsearch\ClientBuilder;
@@ -40,13 +40,13 @@ use stdClass;
  * Repository for entity elastic database queries
  *
  * @uses        Illuminate\Database\Connection
- * @uses        Cookbook\Core\Repository\AbstractRepository
- * @uses        Cookbook\Contracts\Eav\AttributeHandlerFactoryContract
- * @uses        Cookbook\Eav\Managers\AttributeManager
+ * @uses        Congraph\Core\Repository\AbstractRepository
+ * @uses        Congraph\Contracts\Eav\AttributeHandlerFactoryContract
+ * @uses        Congraph\Eav\Managers\AttributeManager
  *
  * @author      Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright   Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package     cookbook/entity-elastic
+ * @package     congraph/entity-elastic
  * @since       0.1.0-alpha
  * @version     0.1.0-alpha
  */
@@ -58,7 +58,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
      * Factory for field handlers,
      * makes appropriate field handler depending on attribute data type
      *
-     * @var \Cookbook\Contracts\Eav\FieldHandlerFactoryContract
+     * @var \Congraph\Contracts\Eav\FieldHandlerFactoryContract
      */
     protected $fieldHandlerFactory;
 
@@ -66,14 +66,14 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     /**
      * Helper for attributes
      *
-     * @var \Cookbook\Eav\Managers\AttributeManager
+     * @var \Congraph\Eav\Managers\AttributeManager
      */
     protected $attributeManager;
 
     /**
      * Service for formating entities
      *
-     * @var \Cookbook\EntityElastic\Services\EntityFormater
+     * @var \Congraph\EntityElastic\Services\EntityFormater
      */
     protected $formater;
 
@@ -94,9 +94,9 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
      * Create new EntityRepository
      *
      * @param Elasticsearch\ClientBuilder $elasticClientBuilder
-     * @param Cookbook\Eav\Handlers\AttributeHandlerFactoryContract $attributeHandlerFactory
-     * @param Cookbook\Eav\Managers\AttributeManager $attributeManager
-     * @param Cookbook\EntityElastic\Services\EntityFormater $entityFormater
+     * @param Congraph\Eav\Handlers\AttributeHandlerFactoryContract $attributeHandlerFactory
+     * @param Congraph\Eav\Managers\AttributeManager $attributeManager
+     * @param Congraph\EntityElastic\Services\EntityFormater $entityFormater
      *
      * @return void
      */

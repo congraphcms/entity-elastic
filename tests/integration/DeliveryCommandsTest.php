@@ -1,6 +1,6 @@
 <?php
 
-use Cookbook\Core\Exceptions\ValidationException;
+use Congraph\Core\Exceptions\ValidationException;
 use Illuminate\Support\Debug\Dumper;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -23,22 +23,22 @@ class EntityTest extends Orchestra\Testbench\TestCase
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Eav/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Eav/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Filesystem/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Filesystem/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Locales/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Locales/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Workflows/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Workflows/database/migrations'),
 		]);
 
 		$this->artisan('db:seed', [
@@ -99,7 +99,7 @@ class EntityTest extends Orchestra\Testbench\TestCase
 			'driver'   	=> 'mysql',
 			'host'      => '127.0.0.1',
 			'port'		=> '3306',
-			'database'	=> 'cookbook_testbench',
+			'database'	=> 'congraph_testbench',
 			'username'  => 'root',
 			'password'  => '',
 			'charset'   => 'utf8',
@@ -125,12 +125,12 @@ class EntityTest extends Orchestra\Testbench\TestCase
 	protected function getPackageProviders($app)
 	{
 		return [
-			'Cookbook\Core\CoreServiceProvider',
-			'Cookbook\Locales\LocalesServiceProvider',
-			'Cookbook\Eav\EavServiceProvider',
-			'Cookbook\Filesystem\FilesystemServiceProvider',
-			'Cookbook\Workflows\WorkflowsServiceProvider',
-			'Cookbook\EntityElastic\EntityElasticServiceProvider'
+			'Congraph\Core\CoreServiceProvider',
+			'Congraph\Locales\LocalesServiceProvider',
+			'Congraph\Eav\EavServiceProvider',
+			'Congraph\Filesystem\FilesystemServiceProvider',
+			'Congraph\Workflows\WorkflowsServiceProvider',
+			'Congraph\EntityElastic\EntityElasticServiceProvider'
 		];
 	}
 
@@ -147,12 +147,12 @@ class EntityTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 
-		$result = $bus->dispatch( new Cookbook\EntityElastic\Commands\Entities\EntityFetchCommand(['locale' => 'en_US'], 1));
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$result = $bus->dispatch( new Congraph\EntityElastic\Commands\Entities\EntityFetchCommand(['locale' => 'en_US'], 1));
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
 
 
@@ -168,13 +168,13 @@ class EntityTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 
-		$result = $bus->dispatch( new Cookbook\EntityElastic\Commands\Entities\EntityGetCommand([]));
+		$result = $bus->dispatch( new Congraph\EntityElastic\Commands\Entities\EntityGetCommand([]));
 		// $this->d->dump($result->toArray());
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertTrue(count($result) > 0);
 		
 
@@ -186,16 +186,16 @@ class EntityTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 
 		// $mapping = $repo->getMappings('congraph_entities');
 		// $this->d->dump($mapping);
 
-		$result = $bus->dispatch( new Cookbook\EntityElastic\Commands\Entities\EntityGetCommand(['locale' => 'en_US', 'sort' => ['fields.attribute3'], 'limit' => 3, 'offset' => 0]));
+		$result = $bus->dispatch( new Congraph\EntityElastic\Commands\Entities\EntityGetCommand(['locale' => 'en_US', 'sort' => ['fields.attribute3'], 'limit' => 3, 'offset' => 0]));
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertEquals(3, count($result));
 
 		// $this->d->dump($result->toArray());
@@ -207,16 +207,16 @@ class EntityTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 
 		$filter = [ 'fields.attribute3' => 'value3-en' ];
 
-		$result = $bus->dispatch( new Cookbook\EntityElastic\Commands\Entities\EntityGetCommand(['filter' => $filter, 'locale' => 'en_US', 'sort' => ['fields.attribute1']]));
+		$result = $bus->dispatch( new Congraph\EntityElastic\Commands\Entities\EntityGetCommand(['filter' => $filter, 'locale' => 'en_US', 'sort' => ['fields.attribute1']]));
 		// $this->d->dump($result->toArray());
 		
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Collection);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
 		$this->assertEquals(4, count($result));
 
 		

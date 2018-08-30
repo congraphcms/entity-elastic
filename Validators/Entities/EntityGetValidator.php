@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,15 +8,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Validators\Entities;
+namespace Congraph\EntityElastic\Validators\Entities;
 
-use Cookbook\Contracts\Eav\FieldValidatorFactoryContract;
-use Cookbook\Eav\Managers\AttributeManager;
-use Cookbook\Eav\Facades\MetaData;
-use Cookbook\Core\Bus\RepositoryCommand;
-use Cookbook\Core\Exceptions\BadRequestException;
-use Cookbook\Core\Exceptions\NotFoundException;
-use Cookbook\Core\Validation\Validator;
+use Congraph\Contracts\Eav\FieldValidatorFactoryContract;
+use Congraph\Eav\Managers\AttributeManager;
+use Congraph\Eav\Facades\MetaData;
+use Congraph\Core\Bus\RepositoryCommand;
+use Congraph\Core\Exceptions\BadRequestException;
+use Congraph\Core\Exceptions\NotFoundException;
+use Congraph\Core\Validation\Validator;
 use Carbon\Carbon;
 
 
@@ -28,7 +28,7 @@ use Carbon\Carbon;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -60,14 +60,14 @@ class EntityGetValidator extends Validator
 	 * Factory for field validators,
 	 * makes appropriate field validator depending on field type
 	 *
-	 * @var Cookbook\Contracts\Eav\FieldValidatorFactoryContract
+	 * @var Congraph\Contracts\Eav\FieldValidatorFactoryContract
 	 */
 	protected $fieldValidatorFactory;
 
 	/**
 	 * Helper for attributes
 	 * 
-	 * @var Cookbook\Eav\Managers\AttributeManager
+	 * @var Congraph\Eav\Managers\AttributeManager
 	 */
 	protected $attributeManager;
 	
@@ -123,7 +123,7 @@ class EntityGetValidator extends Validator
 	/**
 	 * Validate RepositoryCommand
 	 * 
-	 * @param Cookbook\Core\Bus\RepositoryCommand $command
+	 * @param Congraph\Core\Bus\RepositoryCommand $command
 	 * 
 	 * @todo  Create custom validation for all db related checks (DO THIS FOR ALL VALIDATORS)
 	 * @todo  Check all db rules | make validators on repositories

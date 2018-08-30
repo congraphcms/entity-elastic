@@ -1,6 +1,6 @@
 <?php
 
-use Cookbook\Core\Exceptions\ValidationException;
+use Congraph\Core\Exceptions\ValidationException;
 use Illuminate\Support\Debug\Dumper;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -23,22 +23,22 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Eav/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Eav/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Filesystem/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Filesystem/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Locales/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Locales/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Workflows/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Workflows/database/migrations'),
 		]);
 
 		$this->artisan('db:seed', [
@@ -99,7 +99,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 			'driver'   	=> 'mysql',
 			'host'      => '127.0.0.1',
 			'port'		=> '3306',
-			'database'	=> 'cookbook_testbench',
+			'database'	=> 'congraph_testbench',
 			'username'  => 'root',
 			'password'  => '',
 			'charset'   => 'utf8',
@@ -125,12 +125,12 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 	protected function getPackageProviders($app)
 	{
 		return [
-			'Cookbook\Core\CoreServiceProvider',
-			'Cookbook\Locales\LocalesServiceProvider',
-			'Cookbook\Eav\EavServiceProvider',
-			'Cookbook\Filesystem\FilesystemServiceProvider',
-			'Cookbook\Workflows\WorkflowsServiceProvider',
-			'Cookbook\EntityElastic\EntityElasticServiceProvider'
+			'Congraph\Core\CoreServiceProvider',
+			'Congraph\Locales\LocalesServiceProvider',
+			'Congraph\Eav\EavServiceProvider',
+			'Congraph\Filesystem\FilesystemServiceProvider',
+			'Congraph\Workflows\WorkflowsServiceProvider',
+			'Congraph\EntityElastic\EntityElasticServiceProvider'
 		];
 	}
 
@@ -146,7 +146,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
 		$params = [
 			'entity_type' => ['id' => 1],
@@ -159,9 +159,9 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 			]
 		];
 		
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityCreateCommand($params));
+		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityCreateCommand($params));
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
 		// $this->d->dump($result->toArray());
 
@@ -170,7 +170,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		// $this->d->dump($result->toArray());
 		// $this->d->dump($document->toArray());
 
-		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($document instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals($result->id, $document->id);
 
 		$this->assertArraySubset($result->toArray(), $document->toArray());
@@ -190,7 +190,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		
 		try
 		{
-			$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityCreateCommand($params));
+			$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityCreateCommand($params));
 		}
 		catch(\Exception $e)
 		{
@@ -199,7 +199,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		}
 		
 
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
 		// $this->d->dump($result->toArray());
 
@@ -208,7 +208,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		// $this->d->dump($result->toArray());
 		// $this->d->dump($document->toArray());
 
-		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($document instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals($result->id, $document->id);
 
 		$resultArray = $result->toArray();
@@ -226,7 +226,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
 		$params = [
 			'fields' => [
@@ -236,10 +236,10 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 			]
 		];
 		
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
+		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
 		
 		
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
 		$this->assertEquals($result->fields->attribute3['fr_FR'], 'changed value');
 		// $this->d->dump($result->toArray());
@@ -249,7 +249,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		// $this->d->dump($result->toArray());
 		// $this->d->dump($document->toArray());
 
-		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($document instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals($result->id, $document->id);
 
 		$resultArray = $result->toArray();
@@ -268,16 +268,16 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
 		$params = [
 			'status' => 'draft'
 		];
 		
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
+		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
 		
 		
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
 		foreach ($result->status as $key => $value)
 		{
@@ -291,7 +291,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		// $this->d->dump($result->toArray());
 		// $this->d->dump($document->toArray());
 
-		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($document instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals($result->id, $document->id);
 
 		$resultArray = $result->toArray();
@@ -302,10 +302,10 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 			'status' => 'published'
 		];
 		
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
+		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
 		
 		
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
 		foreach ($result->status as $key => $value)
 		{
@@ -319,7 +319,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		// $this->d->dump($result->toArray());
 		// $this->d->dump($document->toArray());
 
-		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($document instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals($result->id, $document->id);
 
 		$resultArray = $result->toArray();
@@ -335,10 +335,10 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 			'locale' => 'en_US'
 		];
 		
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
+		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
 		
 		
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
 		$this->assertEquals($result->status, 'draft');
 		
@@ -349,7 +349,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		// $this->d->dump($result->toArray());
 		// $this->d->dump($document->toArray());
 
-		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($document instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals($result->id, $document->id);
 
 		$resultArray = $result->toArray();
@@ -362,10 +362,10 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 			'locale' => 'en_US'
 		];
 		
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
+		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityUpdateCommand($params, 1));
 		
 		
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
 		$this->assertEquals($result->status, 'published');
 		
@@ -376,7 +376,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		// $this->d->dump($result->toArray());
 		// $this->d->dump($document->toArray());
 
-		$this->assertTrue($document instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($document instanceof Congraph\Core\Repositories\Model);
 		$this->assertEquals($result->id, $document->id);
 
 		$resultArray = $result->toArray();
@@ -390,9 +390,9 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityDeleteCommand([], 1));
+		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityDeleteCommand([], 1));
 
 		$this->assertEquals(1, $result->id);
 		// $this->d->dump($result);
@@ -403,7 +403,7 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		}
 		catch(\Exception $e)
 		{
-			$this->assertTrue($e instanceof \Cookbook\Core\Exceptions\NotFoundException);
+			$this->assertTrue($e instanceof \Congraph\Core\Exceptions\NotFoundException);
 			return;
 		}
 		
@@ -415,9 +415,9 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\AttributeSets\AttributeSetDeleteCommand([], 1));
+		$result = $bus->dispatch( new Congraph\Eav\Commands\AttributeSets\AttributeSetDeleteCommand([], 1));
 
 		$this->assertEquals(1, $result->id);
 		// $this->d->dump($result);
@@ -437,9 +437,9 @@ class EavEventsHandlersTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\EntityTypes\EntityTypeDeleteCommand([], 1) );
+		$result = $bus->dispatch( new Congraph\Eav\Commands\EntityTypes\EntityTypeDeleteCommand([], 1) );
 
 		$this->assertEquals(1, $result->id);
 		// $this->d->dump($result);

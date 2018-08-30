@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,13 +8,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Fields;
+namespace Congraph\EntityElastic\Fields;
 
-use Cookbook\Contracts\Eav\AttributeRepositoryContract;
-use Cookbook\Core\Traits\ErrorManagerTrait;
-use Cookbook\Eav\Managers\AttributeManager;
+use Congraph\Contracts\Eav\AttributeRepositoryContract;
+use Congraph\Core\Traits\ErrorManagerTrait;
+use Congraph\Eav\Managers\AttributeManager;
 
-use Cookbook\EntityElastic\Traits\ElasticQueryBuilderTrait;
+use Congraph\EntityElastic\Traits\ElasticQueryBuilderTrait;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Support\Facades\Config;
 
@@ -23,13 +23,13 @@ use Illuminate\Support\Facades\Config;
  * 
  * Base class for all feild handlers
  * 
- * @uses  		Cookbook\Core\Traits\ErrorManagerTrait
- * @uses  		Cookbook\Eav\Managers\AttributeManager
+ * @uses  		Congraph\Core\Traits\ErrorManagerTrait
+ * @uses  		Congraph\Eav\Managers\AttributeManager
  * @uses 		Illuminate\Database\Connection
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -56,7 +56,7 @@ abstract class AbstractFieldHandler
 	 * Create new AbstractAttributeHandler
 	 * 
 	 * @param Illuminate\Database\Connection 			$db
-	 * @param Cookbook\Eav\Managers\AttributeManager 	$attributeManager
+	 * @param Congraph\Eav\Managers\AttributeManager 	$attributeManager
 	 * @param string 									$table
 	 *  
 	 * @return void

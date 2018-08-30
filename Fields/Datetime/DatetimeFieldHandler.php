@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,9 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Fields\Datetime;
+namespace Congraph\EntityElastic\Fields\Datetime;
 
-use Cookbook\EntityElastic\Fields\AbstractFieldHandler;
+use Congraph\EntityElastic\Fields\AbstractFieldHandler;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 use stdClass;
@@ -23,7 +23,7 @@ use stdClass;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */

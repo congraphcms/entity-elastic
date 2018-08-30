@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,16 +8,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Services;
+namespace Congraph\EntityElastic\Services;
 
-use Cookbook\Contracts\Eav\FieldHandlerFactoryContract;
-use Cookbook\Core\Exceptions\Exception;
-use Cookbook\Core\Exceptions\NotFoundException;
-use Cookbook\Core\Exceptions\BadRequestException;
-use Cookbook\Core\Repositories\Collection;
-use Cookbook\Core\Repositories\Model;
-use Cookbook\Eav\Managers\AttributeManager;
-use Cookbook\Eav\Facades\MetaData;
+use Congraph\Contracts\Eav\FieldHandlerFactoryContract;
+use Congraph\Core\Exceptions\Exception;
+use Congraph\Core\Exceptions\NotFoundException;
+use Congraph\Core\Exceptions\BadRequestException;
+use Congraph\Core\Repositories\Collection;
+use Congraph\Core\Repositories\Model;
+use Congraph\Eav\Managers\AttributeManager;
+use Congraph\Eav\Facades\MetaData;
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
@@ -29,12 +29,12 @@ use stdClass;
  *
  * Service for entity formating
  *
- * @uses        Cookbook\Contracts\Eav\AttributeHandlerFactoryContract
- * @uses        Cookbook\Eav\Managers\AttributeManager
+ * @uses        Congraph\Contracts\Eav\AttributeHandlerFactoryContract
+ * @uses        Congraph\Eav\Managers\AttributeManager
  *
  * @author      Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright   Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package     cookbook/entity-elastic
+ * @package     congraph/entity-elastic
  * @since       0.1.0-alpha
  * @version     0.1.0-alpha
  */
@@ -45,7 +45,7 @@ class EntityFormater
      * Factory for field handlers,
      * makes appropriate field handler depending on attribute data type
      *
-     * @var \Cookbook\Contracts\Eav\FieldHandlerFactoryContract
+     * @var \Congraph\Contracts\Eav\FieldHandlerFactoryContract
      */
     protected $fieldHandlerFactory;
 
@@ -53,15 +53,15 @@ class EntityFormater
     /**
      * Helper for attributes
      *
-     * @var \Cookbook\Eav\Managers\AttributeManager
+     * @var \Congraph\Eav\Managers\AttributeManager
      */
     protected $attributeManager;
 
     /**
      * Create new EntityFormater
      *
-     * @param Cookbook\Eav\Handlers\AttributeHandlerFactoryContract $attributeHandlerFactory
-     * @param Cookbook\Eav\Managers\AttributeManager $attributeManager
+     * @param Congraph\Eav\Handlers\AttributeHandlerFactoryContract $attributeHandlerFactory
+     * @param Congraph\Eav\Managers\AttributeManager $attributeManager
      *
      * @return void
      */

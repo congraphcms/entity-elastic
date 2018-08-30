@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,10 +8,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Fields;
+namespace Congraph\EntityElastic\Fields;
 
-use Cookbook\Contracts\Eav\FieldHandlerFactoryContract;
-use Cookbook\Eav\Managers\AttributeManager;
+use Congraph\Contracts\Eav\FieldHandlerFactoryContract;
+use Congraph\Eav\Managers\AttributeManager;
 use Illuminate\Contracts\Container\Container;
 
 /**
@@ -19,13 +19,13 @@ use Illuminate\Contracts\Container\Container;
  * 
  * Used to create suitable handler for different field types
  *
- * @uses  		Cookbook\Contracts\Eav\FieldHandlerFactoryContract
- * @uses  		Cookbook\Eav\Managers\AttributeManager
+ * @uses  		Congraph\Contracts\Eav\FieldHandlerFactoryContract
+ * @uses  		Congraph\Eav\Managers\AttributeManager
  * @uses 		Illuminate\Container\Container
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -42,7 +42,7 @@ class FieldHandlerFactory implements FieldHandlerFactoryContract
 	/**
 	 * AttributeManager
 	 * 
-	 * @var Cookbook\Eav\Managers\AttributeManager
+	 * @var Congraph\Eav\Managers\AttributeManager
 	 */
 	public $attributeManager;
 
@@ -74,7 +74,7 @@ class FieldHandlerFactory implements FieldHandlerFactoryContract
 	 * 
 	 * @param string $attributeFieldType - field type of attribute
 	 * 
-	 * @return Cookbook\Eav\Fields\AbstractFieldHandler
+	 * @return Congraph\Eav\Fields\AbstractFieldHandler
 	 * 
 	 * @throws InvalidArgumentException
 	 */

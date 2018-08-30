@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the cookbook/eav package.
+ * This file is part of the congraph/eav package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,19 +8,19 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Fields\Compound;
+namespace Congraph\EntityElastic\Fields\Compound;
 
-use Cookbook\EntityElastic\Fields\AbstractFieldHandler;
+use Congraph\EntityElastic\Fields\AbstractFieldHandler;
 use Illuminate\Support\Facades\Config;
-use Cookbook\Eav\Managers\AttributeManager;
-use Cookbook\Contracts\Eav\AttributeRepositoryContract;
-use Cookbook\EntityElastic\Repositories\EntityRepository;
+use Congraph\Eav\Managers\AttributeManager;
+use Congraph\Contracts\Eav\AttributeRepositoryContract;
+use Congraph\EntityElastic\Repositories\EntityRepository;
 use Illuminate\Database\Connection;
-use Cookbook\Core\Exceptions\BadRequestException;
-use Cookbook\Eav\Facades\MetaData;
+use Congraph\Core\Exceptions\BadRequestException;
+use Congraph\Eav\Facades\MetaData;
 use Illuminate\Support\Facades\Event;
 use Elasticsearch\ClientBuilder;
-use Cookbook\Core\Exceptions\NotFoundException;
+use Congraph\Core\Exceptions\NotFoundException;
 use \Exception;
 
 /**
@@ -31,7 +31,7 @@ use \Exception;
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/eav
+ * @package 	congraph/eav
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -43,7 +43,7 @@ class CompoundFieldHandler extends AbstractFieldHandler
 	/**
 	 * Repository for entities
 	 *
-	 * @var Cookbook\Contracts\Eav\EntityRepository
+	 * @var Congraph\Contracts\Eav\EntityRepository
 	 */
 	public $entityRepository;
 
@@ -51,7 +51,7 @@ class CompoundFieldHandler extends AbstractFieldHandler
 	 * Create new CompoundFieldHandler
 	 *
 	 * @param Illuminate\Database\Connection 			$db
-	 * @param Cookbook\Eav\Managers\AttributeManager 	$attributeManager
+	 * @param Congraph\Eav\Managers\AttributeManager 	$attributeManager
 	 * @param string 									$table
 	 *
 	 * @return void

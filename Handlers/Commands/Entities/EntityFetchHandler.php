@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,11 +8,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Handlers\Commands\Entities;
+namespace Congraph\EntityElastic\Handlers\Commands\Entities;
 
-use Cookbook\EntityElastic\Repositories\EntityRepositoryContract;
-use Cookbook\Core\Bus\RepositoryCommandHandler;
-use Cookbook\Core\Bus\RepositoryCommand;
+use Congraph\EntityElastic\Repositories\EntityRepositoryContract;
+use Congraph\Core\Bus\RepositoryCommandHandler;
+use Congraph\Core\Bus\RepositoryCommand;
 
 /**
  * EntityFetchHandler class
@@ -22,7 +22,7 @@ use Cookbook\Core\Bus\RepositoryCommand;
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -32,7 +32,7 @@ class EntityFetchHandler extends RepositoryCommandHandler
     /**
      * Create new EntityFetchHandler
      *
-     * @param Cookbook\EntityElastic\Repositories\EntityRepositoryContract $repository
+     * @param Congraph\EntityElastic\Repositories\EntityRepositoryContract $repository
      *
      * @return void
      */
@@ -44,7 +44,7 @@ class EntityFetchHandler extends RepositoryCommandHandler
     /**
      * Handle RepositoryCommand
      *
-     * @param Cookbook\Core\Bus\RepositoryCommand $command
+     * @param Congraph\Core\Bus\RepositoryCommand $command
      *
      * @return void
      */

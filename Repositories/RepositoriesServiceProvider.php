@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/entity-elastic package.
+ * This file is part of the congraph/entity-elastic package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EntityElastic\Repositories;
+namespace Congraph\EntityElastic\Repositories;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -21,7 +21,7 @@ use Illuminate\Support\ServiceProvider;
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/entity-elastic
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -63,12 +63,12 @@ class RepositoriesServiceProvider extends ServiceProvider
      */
     protected function registerListeners()
     {
-        $this->app['events']->listen('cb.after.entity.create', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityCreated', 100);
-        $this->app['events']->listen('cb.after.entity.update', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityUpdated', 100);
-        $this->app['events']->listen('cb.after.entity.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityDeleted', 100);
-        $this->app['events']->listen('cb.after.attribute.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onAttributeDeleted', 100);
-        $this->app['events']->listen('cb.after.attribute.set.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onAttributeSetDeleted', 100);
-        $this->app['events']->listen('cb.after.entity.type.delete', 'Cookbook\EntityElastic\Repositories\EntityRepository@onEntityTypeDeleted', 100);
+        $this->app['events']->listen('cb.after.entity.create', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityCreated', 100);
+        $this->app['events']->listen('cb.after.entity.update', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityUpdated', 100);
+        $this->app['events']->listen('cb.after.entity.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityDeleted', 100);
+        $this->app['events']->listen('cb.after.attribute.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onAttributeDeleted', 100);
+        $this->app['events']->listen('cb.after.attribute.set.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onAttributeSetDeleted', 100);
+        $this->app['events']->listen('cb.after.entity.type.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityTypeDeleted', 100);
     }
 
     /**
@@ -78,19 +78,19 @@ class RepositoriesServiceProvider extends ServiceProvider
      */
     public function registerRepositories()
     {
-        $this->app->singleton('Cookbook\EntityElastic\Repositories\EntityRepository', function ($app) {
+        $this->app->singleton('Congraph\EntityElastic\Repositories\EntityRepository', function ($app) {
             // var_dump('Contract for attribute repository resolving...');
             return new EntityRepository(
                 $app->make('Elasticsearch\ClientBuilder'),
-                $app->make('Cookbook\EntityElastic\Fields\FieldHandlerFactory'),
-                $app->make('Cookbook\Eav\Managers\AttributeManager'),
-                $app->make('Cookbook\EntityElastic\Services\EntityFormater')
+                $app->make('Congraph\EntityElastic\Fields\FieldHandlerFactory'),
+                $app->make('Congraph\Eav\Managers\AttributeManager'),
+                $app->make('Congraph\EntityElastic\Services\EntityFormater')
             );
         });
 
         $this->app->alias(
-            'Cookbook\EntityElastic\Repositories\EntityRepository',
-            'Cookbook\EntityElastic\Repositories\EntityRepositoryContract'
+            'Congraph\EntityElastic\Repositories\EntityRepository',
+            'Congraph\EntityElastic\Repositories\EntityRepositoryContract'
         );
     }
 
@@ -102,10 +102,10 @@ class RepositoriesServiceProvider extends ServiceProvider
     public function mapObjectResolvers()
     {
         $mappings = [
-            // 'entity' => 'Cookbook\EntityElastic\Repositories\EntityElasticRepository',
+            // 'entity' => 'Congraph\EntityElastic\Repositories\EntityElasticRepository',
         ];
 
-        $this->app->make('Cookbook\Contracts\Core\ObjectResolverContract')->maps($mappings);
+        $this->app->make('Congraph\Contracts\Core\ObjectResolverContract')->maps($mappings);
     }
 
     /**
@@ -116,8 +116,8 @@ class RepositoriesServiceProvider extends ServiceProvider
     public function provides()
     {
         return [
-            'Cookbook\EntityElastic\Repositories\EntityRepository',
-            'Cookbook\EntityElastic\Repositories\EntityRepositoryContract'
+            'Congraph\EntityElastic\Repositories\EntityRepository',
+            'Congraph\EntityElastic\Repositories\EntityRepositoryContract'
         ];
     }
 }

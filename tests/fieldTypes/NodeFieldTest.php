@@ -1,6 +1,6 @@
 <?php
 
-use Cookbook\Core\Exceptions\ValidationException;
+use Congraph\Core\Exceptions\ValidationException;
 use Illuminate\Support\Debug\Dumper;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -23,22 +23,22 @@ class NodeFieldTest extends Orchestra\Testbench\TestCase
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Eav/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Eav/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Filesystem/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Filesystem/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Locales/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Locales/database/migrations'),
 		]);
 
 		$this->artisan('migrate', [
 			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Cookbook/Workflows/database/migrations'),
+			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Workflows/database/migrations'),
 		]);
 
 		$this->artisan('db:seed', [
@@ -97,7 +97,7 @@ class NodeFieldTest extends Orchestra\Testbench\TestCase
 			'driver'   	=> 'mysql',
 			'host'      => '127.0.0.1',
 			'port'		=> '3306',
-			'database'	=> 'cookbook_testbench',
+			'database'	=> 'congraph_testbench',
 			'username'  => 'root',
 			'password'  => '',
 			'charset'   => 'utf8',
@@ -123,12 +123,12 @@ class NodeFieldTest extends Orchestra\Testbench\TestCase
 	protected function getPackageProviders($app)
 	{
 		return [
-			'Cookbook\Core\CoreServiceProvider',
-			'Cookbook\Locales\LocalesServiceProvider',
-			'Cookbook\Eav\EavServiceProvider',
-			'Cookbook\Filesystem\FilesystemServiceProvider',
-			'Cookbook\Workflows\WorkflowsServiceProvider',
-			'Cookbook\EntityElastic\EntityElasticServiceProvider'
+			'Congraph\Core\CoreServiceProvider',
+			'Congraph\Locales\LocalesServiceProvider',
+			'Congraph\Eav\EavServiceProvider',
+			'Congraph\Filesystem\FilesystemServiceProvider',
+			'Congraph\Workflows\WorkflowsServiceProvider',
+			'Congraph\EntityElastic\EntityElasticServiceProvider'
 		];
 	}
 
@@ -153,11 +153,11 @@ class NodeFieldTest extends Orchestra\Testbench\TestCase
 		];
 
 		$app = $this->createApplication();
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$array = $result->toArray();
 		// $this->d->dump($array);
 
@@ -192,18 +192,18 @@ class NodeFieldTest extends Orchestra\Testbench\TestCase
 
 		$app = $this->createApplication();
 
-		$repo = $app->make('Cookbook\EntityElastic\Repositories\EntityRepository');
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
 
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 
-		$result = $bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityCreateCommand($params));
+		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityCreateCommand($params));
 		$array = $result->toArray();
 		// $this->d->dump($array);
 
 		$result = $repo->fetch($result->id, [], $result->locale);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$array = $result->toArray();
 		// $this->d->dump($array);
 		
@@ -232,12 +232,12 @@ class NodeFieldTest extends Orchestra\Testbench\TestCase
 			]
 		];
 
-		$bus->dispatch( new Cookbook\Eav\Commands\Entities\EntityUpdateCommand($params, $result->id));
+		$bus->dispatch( new Congraph\Eav\Commands\Entities\EntityUpdateCommand($params, $result->id));
 		$repo->refreshIndex();
 
 		// $result = $repo->update($result->id, $params);
 		$result = $repo->fetch($result->id, [], $result->locale);
-		$this->assertTrue($result instanceof Cookbook\Core\Repositories\Model);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$array = $result->toArray();
 		// $this->d->dump($result->toArray());
 
