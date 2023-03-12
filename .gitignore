@@ -1,7 +1,9 @@
 /vendor
-/tests/storage/cache
+/tests/storage/cache/*
+/storage/cache/*
 composer.phar
 composer.lock
 .DS_Store
 Thumbs.db
 .env
+.phpunit.result.cache
