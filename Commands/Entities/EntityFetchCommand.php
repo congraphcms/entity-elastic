@@ -11,6 +11,7 @@
 namespace Congraph\EntityElastic\Commands\Entities;
 
 use Congraph\Core\Bus\RepositoryCommand;
+use Congraph\EntityElastic\Repositories\EntityRepositoryContract;
 
 /**
  * EntityFetchCommand class
@@ -25,5 +26,30 @@ use Congraph\Core\Bus\RepositoryCommand;
  */
 class EntityFetchCommand extends RepositoryCommand
 {
+
+    /**
+     * Create new EntityFetchCommand
+     *
+     * @param Congraph\EntityElastic\Repositories\EntityRepositoryContract $repository
+     *
+     * @return void
+     */
+    public function __construct(EntityRepositoryContract $repository)
+    {
+        parent::__construct($repository);
+    }
+
+    /**
+     * Handle RepositoryCommand
+     *
+	 * @return Congraph/Core/Repositories/Model
+     */
+    public function handle()
+    {
+        $locale = (!empty($this->params['locale']))?$this->params['locale']:null;
+        $include = (!empty($this->params['include']))?$this->params['include']:[];
+        $status = (!empty($this->params['status']))?$this->params['status']:null;
+        return $this->repository->fetch($this->id, $include, $locale, $status);
+    }
 
 }

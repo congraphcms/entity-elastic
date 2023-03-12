@@ -135,12 +135,11 @@ class AssetFieldHandler extends AbstractFieldHandler {
 
 			$params = [];
 	        $params['index'] = $this->indexName;
-	        $params['type'] = 'doc';
 	        $params['id'] = $id;
-	        $params['body'] = [];
-	        $params['body']['doc'] = $body;
+	        $params['body'] = ['doc' => $body];
 
 	        $this->client->update($params);
+			// var_dump($this->client->transport->getLastConnection()->getLastRequestInfo()["request"]);
 	        $changed = true;
 		}
 

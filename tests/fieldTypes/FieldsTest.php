@@ -1,142 +1,19 @@
 <?php
 
 use Congraph\Core\Exceptions\ValidationException;
-use Illuminate\Support\Debug\Dumper;
+use Congraph\Eav\Commands\Entities\EntityCreateCommand;
+use Congraph\Eav\Commands\Entities\EntityUpdateCommand;
+use Congraph\Eav\Commands\Entities\EntityDeleteCommand;
+use Congraph\Filesystem\Commands\Files\FileDeleteCommand;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Elasticsearch\ClientBuilder;
 
-require_once(__DIR__ . '/../database/seeders/EavDbSeeder.php');
-require_once(__DIR__ . '/../database/seeders/LocaleDbSeeder.php');
-require_once(__DIR__ . '/../database/seeders/FileDbSeeder.php');
-require_once(__DIR__ . '/../database/seeders/WorkflowDbSeeder.php');
-require_once(__DIR__ . '/../database/seeders/ClearDB.php');
-require_once(__DIR__ . '/../database/seeders/ElasticIndexSeeder.php');
+require_once(__DIR__ . '/../TestCase.php');
 
-class FieldsTest extends Orchestra\Testbench\TestCase
+class FieldsTest extends TestCase
 {
-
-	public function setUp()
-	{
-		parent::setUp();
-
-		$this->artisan('migrate', [
-			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Eav/database/migrations'),
-		]);
-
-		$this->artisan('migrate', [
-			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Filesystem/database/migrations'),
-		]);
-
-		$this->artisan('migrate', [
-			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Locales/database/migrations'),
-		]);
-
-		$this->artisan('migrate', [
-			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Workflows/database/migrations'),
-		]);
-
-		$this->artisan('db:seed', [
-			'--class' => 'EavDbSeeder'
-		]);
-
-		$this->artisan('db:seed', [
-			'--class' => 'LocaleDbSeeder'
-		]);
-
-		$this->artisan('db:seed', [
-			'--class' => 'FileDbSeeder'
-		]);
-
-		$this->artisan('db:seed', [
-			'--class' => 'WorkflowDbSeeder'
-		]);
-
-		$this->d = new Dumper();
-
-		$elasticClientBuilder = new ClientBuilder();
-
-		$hosts = Config::get('cb.elastic.hosts');
-
-        $client = $elasticClientBuilder->create()
-                                            ->setHosts($hosts)
-                                            ->build();
-
-		$this->elasticSeeder = new ElasticIndexSeeder($client);
-
-	}
-
-	public function tearDown()
-	{
-		$this->artisan('db:seed', [
-			'--class' => 'ClearDB'
-		]);
-		DB::disconnect();
-
-		$this->elasticSeeder->down();
-
-		parent::tearDown();
-	}
-
-	/**
-	 * Define environment setup.
-	 *
-	 * @param  \Illuminate\Foundation\Application  $app
-	 *
-	 * @return void
-	 */
-	protected function getEnvironmentSetUp($app)
-	{
-		$app['config']->set('database.default', 'testbench');
-		$app['config']->set('database.connections.testbench', [
-			'driver'   	=> 'mysql',
-			'host'      => '127.0.0.1',
-			'port'		=> '3306',
-			'database'	=> 'congraph_testbench',
-			'username'  => 'root',
-			'password'  => '',
-			'charset'   => 'utf8',
-			'collation' => 'utf8_unicode_ci',
-			'prefix'    => '',
-		]);
-
-		$app['config']->set('cache.default', 'file');
-
-		$app['config']->set('cache.stores.file', [
-			'driver'	=> 'file',
-			'path'   	=> realpath(__DIR__ . '/../storage/cache/'),
-		]);
-
-		$app['config']->set('filesystems.default', 'local');
-
-		$app['config']->set('filesystems.disks.local', [
-			'driver'	=> 'local',
-			'root'   	=> realpath(__DIR__ . '/../storage/'),
-		]);
-	}
-
-	protected function getPackageProviders($app)
-	{
-		return [
-			'Congraph\Core\CoreServiceProvider',
-			'Congraph\Locales\LocalesServiceProvider',
-			'Congraph\Eav\EavServiceProvider',
-			'Congraph\Filesystem\FilesystemServiceProvider',
-			'Congraph\Workflows\WorkflowsServiceProvider',
-			'Congraph\EntityElastic\EntityElasticServiceProvider'
-		];
-	}
-
-	public function testTheTest()
-	{
-		fwrite(STDOUT, __METHOD__ . "\n");
-
-	}
 
 	public function testTextField()
 	{
@@ -531,6 +408,61 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		], $array);
 	}
 
+	public function testDatetimeField()
+	{
+		fwrite(STDOUT, __METHOD__ . "\n");
+
+		$date =  \Carbon\Carbon::now()->format('c');
+
+		// create field
+		$params = [
+			'entity_type_id' => 4,
+			'attribute_set_id' => 4,
+			'fields' => [
+				'test_datetime_attribute' => $date
+			]
+		];
+
+		$app = $this->createApplication();
+		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
+
+		$result = $repo->create($params);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
+		$array = $result->toArray();
+		// $this->d->dump($array);
+
+		// $this->assertTrue(is_int($result->id));
+		$this->assertArraySubset([
+			"type" => "entity",
+			'entity_type_id' => 4,
+			'attribute_set_id' => 4,
+			'fields' => [
+				'test_datetime_attribute' => $date
+			]
+		], $array);
+
+		$newDate =  \Carbon\Carbon::now()->addDays(1)->format('c');
+
+		// update field
+		$params = [
+			'fields' => [
+				'test_datetime_attribute' => $newDate
+			]
+		];
+		$result = $repo->update($result->id, $params);
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
+		$array = $result->toArray();
+		// $this->d->dump($array);
+
+		// $this->assertTrue(is_int($result->id));
+		$this->assertArraySubset([
+			'fields' => [
+				'test_datetime_attribute' => $newDate
+			]
+		], $array);
+	}
+
 	public function testAssetField()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
@@ -611,15 +543,19 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		$entityWithFile = $repo->create($params);
 		$repo->refreshIndex();
 
-		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
+		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
 
-		$result = $bus->dispatch( new Congraph\Filesystem\Commands\Files\FileDeleteCommand([], 1));
+		$command = $app->make(FileDeleteCommand::class);
+		$command->setId(1);
+		$result = $bus->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithFile->id);
 		$this->assertFalse(isset($changedEntity->fields->test_asset_attribute));
 
-		$result = $bus->dispatch( new Congraph\Filesystem\Commands\Files\FileDeleteCommand([], 2));
+		$command = $app->make(FileDeleteCommand::class);
+		$command->setId(2);
+		$result = $bus->dispatch($command);
 		$repo->refreshIndex();
 	}
 
@@ -716,9 +652,11 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		$entityWithFile = $repo->create($params);
 		$repo->refreshIndex();
 
-		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
+		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
 
-		$result = $bus->dispatch( new Congraph\Filesystem\Commands\Files\FileDeleteCommand([], 1));
+		$command = $app->make(FileDeleteCommand::class);
+		$command->setId(1);
+		$result = $bus->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithFile->id);
@@ -730,7 +668,9 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 			$this->assertNotEquals(1, $value['id']);
 		}
 
-		$result = $bus->dispatch( new Congraph\Filesystem\Commands\Files\FileDeleteCommand([], 2));
+		$command = $app->make(FileDeleteCommand::class);
+		$command->setId(2);
+		$result = $bus->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithFile->id);
@@ -819,15 +759,19 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		$entityWithRelation = $repo->create($params);
 		$repo->refreshIndex();
 
-		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
+		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
 
-		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityDeleteCommand([], 1));
+		$command = $app->make(EntityDeleteCommand::class);
+		$command->setId(1);
+		$result = $bus->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithRelation->id);
 		$this->assertFalse(isset($changedEntity->fields->test_relation_attribute));
 
-		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityDeleteCommand([], 2));
+		$command = $app->make(EntityDeleteCommand::class);
+		$command->setId(2);
+		$result = $bus->dispatch($command);
 		$repo->refreshIndex();
 	}
 
@@ -924,9 +868,11 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 		$entityWithRelation = $repo->create($params);
 		$repo->refreshIndex();
 
-		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
+		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
 
-		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityDeleteCommand([], 1));
+		$command = $app->make(EntityDeleteCommand::class);
+		$command->setId(1);
+		$result = $bus->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithRelation->id);
@@ -938,7 +884,9 @@ class FieldsTest extends Orchestra\Testbench\TestCase
 			$this->assertNotEquals(1, $value['id']);
 		}
 
-		$result = $bus->dispatch( new Congraph\Eav\Commands\Entities\EntityDeleteCommand([], 2));
+		$command = $app->make(EntityDeleteCommand::class);
+		$command->setId(2);
+		$result = $bus->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithRelation->id);

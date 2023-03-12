@@ -8,8 +8,11 @@
  * file that was distributed with this source code.
  */ 
 
+namespace Database\Seeders;
+
 use Elasticsearch\ClientBuilder;
 use Illuminate\Support\Facades\Config;
+use Elasticsearch\Common\Exceptions\NoNodesAvailableException;
 
 /**
  * ElasticIndexSeeder
@@ -40,14 +43,18 @@ class ElasticIndexSeeder {
 	    	'index' => $prefix . 'entities'
 	    ];
 
-	    // if($this->client->indices()->exists($params)) {
-	    // 	$this->client->indices()->delete($params);
-	    // }
+		if($this->client->indices()->exists($params)) {
+			$this->client->indices()->delete($params);
+		}
+
+		// var_dump($this->client->transport->getLastConnection()->getLastRequestInfo()["request"]);
+
+		$params['body'] = Config::get('cb.elastic.default_index_mappings');
+		$this->client->indices()->create($params);
 
 
 		$params = [
 		    'index' => $prefix . 'entities',
-		    'type' => 'doc',
 		    'id' => 1,
 		    'body' => [ 
 		    	'id' => 1,
@@ -61,16 +68,16 @@ class ElasticIndexSeeder {
 		    			'locale' => 'en_US',
 		    			'state' => 'active',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    		[
 		    			'status' => 'published',
 		    			'locale' => 'fr_FR',
 		    			'state' => 'active',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    	],
 		    	'fields' => [
@@ -79,8 +86,8 @@ class ElasticIndexSeeder {
 			    	'attribute3__en_US' => 'value3-en',
 			    	'attribute3__fr_FR' => 'value3-fr'
 			    ],
-			    'created_at' => date("Y-m-d H:i:s"),
-				'updated_at' => date("Y-m-d H:i:s")
+			    'created_at' => gmdate("U"),
+				'updated_at' => gmdate("U")
 		    ]
 		];
 
@@ -88,7 +95,6 @@ class ElasticIndexSeeder {
 
 		$params = [
 		    'index' => $prefix . 'entities',
-		    'type' => 'doc',
 		    'id' => 2,
 		    'body' => [ 
 		    	'id' => 2,
@@ -102,24 +108,24 @@ class ElasticIndexSeeder {
 		    			'locale' => null,
 		    			'state' => 'active',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    		[
 		    			'status' => 'public',
 		    			'locale' => null,
 		    			'state' => 'history',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    	],
 		    	'fields' => [
 			    	'attribute1' => 'value12',
 			    	'attribute2' => 'value22',
 			    ],
-			    'created_at' => date("Y-m-d H:i:s"),
-				'updated_at' => date("Y-m-d H:i:s")
+			    'created_at' => gmdate("U"),
+				'updated_at' => gmdate("U")
 		    ]
 		];
 
@@ -127,7 +133,6 @@ class ElasticIndexSeeder {
 
 		$params = [
 		    'index' => $prefix . 'entities',
-		    'type' => 'doc',
 		    'id' => 3,
 		    'body' => [ 
 		    	'id' => 3,
@@ -141,16 +146,16 @@ class ElasticIndexSeeder {
 		    			'locale' => 'en_US',
 		    			'state' => 'active',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    		[
 		    			'status' => 'draft',
 		    			'locale' => 'fr_FR',
 		    			'state' => 'active',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    	],
 		    	'fields' => [
@@ -159,8 +164,8 @@ class ElasticIndexSeeder {
 			    	'attribute3__en_US' => 'value3-en',
 			    	'attribute3__fr_FR' => 'value3-fr'
 			    ],
-			    'created_at' => date("Y-m-d H:i:s"),
-				'updated_at' => date("Y-m-d H:i:s")
+			    'created_at' => gmdate("U"),
+				'updated_at' => gmdate("U")
 		    ]
 		];
 
@@ -168,7 +173,6 @@ class ElasticIndexSeeder {
 
 		$params = [
 		    'index' => $prefix . 'entities',
-		    'type' => 'doc',
 		    'id' => 4,
 		    'body' => [ 
 		    	'id' => 4,
@@ -182,16 +186,16 @@ class ElasticIndexSeeder {
 		    			'locale' => 'en_US',
 		    			'state' => 'active',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    		[
 		    			'status' => 'published',
 		    			'locale' => 'fr_FR',
 		    			'state' => 'active',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    	],
 		    	'fields' => [
@@ -200,8 +204,8 @@ class ElasticIndexSeeder {
 			    	'attribute3__en_US' => 'value3-en',
 			    	'attribute3__fr_FR' => 'value3-fr'
 			    ],
-			    'created_at' => date("Y-m-d H:i:s"),
-				'updated_at' => date("Y-m-d H:i:s")
+			    'created_at' => gmdate("U"),
+				'updated_at' => gmdate("U")
 		    ]
 		];
 
@@ -209,7 +213,6 @@ class ElasticIndexSeeder {
 
 		$params = [
 		    'index' => $prefix . 'entities',
-		    'type' => 'doc',
 		    'id' => 5,
 		    'body' => [ 
 		    	'id' => 5,
@@ -223,16 +226,16 @@ class ElasticIndexSeeder {
 		    			'locale' => 'en_US',
 		    			'state' => 'active',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    		[
 		    			'status' => 'published',
 		    			'locale' => 'fr_FR',
 		    			'state' => 'active',
 		    			'scheduled_at' => null,
-		    			'created_at' => date("Y-m-d H:i:s"),
-		    			'updated_at' => date("Y-m-d H:i:s")
+		    			'created_at' => gmdate("U"),
+		    			'updated_at' => gmdate("U")
 		    		],
 		    	],
 		    	'fields' => [
@@ -252,16 +255,16 @@ class ElasticIndexSeeder {
 				    			'locale' => 'en_US',
 				    			'state' => 'active',
 				    			'scheduled_at' => null,
-				    			'created_at' => date("Y-m-d H:i:s"),
-				    			'updated_at' => date("Y-m-d H:i:s")
+				    			'created_at' => gmdate("U"),
+				    			'updated_at' => gmdate("U")
 				    		],
 				    		[
 				    			'status' => 'published',
 				    			'locale' => 'fr_FR',
 				    			'state' => 'active',
 				    			'scheduled_at' => null,
-				    			'created_at' => date("Y-m-d H:i:s"),
-				    			'updated_at' => date("Y-m-d H:i:s")
+				    			'created_at' => gmdate("U"),
+				    			'updated_at' => gmdate("U")
 				    		],
 				    	],
 				    	'fields' => [
@@ -270,12 +273,12 @@ class ElasticIndexSeeder {
 					    	'attribute3__en_US' => 'value3-en',
 					    	'attribute3__fr_FR' => 'value3-fr'
 					    ],
-					    'created_at' => date("Y-m-d H:i:s"),
-						'updated_at' => date("Y-m-d H:i:s")
+					    'created_at' => gmdate("U"),
+						'updated_at' => gmdate("U")
 				    ]
 			    ],
-			    'created_at' => date("Y-m-d H:i:s"),
-				'updated_at' => date("Y-m-d H:i:s")
+			    'created_at' => gmdate("U"),
+				'updated_at' => gmdate("U")
 		    ]
 		];
 
@@ -287,10 +290,12 @@ class ElasticIndexSeeder {
 		$prefix = Config::get('cb.elastic.index_prefix');
 
 		$params = [
-	    	'index' => $prefix . '*'
+	    	'index' => $prefix . 'entities'
 		];
 
-		$this->client->indices()->delete($params);
+		if($this->client->indices()->exists($params)) {
+	    	$this->client->indices()->delete($params);
+	    }
 	}
 
 }

@@ -43,7 +43,7 @@ class DatetimeFieldHandler extends AbstractFieldHandler {
 		{
 			return null;
 		}
-		$value = Carbon::parse($value)->tz('UTC')->toDateTimeString();
+		$value = Carbon::parse($value)->tz('UTC')->getTimestamp();
 		return $value;
 	}
 
@@ -62,7 +62,7 @@ class DatetimeFieldHandler extends AbstractFieldHandler {
 			return null;
 		}
 		
-		$value = Carbon::parse($value);
+		$value = Carbon::createFromTimestamp($value);
 		if(Config::get('app.timezone'))
 		{
 			$value->tz(Config::get('app.timezone'));
