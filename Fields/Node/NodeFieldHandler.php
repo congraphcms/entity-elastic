@@ -77,7 +77,6 @@ class NodeFieldHandler extends AbstractFieldHandler
         if (is_array($value)) {
             $params = [
                 'index' => $this->indexName,
-                'type' => 'doc',
                 'id' => $value['id']
             ];
 
@@ -292,10 +291,8 @@ class NodeFieldHandler extends AbstractFieldHandler
 
             $params = [];
             $params['index'] = $this->indexName;
-            $params['type'] = 'doc';
             $params['id'] = $id;
-            $params['body'] = [];
-            $params['body']['doc'] = $body;
+	        $params['body'] = ['doc' => $body];
 
             $this->client->update($params);
             $changed = true;
@@ -342,7 +339,6 @@ class NodeFieldHandler extends AbstractFieldHandler
 
         $params = [
             'index' => $this->indexName,
-            'type' => 'doc',
             'id' => $command->id
         ];
 
@@ -399,10 +395,8 @@ class NodeFieldHandler extends AbstractFieldHandler
             if ($changed) {
                 $params = [];
                 $params['index'] = $this->indexName;
-                $params['type'] = 'doc';
                 $params['id'] = $id;
-                $params['body'] = [];
-                $params['body']['doc'] = $body;
+                $params['body'] = ['doc' => $body];
 
                 $this->client->update($params);
 

@@ -136,6 +136,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
     public function onEntityCreated($command, $result)
     {
+
         $this->create($command->params, $result);
     }
 
@@ -242,13 +243,12 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     {
         $params = [];
         $params['index'] = $this->indexName;
-        $params['type'] = 'doc';
 
         $body = [];
 
         if (!($result instanceof Model) || !is_integer($result->id) || empty($result->id)) {
-            $body['created_at'] = date("Y-m-d H:i:s");
-            $body['updated_at'] = date("Y-m-d H:i:s");
+            $body['created_at'] = gmdate("U");
+            $body['updated_at'] = gmdate("U");
             $body['entity_type_id'] = $model['entity_type_id'];
             $body['attribute_set_id'] = $model['attribute_set_id'];
             if (! empty($model['fields']) && is_array($model['fields'])) {
@@ -257,8 +257,8 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         } else {
             $params['id'] = $result->id;
             $body['id'] = $params['id'];
-            $body['created_at'] = $result->created_at->tz('UTC')->toDateTimeString();
-            $body['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
+            $body['created_at'] = $result->created_at->tz('UTC')->getTimestamp();
+            $body['updated_at'] = $result->updated_at->tz('UTC')->getTimestamp();
             $body['entity_type_id'] = $result->entity_type_id;
             $body['attribute_set_id'] = $result->attribute_set_id;
             $fields = $result->toArray()['fields'];
@@ -379,8 +379,13 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
         $params['body'] = $body;
 
-        $response = $this->client->index($params);
-        // var_dump($response);
+        try {
+            $response = $this->client->index($params);
+		} catch (\Exception $e) {
+			printf ("Exception: %s\n", $e->getMessage());
+            var_dump($this->client->transport->getLastConnection()->getLastRequestInfo()["request"]);
+		}
+
 
         Trunk::forgetType('entity');
 
@@ -405,7 +410,6 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     {
         $params = [];
         $params['index'] = $this->indexName;
-        $params['type'] = 'doc';
         $params['id'] = $id;
 
         // fetch raw document from database
@@ -552,9 +556,9 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
                 // update updated_at
                 if (!($result instanceof Model) || !is_integer($result->id) || empty($result->id)) {
-                    $statusObj['created_at'] = $statusObj['updated_at'] = date("Y-m-d H:i:s");
+                    $statusObj['created_at'] = $statusObj['updated_at'] = gmdate("U");
                 } else {
-                    $statusObj['created_at'] = $statusObj['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
+                    $statusObj['created_at'] = $statusObj['updated_at'] = $result->updated_at->tz('UTC')->getTimestamp();
                 }
 
                 $body['status'][] = $statusObj;
@@ -566,14 +570,13 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         if ($changed) {
             // update updated_at
             if (!($result instanceof Model) || !is_integer($result->id) || empty($result->id)) {
-                $body['updated_at'] = date("Y-m-d H:i:s");
+                $body['updated_at'] = gmdate("U");
             } else {
-                $body['updated_at'] = $result->updated_at->tz('UTC')->toDateTimeString();
+                $body['updated_at'] = $result->updated_at->tz('UTC')->getTimestamp();
             }
 
             // update data in elastic
-            $params['body'] = [];
-            $params['body']['doc'] = $body;
+            $params['body'] = ['doc' => $body];
             $this->client->update($params);
         }
 
@@ -598,7 +601,6 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     {
         $params = [];
         $params['index'] = $this->indexName;
-        $params['type'] = 'doc';
         $params['id'] = $id;
 
         // get the entity
@@ -622,7 +624,6 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     {
         $params = [];
         $params['index'] = $this->indexName;
-        $params['type'] = 'doc';
         $params['id'] = $id;
 
         $changed = false;
@@ -661,10 +662,9 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
         if ($changed) {
             // update updated_at
-            $body['updated_at'] = date("Y-m-d H:i:s");
+            $body['updated_at'] = gmdate("U");
             // update data in elastic
-            $params['body'] = [];
-            $params['body']['doc'] = $body;
+	        $params['body'] = ['doc' => $body];
 
             $this->client->update($params);
         }
@@ -801,7 +801,6 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     {
         $query = [
             'index' => $this->indexName,
-            'type' => 'doc',
             'id' => $id
         ];
 

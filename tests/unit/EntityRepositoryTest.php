@@ -1,141 +1,18 @@
 <?php
 
 use Congraph\Core\Exceptions\ValidationException;
-use Illuminate\Support\Debug\Dumper;
+use Congraph\Eav\Commands\EntityTypes\EntityTypeFetchCommand;
+use Congraph\Eav\Commands\AttributeSets\AttributeSetFetchCommand;
+use Congraph\Eav\Commands\Attributes\AttributeFetchCommand;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Elasticsearch\ClientBuilder;
 
-require_once(__DIR__ . '/../database/seeders/EavDbSeeder.php');
-require_once(__DIR__ . '/../database/seeders/LocaleDbSeeder.php');
-require_once(__DIR__ . '/../database/seeders/FileDbSeeder.php');
-require_once(__DIR__ . '/../database/seeders/WorkflowDbSeeder.php');
-require_once(__DIR__ . '/../database/seeders/ClearDB.php');
-require_once(__DIR__ . '/../database/seeders/ElasticIndexSeeder.php');
+require_once(__DIR__ . '/../TestCase.php');
 
-class EntityRepositoryTest extends Orchestra\Testbench\TestCase
+class EntityRepositoryTest extends TestCase
 {
-
-	public function setUp()
-	{
-		parent::setUp();
-
-		$this->artisan('migrate', [
-			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Eav/database/migrations'),
-		]);
-
-		$this->artisan('migrate', [
-			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Filesystem/database/migrations'),
-		]);
-
-		$this->artisan('migrate', [
-			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Locales/database/migrations'),
-		]);
-
-		$this->artisan('migrate', [
-			'--database' => 'testbench',
-			'--realpath' => realpath(__DIR__.'/../../vendor/Congraph/Workflows/database/migrations'),
-		]);
-
-		$this->artisan('db:seed', [
-			'--class' => 'EavDbSeeder'
-		]);
-
-		$this->artisan('db:seed', [
-			'--class' => 'LocaleDbSeeder'
-		]);
-
-		$this->artisan('db:seed', [
-			'--class' => 'FileDbSeeder'
-		]);
-
-		$this->artisan('db:seed', [
-			'--class' => 'WorkflowDbSeeder'
-		]);
-
-		$this->d = new Dumper();
-
-		$elasticClientBuilder = new ClientBuilder();
-
-		$hosts = Config::get('cb.elastic.hosts');
-
-        $client = $elasticClientBuilder->create()
-                                            ->setHosts($hosts)
-                                            ->build();
-
-		$this->elasticSeeder = new ElasticIndexSeeder($client);
-	}
-
-	public function tearDown()
-	{
-		$this->artisan('db:seed', [
-			'--class' => 'ClearDB'
-		]);
-		DB::disconnect();
-
-		$this->elasticSeeder->down();
-
-		parent::tearDown();
-	}
-
-	/**
-	 * Define environment setup.
-	 *
-	 * @param  \Illuminate\Foundation\Application  $app
-	 *
-	 * @return void
-	 */
-	protected function getEnvironmentSetUp($app)
-	{
-		$app['config']->set('database.default', 'testbench');
-		$app['config']->set('database.connections.testbench', [
-			'driver'   	=> 'mysql',
-			'host'      => '127.0.0.1',
-			'port'		=> '3306',
-			'database'	=> 'congraph_testbench',
-			'username'  => 'root',
-			'password'  => '',
-			'charset'   => 'utf8',
-			'collation' => 'utf8_unicode_ci',
-			'prefix'    => '',
-		]);
-
-		$app['config']->set('cache.default', 'file');
-
-		$app['config']->set('cache.stores.file', [
-			'driver'	=> 'file',
-			'path'   	=> realpath(__DIR__ . '/../storage/cache/'),
-		]);
-
-		$app['config']->set('filesystems.default', 'local');
-
-		$app['config']->set('filesystems.disks.local', [
-			'driver'	=> 'local',
-			'root'   	=> realpath(__DIR__ . '/../storage/'),
-		]);
-	}
-
-	protected function getPackageProviders($app)
-	{
-		return [
-			'Congraph\Core\CoreServiceProvider',
-			'Congraph\Locales\LocalesServiceProvider',
-			'Congraph\Eav\EavServiceProvider',
-			'Congraph\Filesystem\FilesystemServiceProvider',
-			'Congraph\Workflows\WorkflowsServiceProvider',
-			'Congraph\EntityElastic\EntityElasticServiceProvider'
-		];
-	}
-
-	public function testTheTest()
-	{
-		fwrite(STDOUT, __METHOD__ . "\n");
-
-	}
 
 	public function testConfig()
 	{
@@ -145,8 +22,6 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$this->assertTrue(is_array($hosts));
 		$this->assertTrue(isset($hosts[0]));
-		$this->assertEquals('localhost', $hosts[0]['host']);
-		$this->assertEquals('9200', $hosts[0]['port']);
 
 		// $this->d->dump($hosts);
 	}
@@ -289,12 +164,10 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		
 	}
 
-	/**
-	 * @expectedException \Congraph\Core\Exceptions\NotFoundException
-	 */
 	public function testFetchFailOnUnknownID()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
+		$this->expectException(\Congraph\Core\Exceptions\NotFoundException::class);
 		$app = $this->createApplication();
 		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
@@ -302,12 +175,10 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		$result = $repo->fetch(133);
 	}
 
-	/**
-	 * @expectedException \Congraph\Core\Exceptions\NotFoundException
-	 */
 	public function testFetchFailOnLocale()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
+		$this->expectException(\Congraph\Core\Exceptions\NotFoundException::class);
 		$app = $this->createApplication();
 		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
@@ -317,12 +188,10 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		// $this->d->dump($result->toArray());
 	}
 
-	/**
-	 * @expectedException \Congraph\Core\Exceptions\NotFoundException
-	 */
 	public function testFetchFailOnStatus()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
+		$this->expectException(\Congraph\Core\Exceptions\NotFoundException::class);
 		$app = $this->createApplication();
 		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
@@ -1245,9 +1114,11 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
-		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
+		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
 
-		$attribute = $bus->dispatch( new Congraph\Eav\Commands\Attributes\AttributeFetchCommand([], 1));
+		$command = $app->make(AttributeFetchCommand::class);
+		$command->setId(1);
+		$attribute = $bus->dispatch($command);
 
 		$result = $repo->deleteByAttribute($attribute);
 		$repo->refreshIndex();
@@ -1270,9 +1141,11 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 
 		$repo->refreshIndex();
 
-		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
+		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
 
-		$attribute = $bus->dispatch( new Congraph\Eav\Commands\Attributes\AttributeFetchCommand([], 3));
+		$command = $app->make(AttributeFetchCommand::class);
+		$command->setId(3);
+		$attribute = $bus->dispatch($command);
 
 		$result = $repo->deleteByAttribute($attribute);
 
@@ -1309,9 +1182,11 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
-		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
+		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
 
-		$attributeSet = $bus->dispatch( new Congraph\Eav\Commands\AttributeSets\AttributeSetFetchCommand([], 1));
+		$command = $app->make(AttributeSetFetchCommand::class);
+		$command->setId(1);
+		$attributeSet = $bus->dispatch($command);
 
 		$result = $repo->deleteByAttributeSet($attributeSet);
 		$repo->refreshIndex();
@@ -1332,9 +1207,11 @@ class EntityRepositoryTest extends Orchestra\Testbench\TestCase
 		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
-		$bus = $app->make('Illuminate\Contracts\Bus\Dispatcher');
+		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
 
-		$entityType = $bus->dispatch( new Congraph\Eav\Commands\EntityTypes\EntityTypeFetchCommand([], 1));
+		$command = $app->make(EntityTypeFetchCommand::class);
+		$command->setId(1);
+		$entityType = $bus->dispatch($command);
 
 		$result = $repo->deleteByEntityType($entityType);
 		$repo->refreshIndex();

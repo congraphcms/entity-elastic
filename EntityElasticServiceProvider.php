@@ -13,7 +13,7 @@ namespace Congraph\EntityElastic;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * EavServiceProvider service provider for EAV package
+ * EntityElasticServiceProvider service provider for entity-elastic package
  * 
  * It will register all manager to app container
  * 
@@ -21,7 +21,7 @@ use Illuminate\Support\ServiceProvider;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	congraph/eav
+ * @package 	congraph/entity-elastic
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -61,10 +61,6 @@ class EntityElasticServiceProvider extends ServiceProvider {
 		// -----------------------------------------------------------------------------
 		$this->app->register('Congraph\EntityElastic\Fields\FieldsServiceProvider');
 
-		// Handlers
-		// -----------------------------------------------------------------------------
-		$this->app->register('Congraph\EntityElastic\Handlers\HandlersServiceProvider');
-
 		// Validators
 		// -----------------------------------------------------------------------------
 		$this->app->register('Congraph\EntityElastic\Validators\ValidatorsServiceProvider');
@@ -72,6 +68,10 @@ class EntityElasticServiceProvider extends ServiceProvider {
 		// Repositories
 		// -----------------------------------------------------------------------------
 		$this->app->register('Congraph\EntityElastic\Repositories\RepositoriesServiceProvider');
+
+		// Commands
+		// -----------------------------------------------------------------------------
+		$this->app->register('Congraph\EntityElastic\Commands\CommandsServiceProvider');
 
 		// Services
 		// -----------------------------------------------------------------------------

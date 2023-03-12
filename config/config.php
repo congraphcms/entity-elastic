@@ -11,16 +11,9 @@
 
 return array(
 
-	'hosts' => [
-	    // This is effectively equal to: "https://username:password!#$?*abc@foo.com:9200/"
-	    [
-	        'host' => env('ES_HOST', 'localhost'),
-	        'port' => env('ES_PORT', '9200'),
-	        'scheme' => env('ES_SCHEME', 'http'),
-	        'user' => env('ES_USER', 'elastic'),
-	        'pass' => env('ES_PASSWORD', 'changeme')
-	    ]
-	],
+	'hosts' => explode(',', env('ES_HOSTS', 'localhost')),
+    'apiId' => env('ES_API_ID', ''),
+    'apiKey' => env('ES_API_Key', ''),
 
 	'index_prefix' => env('ES_INDEX_PREFIX', 'congraph_'),
 
@@ -37,12 +30,12 @@ return array(
 
 	'default_index_mappings' => [
 		'settings' => [
-            "index.mapping.single_type" => true,
+            // "index.mapping.single_type" => true,
             "analysis" => [
                 "analyzer" => [
                     "default" => [
                         "tokenizer" => "standard",
-                        "filter" => ["standard", "my_ascii_folding", "lowercase"],
+                        "filter" => ["my_ascii_folding", "lowercase"],
                         "char_filter" => [
                           "small_dj",
                           "big_dj"
@@ -70,54 +63,48 @@ return array(
             ]
         ],
         'mappings' => [
-            'doc' => [
-                'properties' => [
-                    'entity_type_id' => [
-                        'type' => 'integer'
-                    ],
-                    'attribute_set_id' => [
-                        'type' => 'integer'
-                    ],
-                    'localized' => [
-                        'type' => 'boolean'
-                    ],
-                    'localized_workflow' => [
-                        'type' => 'boolean'
-                    ],
-                    'status' => [
-                        'type' => 'nested',
-                        'properties' => [
-                            'locale' => [
-                                'type' => 'keyword'
-                            ],
-                            'status' => [
-                                'type' => 'keyword'
-                            ],
-                            'state' => [
-                                'type' => 'keyword'
-                            ],
-                            'created_at' => [
-                                "type" => "date",
-                                "format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-                            ],
-                            'updated_at' => [
-                                "type" => "date",
-                                "format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-                            ]
+            'properties' => [
+                'entity_type_id' => [
+                    'type' => 'long'
+                ],
+                'attribute_set_id' => [
+                    'type' => 'long'
+                ],
+                'localized' => [
+                    'type' => 'boolean'
+                ],
+                'localized_workflow' => [
+                    'type' => 'boolean'
+                ],
+                'status' => [
+                    'type' => 'nested',
+                    'properties' => [
+                        'locale' => [
+                            'type' => 'keyword'
+                        ],
+                        'status' => [
+                            'type' => 'keyword'
+                        ],
+                        'state' => [
+                            'type' => 'keyword'
+                        ],
+                        'created_at' => [
+                            "type" => "long"
+                        ],
+                        'updated_at' => [
+                            "type" => "long"
                         ]
-                    ],
-                    'created_at' => [
-                        "type" => "date",
-                        "format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-                    ],
-                    'updated_at' => [
-                        "type" => "date",
-                        "format" => "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-                    ],
-                    'fields' => [
-                        'type' => 'object'
-                    ],
-                ]
+                    ]
+                ],
+                'created_at' => [
+                    "type" => "long"
+                ],
+                'updated_at' => [
+                    "type" => "long"
+                ],
+                'fields' => [
+                    'type' => 'object'
+                ],
             ]
         ]
     ]

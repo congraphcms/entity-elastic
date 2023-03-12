@@ -129,8 +129,8 @@ class EntityFormater
 
         $timezone = (Config::get('app.timezone'))?Config::get('app.timezone'):'UTC';
 
-        $entity->created_at = Carbon::parse($result['created_at'])->tz($timezone);
-        $entity->updated_at = Carbon::parse($result['updated_at'])->tz($timezone);
+        $entity->created_at = Carbon::createFromTimestamp($result['created_at'])->tz($timezone);
+        $entity->updated_at = Carbon::createFromTimestamp($result['updated_at'])->tz($timezone);
 
         $entity->status = $this->formatStatus($result['status'], $locale, $localeCodes);
 

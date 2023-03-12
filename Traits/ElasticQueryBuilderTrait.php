@@ -168,7 +168,6 @@ trait ElasticQueryBuilderTrait
     {
         return [
             'index' => $index,
-            'type' => 'doc',
             'body' => [
                 "size" => 10000,
                 "query" => [

@@ -202,7 +202,6 @@ class CompoundFieldHandler extends AbstractFieldHandler
 	{
 		$query = [
 			'index' => $this->indexName,
-			'type' => 'doc',
 			'id' => $command->id
 		];
 
@@ -259,7 +258,6 @@ class CompoundFieldHandler extends AbstractFieldHandler
 
 		$query = [
 			'index' => $this->indexName,
-			'type' => 'doc',
 			'id' => $command->id
 		];
 
@@ -308,12 +306,10 @@ class CompoundFieldHandler extends AbstractFieldHandler
 
 		$params = [
 			'index' => $this->indexName,
-			'type' => 'doc',
 			'id' => $command->id
 		];
 
-		$params['body'] = [];
-		$params['body']['doc'] = $body;
+		$params['body'] = ['doc' => $body];
 		$this->client->update($params);
 
 		// // var_dump("COMPUND UPDATE");
