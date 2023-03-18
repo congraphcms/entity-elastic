@@ -15,8 +15,8 @@ class AsciifoldingTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		// $app = $this->createApplication();
+		$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 
@@ -48,6 +48,7 @@ class AsciifoldingTest extends TestCase
 		$result = $repo->create($params);
 		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 
+		$repo->refreshIndex();
 
 		$result = $repo->get(['s' => 'Đoković']);
 		$this->assertEquals(2, count($result));

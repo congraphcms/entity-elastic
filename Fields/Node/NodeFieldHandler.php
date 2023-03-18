@@ -13,7 +13,7 @@ namespace Congraph\EntityElastic\Fields\Node;
 use Congraph\EntityElastic\Fields\AbstractFieldHandler;
 use Congraph\Eav\Managers\AttributeManager;
 use Congraph\EntityElastic\Services\EntityFormater;
-use Elasticsearch\ClientBuilder;
+use Elasticsearch\Client;
 use Congraph\Eav\Facades\MetaData;
 use Congraph\Core\Facades\Trunk;
 use Congraph\Core\Exceptions\NotFoundException;
@@ -52,11 +52,11 @@ class NodeFieldHandler extends AbstractFieldHandler
      * @return void
      */
     public function __construct(
-        ClientBuilder $elasticClientBuilder,
+        Client $elasticClient,
         AttributeManager $attributeManager,
         EntityFormater $entityFormater
     ) {
-        parent::__construct($elasticClientBuilder, $attributeManager);
+        parent::__construct($elasticClient, $attributeManager);
         $this->formater = $entityFormater;
     }
 

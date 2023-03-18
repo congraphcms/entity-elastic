@@ -78,6 +78,7 @@ trait ElasticQueryBuilderTrait
                         {
                             $termKey = $key;
                         }
+                        // $termKey = $key;
                         $query = $this->addShouldTermQuery($query, $termKey, $word, 0);
                     }
                     return $this->addMatchQuery($query, $key, $value);
@@ -142,7 +143,7 @@ trait ElasticQueryBuilderTrait
     {
         if($from + $size > 10000)
         {
-            throw new BadRequestException("Can't paginate over 10000 records with elasticsearch, use last_record parapeter instead.");
+            throw new BadRequestException("Can't paginate over 10000 records with elasticsearch, use last_record parameter instead.");
         }
 
         $parentKey = $this->getQueryParentKey($query);

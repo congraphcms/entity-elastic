@@ -39,10 +39,24 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
     protected function getEnvironmentSetUp($app)
     {
-        // make sure, our .env file is loaded
-        $app->useEnvironmentPath(__DIR__.'/..');
-        $app->bootstrapWith([LoadEnvironmentVariables::class]);
+        
         parent::getEnvironmentSetUp($app);
+    }
+
+	/**
+     * Resolve application core configuration implementation.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     *
+     * @return void
+     */
+    protected function resolveApplicationConfiguration($app)
+    {
+		// make sure, our .env file is loaded
+        $app->useEnvironmentPath(__DIR__.'/..');
+		$app->useStoragePath(realpath(__DIR__.'./storage/'));
+        $app->bootstrapWith([LoadEnvironmentVariables::class]);
+        parent::resolveApplicationConfiguration($app);
     }
 
     /**
@@ -193,11 +207,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
 		$this->d = new Dumper();
 
-		// $hosts = Config::get('cb.elastic.hosts');
-		$hosts = ["https://rz0t5yd4i3:d2xumszetw@wrpm-search-7032446597.eu-central-1.bonsaisearch.net:443"];
-        $client = ClientBuilder::create()
-                    ->setHosts($hosts)
-                    ->build();
+        $client = $this->app->make('Elasticsearch\Client');
 		$this->elasticSeeder = 
             new Database\Seeders\ElasticIndexSeeder($client);
 	}

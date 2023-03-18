@@ -14,18 +14,6 @@ require_once(__DIR__ . '/../TestCase.php');
 class EntityRepositoryTest extends TestCase
 {
 
-	public function testConfig()
-	{
-		fwrite(STDOUT, __METHOD__ . "\n");
-
-		$hosts = Config::get('cb.elastic.hosts');
-
-		$this->assertTrue(is_array($hosts));
-		$this->assertTrue(isset($hosts[0]));
-
-		// $this->d->dump($hosts);
-	}
-
 
 	public function testConstructor()
 	{

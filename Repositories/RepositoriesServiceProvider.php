@@ -81,7 +81,7 @@ class RepositoriesServiceProvider extends ServiceProvider
         $this->app->singleton('Congraph\EntityElastic\Repositories\EntityRepository', function ($app) {
             // var_dump('Contract for attribute repository resolving...');
             return new EntityRepository(
-                $app->make('Elasticsearch\ClientBuilder'),
+                $app->make('Elasticsearch\Client'),
                 $app->make('Congraph\EntityElastic\Fields\FieldHandlerFactory'),
                 $app->make('Congraph\Eav\Managers\AttributeManager'),
                 $app->make('Congraph\EntityElastic\Services\EntityFormater')

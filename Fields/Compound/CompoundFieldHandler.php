@@ -19,7 +19,7 @@ use Illuminate\Database\Connection;
 use Congraph\Core\Exceptions\BadRequestException;
 use Congraph\Eav\Facades\MetaData;
 use Illuminate\Support\Facades\Event;
-use Elasticsearch\ClientBuilder;
+use Elasticsearch\Client;
 use Congraph\Core\Exceptions\NotFoundException;
 use \Exception;
 
@@ -57,7 +57,7 @@ class CompoundFieldHandler extends AbstractFieldHandler
 	 * @return void
 	 */
 	public function __construct(
-		ClientBuilder $elasticClientBuilder,
+		Client $elasticClient,
 		AttributeManager $attributeManager,
 		EntityRepository $entityRepository
 	) {
@@ -67,13 +67,10 @@ class CompoundFieldHandler extends AbstractFieldHandler
 		// Init empty MessagBag object for errors
 		$this->setErrors();
 
-		$hosts = Config::get('cb.elastic.hosts');
 		$prefix = Config::get('cb.elastic.index_prefix');
 		$this->indexName = $prefix . 'entities';
 
-		$this->client = $elasticClientBuilder->create()
-			->setHosts($hosts)
-			->build();
+		$this->client = $elasticClient;
 	}
 
 
