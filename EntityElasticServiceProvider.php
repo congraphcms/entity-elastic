@@ -61,6 +61,10 @@ class EntityElasticServiceProvider extends ServiceProvider {
 		// -----------------------------------------------------------------------------
 		$this->app->register('Congraph\EntityElastic\Fields\FieldsServiceProvider');
 
+		// Services
+		// -----------------------------------------------------------------------------
+		$this->app->register('Congraph\EntityElastic\Services\ServicesServiceProvider');
+
 		// Validators
 		// -----------------------------------------------------------------------------
 		$this->app->register('Congraph\EntityElastic\Validators\ValidatorsServiceProvider');
@@ -72,10 +76,6 @@ class EntityElasticServiceProvider extends ServiceProvider {
 		// Commands
 		// -----------------------------------------------------------------------------
 		$this->app->register('Congraph\EntityElastic\Commands\CommandsServiceProvider');
-
-		// Services
-		// -----------------------------------------------------------------------------
-		$this->app->register('Congraph\EntityElastic\Services\ServicesServiceProvider');
 
 		
 

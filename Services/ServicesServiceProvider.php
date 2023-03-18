@@ -11,6 +11,8 @@
 namespace Congraph\EntityElastic\Services;
 
 use Illuminate\Support\ServiceProvider;
+use Elasticsearch\Client;
+use Illuminate\Contracts\Container\Container;
 
 /**
  * ServicesServiceProvider service provider for services
@@ -72,6 +74,25 @@ class ServicesServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function registerServices() {
+
+		$app = $this->app;
+
+        $app->singleton('cb.elastic.factory', function($app) {
+            return new ESFactory();
+        });
+
+        $app->singleton('cb.elastic', function($app) {
+            return new ESManager($app, $app['cb.elastic.factory']);
+        });
+
+        $app->alias('cb.elastic', ESManager::class);
+
+        $app->singleton(Client::class, function(Container $app) {
+            return $app->make('cb.elastic')->connection();
+        });
+
+
+
 		$this->app->singleton('Congraph\EntityElastic\Services\EntityFormater', function($app) {
 			// var_dump('Contract for attribute repository resolving...');
 			return new EntityFormater(

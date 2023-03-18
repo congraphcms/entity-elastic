@@ -15,7 +15,7 @@ use Congraph\Core\Traits\ErrorManagerTrait;
 use Congraph\Eav\Managers\AttributeManager;
 
 use Congraph\EntityElastic\Traits\ElasticQueryBuilderTrait;
-use Elasticsearch\ClientBuilder;
+use Elasticsearch\Client;
 use Illuminate\Support\Facades\Config;
 
 /**
@@ -61,19 +61,16 @@ abstract class AbstractFieldHandler
 	 *  
 	 * @return void
 	 */
-	public function __construct(ClientBuilder $elasticClientBuilder, AttributeManager $attributeManager)
+	public function __construct(Client $elasticClient, AttributeManager $attributeManager)
 	{
 		$this->attributeManager = $attributeManager;
 		// Init empty MessagBag object for errors
 		$this->setErrors();
 
-		$hosts = Config::get('cb.elastic.hosts');
         $prefix = Config::get('cb.elastic.index_prefix');
         $this->indexName = $prefix . 'entities';
 
-        $this->client = $elasticClientBuilder->create()
-                                            ->setHosts($hosts)
-                                            ->build();
+        $this->client = $elasticClient;
 	}
 
 	/**

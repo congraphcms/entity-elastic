@@ -28,7 +28,7 @@ use Congraph\EntityElastic\Services\EntityFormater;
 use Congraph\Eav\Facades\MetaData;
 
 
-use Elasticsearch\ClientBuilder;
+use Elasticsearch\Client;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
@@ -101,7 +101,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
      * @return void
      */
     public function __construct(
-        ClientBuilder $elasticClientBuilder,
+        Client $elasticClient,
         FieldHandlerFactoryContract $fieldHandlerFactory,
         AttributeManager $attributeManager,
         EntityFormater $entityFormater
@@ -111,15 +111,11 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         $this->fieldHandlerFactory = $fieldHandlerFactory;
         $this->attributeManager = $attributeManager;
         $this->formater = $entityFormater;
+        $this->client = $elasticClient;
 
-        
-        $hosts = Config::get('cb.elastic.hosts');
         $prefix = Config::get('cb.elastic.index_prefix');
         $this->indexName = $prefix . 'entities';
 
-        $this->client = $elasticClientBuilder->create()
-                                            ->setHosts($hosts)
-                                            ->build();
         $indexParams = [
             'index' => $this->indexName
         ];
@@ -1036,7 +1032,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             $boost = floatval($boostKey);
             if (!empty($values)) {
                 $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'cross_fields', true, $boost * 1);
-                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
+                // $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
                 $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase', true, $boost * 3);
             }
         }
@@ -1045,7 +1041,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             $boost = floatval($boostKey);
             if (!empty($values)) {
                 $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'cross_fields', true, $boost * 1);
-                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
+                // $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
                 $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase', true, $boost * 3);
             }
         }
