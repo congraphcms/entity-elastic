@@ -235,30 +235,38 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
      *
      * @throws Exception
      */
-    public function create($model, $result = null)
+    public function create($model)
     {
         $params = [];
         $params['index'] = $this->indexName;
 
         $body = [];
 
-        if (!($result instanceof Model) || !is_integer($result->id) || empty($result->id)) {
-            $body['created_at'] = gmdate("U");
-            $body['updated_at'] = gmdate("U");
-            $body['entity_type_id'] = $model['entity_type_id'];
-            $body['attribute_set_id'] = $model['attribute_set_id'];
-            if (! empty($model['fields']) && is_array($model['fields'])) {
-                $fields = $model['fields'];
-            }
+        if ($model instanceof Model) {
+            $body['created_at'] = $model->created_at->tz('UTC')->getTimestamp();
+            $body['updated_at'] = $model->updated_at->tz('UTC')->getTimestamp();
+            $model = $model->toArray();
         } else {
-            $params['id'] = $result->id;
-            $body['id'] = $params['id'];
-            $body['created_at'] = $result->created_at->tz('UTC')->getTimestamp();
-            $body['updated_at'] = $result->updated_at->tz('UTC')->getTimestamp();
-            $body['entity_type_id'] = $result->entity_type_id;
-            $body['attribute_set_id'] = $result->attribute_set_id;
-            $fields = $result->toArray()['fields'];
+            $body['created_at'] = array_key_exists('created_at', $model)
+                ? $model['created_at']
+                : gmdate("U");
+
+            $body['updated_at'] = array_key_exists('updated_at', $model)
+                ? $model['updated_at']
+                : $body['created_at'];
         }
+
+        if (array_key_exists('id', $model)) {
+            $params['id'] = $body['id'] = $model['id'];
+        }
+
+        if (array_key_exists('fields', $model) && is_array($model['fields'])) {
+            $params['id'] = $body['id'] = $model['id'];
+            $fields = $model['fields'];
+        }
+
+        $body['entity_type_id'] = $model['entity_type_id'];
+        $body['attribute_set_id'] = $model['attribute_set_id'];
         
         $body['fields'] = [];
         $body['status'] = [];
