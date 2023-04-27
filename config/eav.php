@@ -186,6 +186,26 @@ return array(
 		),
 
 		/**
+		 * Date field
+		 */
+		'date' => array(
+			'label'						=> 'Date',
+			'table' 					=> 'attribute_values_date',
+			'handler'					=> 'Congraph\Eav\Fields\Date\DateFieldHandler',
+			'elastic_handler'			=> 'Congraph\EntityElastic\Fields\Date\DateFieldHandler',
+			'validator'					=> 'Congraph\Eav\Fields\Date\DateFieldValidator',
+			'handler_name'				=> 'DateFieldHandler',
+			'can_have_default_value'	=> false,
+			'can_be_unique'				=> true,
+			'can_be_localized'			=> true,
+			'can_be_filter'				=> true,
+			'can_be_searchable'			=> false,
+			'has_options'				=> false,
+			'has_multiple_values'		=> false,
+			'sortable'					=> true
+		),
+
+		/**
 		 * Datetime field
 		 */
 		'datetime' => array(
