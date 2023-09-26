@@ -16,6 +16,9 @@ use Elasticsearch\ClientBuilder;
 use Congraph\Eav\Facades\MetaData;
 use Congraph\Core\Facades\Trunk;
 use stdClass;
+use Congraph\Eav\Repositories\EntityRepository as EntitySQLRepository;
+use Congraph\EntityElastic\Repositories\EntityRepository as EntityElasticRepository;
+
 
 /**
  * RelationFieldHandler class
@@ -31,6 +34,41 @@ use stdClass;
  */
 class RelationFieldHandler extends AbstractFieldHandler
 {
+
+
+    /**
+     * Entity ES Repository
+     *
+     * @var \Congraph\EntityElastic\Repositories\EntityRepository
+     */
+    protected $esRepository;
+
+    /**
+     * Entity MySQL Repository
+     *
+     * @var \Congraph\Eav\Repositories\EntityRepository
+     */
+    protected $sqlRepository;
+
+    /**
+     * Create new RelationFieldHandler
+     *
+     * @param Illuminate\Database\Connection 			$db
+     * @param Congraph\Eav\Managers\AttributeManager 	$attributeManager
+     * @param string 									$table
+     *
+     * @return void
+     */
+    public function __construct(
+      Client $elasticClient,
+      AttributeManager $attributeManager,
+      EntityElasticRepository $esRepository,
+      EntitySQLRepository $sqlRepository
+  ) {
+      parent::__construct($elasticClient, $attributeManager);
+      $this->esRepository = $esRepository;
+      $this->sqlRepository = $sqlRepository;
+  }
 
     /**
      * Parse value for database input
@@ -51,8 +89,14 @@ class RelationFieldHandler extends AbstractFieldHandler
                 'id' => $value['id']
             ];
 
-            $rawRelation = $this->client->get($params);
-            $source = $rawRelation['_source'];
+            if (!config('cb.elastic.indexing')) {
+                $rawRelation = $this->client->get($params);
+                $source = $rawRelation['_source'];
+            } else {
+                $result = $this->sqlRepository->fetch($value['id']);
+                $source = $this->esRepository->parseEntityForES($result->toArray());
+            }
+
             $data = [
                 'id' => intval($value['id']),
                 'type' => 'entity',

@@ -154,7 +154,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         } catch (NotFoundException $e) {
             return;
         }
-        
+
         $this->delete($command->id);
     }
 
@@ -243,25 +243,16 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         $body = [];
 
         if (!($result instanceof Model) || !is_integer($result->id) || empty($result->id)) {
-            $body['created_at'] = gmdate("U");
-            $body['updated_at'] = gmdate("U");
-            $body['entity_type_id'] = $model['entity_type_id'];
-            $body['attribute_set_id'] = $model['attribute_set_id'];
-            if (! empty($model['fields']) && is_array($model['fields'])) {
-                $fields = $model['fields'];
-            }
+            $model['created_at'] = gmdate("U");
+            $model['updated_at'] = gmdate("U");
+            $body = $this->parseEntityForES($model);
         } else {
+            $body = $this->parseEntityForES($result->toArray());
             $params['id'] = $result->id;
             $body['id'] = $params['id'];
-            $body['created_at'] = $result->created_at->tz('UTC')->getTimestamp();
-            $body['updated_at'] = $result->updated_at->tz('UTC')->getTimestamp();
-            $body['entity_type_id'] = $result->entity_type_id;
-            $body['attribute_set_id'] = $result->attribute_set_id;
-            $fields = $result->toArray()['fields'];
         }
-        
-        $body['fields'] = [];
-        $body['status'] = [];
+
+        $params['body'] = $body;
 
         $locale = false;
         $localeCodes = [null];
@@ -271,109 +262,6 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             list($locale, $localeCodes) = $this->parseLocale($model['locale']);
             $locale_id = $locale->id;
         }
-
-        $status = null;
-        if (! empty($model['status'])) {
-            $status = $model['status'];
-        }
-
-        $attributeSet = MetaData::getAttributeSetById($body['attribute_set_id']);
-        
-        foreach ($attributeSet['attributes'] as $setAttribute) {
-            $attribute = MetaData::getAttributeById($setAttribute->id);
-            $code = $attribute->code;
-            $fieldHandler = $this->fieldHandlerFactory->make($attribute->field_type);
-            
-            if (!$attribute->localized) {
-                if (array_key_exists($code, $fields)) {
-                    $value = $fields[$code];
-                } else {
-                    $value = $attribute->default_value;
-                }
-
-                $value = $fieldHandler->prepareForElastic($value, $attribute, $locale_id, $model, null);
-                $body['fields'][$code] = $value;
-                continue;
-            }
-
-            foreach (MetaData::getLocales() as $l) {
-                if ($locale) {
-                    if ($locale->id == $l->id) {
-                        $value = (array_key_exists($code, $fields))?$fields[$code]:$attribute->default_value;
-                        $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
-                        $body['fields'][$code . '__' . $l->code] = $value;
-                        continue;
-                    }
-                    
-                    $value = $attribute->default_value;
-                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
-                    $body['fields'][$code . '__' . $l->code] = $value;
-                    continue;
-                }
-
-                if (array_key_exists($code, $fields) && array_key_exists($l->code, $fields[$code])) {
-                    $value = $fields[$code][$l->code];
-                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
-                    $body['fields'][$code . '__' . $l->code] = $value;
-                    continue;
-                }
-
-                $value = $attribute->default_value;
-                $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
-                $body['fields'][$code . '__' . $l->code] = $value;
-            }
-        }
-
-        $entityType = MetaData::getEntityTypeById($body['entity_type_id']);
-        $body['localized'] = !!$entityType->localized;
-        $body['localized_workflow'] = !!$entityType->localized_workflow;
-        
-
-        if (isset($status)) {
-            if (is_array($status)) {
-                $point = [];
-                foreach ($status as $loc => $value) {
-                    $point[$loc] = MetaData::getWorkflowPointByStatus($value);
-                }
-            } else {
-                $point = MetaData::getWorkflowPointByStatus($status);
-            }
-        } else {
-            $point = MetaData::getWorkflowPointById($entityType->default_point->id);
-        }
-
-        $localeCodes = [];
-        if (! $entityType->localized_workflow) {
-            $localeCodes[] = null;
-        } else {
-            if (empty($locale)) {
-                foreach (MetaData::getLocales() as $l) {
-                    $localeCodes[] = $l->code;
-                }
-            } else {
-                $localeCodes[] = $locale->code;
-            }
-        }
-
-        foreach ($localeCodes as $lc) {
-            if (is_array($point)) {
-                $s = $point[$lc]->status;
-            } else {
-                $s = $point->status;
-            }
-            $statusObj = [
-                'status' => $s,
-                'locale' => $lc,
-                'state' => 'active',
-                'scheduled_at' => null,
-                'created_at' => $body['created_at'],
-                'updated_at' => $body['updated_at']
-            ];
-
-            $body['status'][] = $statusObj;
-        }
-
-        $params['body'] = $body;
 
         try {
             $response = $this->client->index($params);
@@ -444,7 +332,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             if (!array_key_exists($code, $fields)) {
                 continue;
             }
-            
+
             if (!$attribute->localized || $locale) {
                 $fieldName = $code;
                 if ($attribute->localized) {
@@ -561,7 +449,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             }
         }
 
-        
+
 
         if ($changed) {
             // update updated_at
@@ -582,6 +470,143 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         $entity = $this->fetch($id, [], $locale_id);
         // return new document
         return $entity;
+    }
+
+    public function parseEntityForES(array $entity) {
+        $body = [];
+
+        // get system values
+        $body['id'] = $entity['id'];
+        $body['created_at'] = Carbon::parse($entity['created_at'])
+                                    ->tz('UTC')
+                                    ->getTimestamp();
+
+        $body['updated_at'] = Carbon::parse($entity['updated_at'])
+                                    ->tz('UTC')
+                                    ->getTimestamp();
+        $body['entity_type_id'] = $entity['entity_type_id'];
+        $body['attribute_set_id'] = $entity['attribute_set_id'];
+
+        // get fields
+        $fields = $entity['fields'];
+
+        $body['fields'] = [];
+        $body['status'] = [];
+
+        $locale = false;
+        $localeCodes = [null];
+        $locale_id = null;
+
+        if (! empty($entity['locale'])) {
+            list($locale, $localeCodes) = $this->parseLocale($entity['locale']);
+            $locale_id = $locale->id;
+        }
+
+        $status = null;
+        if (! empty($entity['status'])) {
+            $status = $entity['status'];
+        }
+
+        $attributeSet = MetaData::getAttributeSetById($entity['attribute_set_id']);
+
+        foreach ($attributeSet['attributes'] as $setAttribute) {
+            $attribute = MetaData::getAttributeById($setAttribute->id);
+            $code = $attribute->code;
+            $fieldHandler = $this->fieldHandlerFactory->make($attribute->field_type);
+
+            if (!$attribute->localized) {
+                if (array_key_exists($code, $fields)) {
+                    $value = $fields[$code];
+                } else {
+                    $value = $attribute->default_value;
+                }
+
+                $value = $fieldHandler->prepareForElastic($value, $attribute, $locale_id, $entity, null);
+                $body['fields'][$code] = $value;
+                continue;
+            }
+
+            foreach (MetaData::getLocales() as $l) {
+                if ($locale) {
+                    if ($locale->id == $l->id) {
+                        $value = (array_key_exists($code, $fields))?$fields[$code]:$attribute->default_value;
+                        $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $entity, null);
+                        $body['fields'][$code . '__' . $l->code] = $value;
+                        continue;
+                    }
+
+                    $value = $attribute->default_value;
+                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $entity, null);
+                    $body['fields'][$code . '__' . $l->code] = $value;
+                    continue;
+                }
+
+                if (array_key_exists($code, $fields) && array_key_exists($l->code, $fields[$code])) {
+                    $value = $fields[$code][$l->code];
+                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $entity, null);
+                    $body['fields'][$code . '__' . $l->code] = $value;
+                    continue;
+                }
+
+                $value = $attribute->default_value;
+                $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $entity, null);
+                $body['fields'][$code . '__' . $l->code] = $value;
+            }
+        }
+
+        $entityType = MetaData::getEntityTypeById($body['entity_type_id']);
+        $body['localized'] = !!$entityType->localized;
+        $body['localized_workflow'] = !!$entityType->localized_workflow;
+
+
+        if (isset($status)) {
+            if (is_array($status)) {
+                $point = [];
+                foreach ($status as $loc => $value) {
+                    $point[$loc] = MetaData::getWorkflowPointByStatus($value);
+                }
+            } else {
+                $point = MetaData::getWorkflowPointByStatus($status);
+            }
+        } else {
+            $point = MetaData::getWorkflowPointById($entityType->default_point->id);
+        }
+
+        $localeCodes = [];
+        if (! $entityType->localized_workflow) {
+            $localeCodes[] = null;
+        } else {
+            if (empty($locale)) {
+                foreach (MetaData::getLocales() as $l) {
+                    $localeCodes[] = $l->code;
+                }
+            } else {
+                $localeCodes[] = $locale->code;
+            }
+        }
+
+        foreach ($localeCodes as $lc) {
+            if (is_array($point)) {
+                if (empty($point[$lc])) {
+                    continue;
+                }
+                $s = $point[$lc]->status;
+            } else {
+                $s = $point->status;
+            }
+            $statusObj = [
+                'status' => $s,
+                'locale' => $lc,
+                'state' => 'active',
+                'scheduled_at' => null,
+                'created_at' => $body['created_at'],
+                'updated_at' => $body['updated_at']
+            ];
+
+            $body['status'][] = $statusObj;
+        }
+
+        return $body;
     }
 
     /**
@@ -754,7 +779,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
         return true;
     }
-    
+
 
     // ----------------------------------------------------------------------------------------------
     // GETTERS
@@ -837,9 +862,9 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         if ($doSorting) {
             $query = $this->querySorting($query, $sort, $locale, $localeCodes);
         }
-        
 
-        
+
+
 
         $result = $this->client->search($query);
         // foreach ($result['hits']['hits'] as $value) {
@@ -864,7 +889,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         $public = false;
         $fulltextSearch = null;
         $doSorting = true;
-        
+
 
 
         foreach ($filters as $key => $filter) {
@@ -884,7 +909,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
                 $fieldFilters[$code] = $filter;
                 continue;
             }
-            
+
             if (!is_array($filter)) {
                 $query = $this->addTermQuery($query, $key, $filter);
                 continue;
@@ -1000,7 +1025,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
                         $nodeFields[$nodeBoostKey] = [];
                     }
                 }
-                
+
 
                 if (!$attribute->localized) {
                     $fields[$boostKey][] = 'fields.' . $attribute->code;
@@ -1135,7 +1160,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
             return $query;
         }
-        
+
         if (!is_array($statusFilter)) {
             $nested = $this->addTermQuery($nested, 'status.status', $statusFilter);
             $nested = $this->addTermQuery($nested, 'status.state', 'active');
@@ -1217,7 +1242,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         ];
         $result->setMeta($meta);
         $result->load((isset($params[4]))?$params[4]:[]);
-        
+
         return $result;
     }
 
@@ -1237,7 +1262,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         return array($locale, $localeCodes);
     }
 
-    
+
 
     // public function onEntityTypeCreated($command, $result)
     // {

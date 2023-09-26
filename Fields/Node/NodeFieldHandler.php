@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * This file is part of the congraph/entity-elastic package.
  *
@@ -10,15 +10,17 @@
 
 namespace Congraph\EntityElastic\Fields\Node;
 
-use Congraph\EntityElastic\Fields\AbstractFieldHandler;
-use Congraph\Eav\Managers\AttributeManager;
-use Congraph\EntityElastic\Services\EntityFormater;
-use Elasticsearch\Client;
-use Congraph\Eav\Facades\MetaData;
-use Congraph\Core\Facades\Trunk;
-use Congraph\Core\Exceptions\NotFoundException;
-use Illuminate\Support\Facades\Log;
 use stdClass;
+use Elasticsearch\Client;
+use Congraph\Core\Facades\Trunk;
+use Congraph\Eav\Facades\MetaData;
+use Illuminate\Support\Facades\Log;
+use Congraph\Eav\Managers\AttributeManager;
+use Congraph\Core\Exceptions\NotFoundException;
+use Congraph\Eav\Repositories\EntityRepository as EntitySQLRepository;
+use Congraph\EntityElastic\Services\EntityFormater;
+use Congraph\EntityElastic\Fields\AbstractFieldHandler;
+use Congraph\EntityElastic\Repositories\EntityRepository as EntityElasticRepository;
 
 /**
  * NodeFieldHandler class
@@ -43,6 +45,20 @@ class NodeFieldHandler extends AbstractFieldHandler
     protected $formater;
 
     /**
+     * Entity ES Repository
+     *
+     * @var \Congraph\EntityElastic\Repositories\EntityRepository
+     */
+    protected $esRepository;
+
+    /**
+     * Entity MySQL Repository
+     *
+     * @var \Congraph\Eav\Repositories\EntityRepository
+     */
+    protected $sqlRepository;
+
+    /**
      * Create new AbstractAttributeHandler
      *
      * @param Illuminate\Database\Connection 			$db
@@ -54,10 +70,14 @@ class NodeFieldHandler extends AbstractFieldHandler
     public function __construct(
         Client $elasticClient,
         AttributeManager $attributeManager,
-        EntityFormater $entityFormater
+        EntityFormater $entityFormater,
+        EntityElasticRepository $esRepository,
+        EntitySQLRepository $sqlRepository
     ) {
         parent::__construct($elasticClient, $attributeManager);
         $this->formater = $entityFormater;
+        $this->esRepository = $esRepository;
+        $this->sqlRepository = $sqlRepository;
     }
 
 
@@ -79,14 +99,19 @@ class NodeFieldHandler extends AbstractFieldHandler
                 'index' => $this->indexName,
                 'id' => $value['id']
             ];
+            $source = null;
+            if (!config('cb.elastic.indexing')) {
+                $rawRelation = $this->client->get($params);
+                $source = $rawRelation['_source'];
+            } else {
+                $result = $this->sqlRepository->fetch($value['id']);
+                $source = $this->esRepository->parseEntityForES($result->toArray());
+            }
 
-            $rawRelation = $this->client->get($params);
-            $source = $rawRelation['_source'];
 
-            
             $value = $this->parseNode($source);
         }
-        
+
         return $value;
     }
 
@@ -335,7 +360,7 @@ class NodeFieldHandler extends AbstractFieldHandler
 
         $rawDocuments = $this->client->search($query);
 
-        
+
 
         $params = [
             'index' => $this->indexName,
@@ -370,7 +395,7 @@ class NodeFieldHandler extends AbstractFieldHandler
                         $value = $newValue;
                         $changed = true;
                     }
-                    
+
                     continue;
                 }
 
