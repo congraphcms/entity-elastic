@@ -10,6 +10,7 @@
 
 namespace Congraph\EntityElastic\Fields\Relation;
 
+use Elasticsearch\Client;
 use Congraph\EntityElastic\Fields\AbstractFieldHandler;
 use Congraph\Eav\Managers\AttributeManager;
 use Elasticsearch\ClientBuilder;
