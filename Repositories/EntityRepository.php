@@ -235,24 +235,34 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
      *
      * @throws Exception
      */
-    public function create($model, $result = null)
+    public function create($model)
     {
+        if ((!$model instanceof Model)) {
+            throw new \Exception('NOT A MODEL');
+        }
         $params = [];
         $params['index'] = $this->indexName;
 
         $body = [];
 
-        if (!($result instanceof Model) || !is_integer($result->id) || empty($result->id)) {
-            $model['created_at'] = gmdate("U");
-            $model['updated_at'] = gmdate("U");
-            $body = $this->parseEntityForES($model);
-        } else {
-            $body = $this->parseEntityForES($result->toArray());
-            $params['id'] = $result->id;
-            $body['id'] = $params['id'];
+        $body['created_at'] = $model->created_at->tz('UTC')->getTimestamp();
+        $body['updated_at'] = $model->updated_at->tz('UTC')->getTimestamp();
+        $model = $model->toArray();
+        $fields = [];
+
+        // if (array_key_exists('id', $model)) {
+        $params['id'] = $body['id'] = $model['id'];
+        // }
+
+        if (array_key_exists('fields', $model) && is_array($model['fields'])) {
+            $fields = $model['fields'];
         }
 
-        $params['body'] = $body;
+        $body['entity_type_id'] = $model['entity_type_id'];
+        $body['attribute_set_id'] = $model['attribute_set_id'];
+
+        $body['fields'] = [];
+        $body['status'] = [];
 
         $locale = false;
         $localeCodes = [null];
@@ -262,6 +272,109 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             list($locale, $localeCodes) = $this->parseLocale($model['locale']);
             $locale_id = $locale->id;
         }
+
+        $status = null;
+        if (! empty($model['status'])) {
+            $status = $model['status'];
+        }
+
+        $attributeSet = MetaData::getAttributeSetById($body['attribute_set_id']);
+
+        foreach ($attributeSet['attributes'] as $setAttribute) {
+            $attribute = MetaData::getAttributeById($setAttribute->id);
+            $code = $attribute->code;
+            $fieldHandler = $this->fieldHandlerFactory->make($attribute->field_type);
+
+            if (!$attribute->localized) {
+                if (array_key_exists($code, $fields)) {
+                    $value = $fields[$code];
+                } else {
+                    $value = $attribute->default_value;
+                }
+
+                $value = $fieldHandler->prepareForElastic($value, $attribute, $locale_id, $model, null);
+                $body['fields'][$code] = $value;
+                continue;
+            }
+
+            foreach (MetaData::getLocales() as $l) {
+                if ($locale) {
+                    if ($locale->id == $l->id) {
+                        $value = (array_key_exists($code, $fields))?$fields[$code]:$attribute->default_value;
+                        $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
+                        $body['fields'][$code . '__' . $l->code] = $value;
+                        continue;
+                    }
+
+                    $value = $attribute->default_value;
+                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
+                    $body['fields'][$code . '__' . $l->code] = $value;
+                    continue;
+                }
+
+                if (array_key_exists($code, $fields) && array_key_exists($l->code, $fields[$code])) {
+                    $value = $fields[$code][$l->code];
+                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
+                    $body['fields'][$code . '__' . $l->code] = $value;
+                    continue;
+                }
+
+                $value = $attribute->default_value;
+                $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
+                $body['fields'][$code . '__' . $l->code] = $value;
+            }
+        }
+
+        $entityType = MetaData::getEntityTypeById($body['entity_type_id']);
+        $body['localized'] = !!$entityType->localized;
+        $body['localized_workflow'] = !!$entityType->localized_workflow;
+
+
+        if (isset($status)) {
+            if (is_array($status)) {
+                $point = [];
+                foreach ($status as $loc => $value) {
+                    $point[$loc] = MetaData::getWorkflowPointByStatus($value);
+                }
+            } else {
+                $point = MetaData::getWorkflowPointByStatus($status);
+            }
+        } else {
+            $point = MetaData::getWorkflowPointById($entityType->default_point->id);
+        }
+
+        $localeCodes = [];
+        if (! $entityType->localized_workflow) {
+            $localeCodes[] = null;
+        } else {
+            if (empty($locale)) {
+                foreach (MetaData::getLocales() as $l) {
+                    $localeCodes[] = $l->code;
+                }
+            } else {
+                $localeCodes[] = $locale->code;
+            }
+        }
+
+        foreach ($localeCodes as $lc) {
+            if (is_array($point)) {
+                $s = $point[$lc]->status;
+            } else {
+                $s = $point->status;
+            }
+            $statusObj = [
+                'status' => $s,
+                'locale' => $lc,
+                'state' => 'active',
+                'scheduled_at' => null,
+                'created_at' => $body['created_at'],
+                'updated_at' => $body['updated_at']
+            ];
+
+            $body['status'][] = $statusObj;
+        }
+
+        $params['body'] = $body;
 
         try {
             $response = $this->client->index($params);

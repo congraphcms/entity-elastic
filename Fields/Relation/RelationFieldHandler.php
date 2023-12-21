@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * This file is part of the congraph/entity-elastic package.
  *
@@ -16,9 +16,12 @@ use Congraph\Eav\Managers\AttributeManager;
 use Elasticsearch\ClientBuilder;
 use Congraph\Eav\Facades\MetaData;
 use Congraph\Core\Facades\Trunk;
-use stdClass;
-use Congraph\Eav\Repositories\EntityRepository as EntitySQLRepository;
+use Congraph\Eav\Repositories\EntityRepository;
 use Congraph\EntityElastic\Repositories\EntityRepository as EntityElasticRepository;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+use stdClass;
 
 
 /**
@@ -36,23 +39,22 @@ use Congraph\EntityElastic\Repositories\EntityRepository as EntityElasticReposit
 class RelationFieldHandler extends AbstractFieldHandler
 {
 
+    /**
+     * EAV Entity Repository
+     *
+     * @var \Congraph\EAV\Repositories\EntityRepository
+     */
+    protected $repository;
 
     /**
-     * Entity ES Repository
+     * Elastic Entity Repository
      *
      * @var \Congraph\EntityElastic\Repositories\EntityRepository
      */
-    protected $esRepository;
+    protected $eRepository;
 
     /**
-     * Entity MySQL Repository
-     *
-     * @var \Congraph\Eav\Repositories\EntityRepository
-     */
-    protected $sqlRepository;
-
-    /**
-     * Create new RelationFieldHandler
+     * Create new AbstractAttributeHandler
      *
      * @param Illuminate\Database\Connection 			$db
      * @param Congraph\Eav\Managers\AttributeManager 	$attributeManager
@@ -61,15 +63,15 @@ class RelationFieldHandler extends AbstractFieldHandler
      * @return void
      */
     public function __construct(
-      Client $elasticClient,
-      AttributeManager $attributeManager,
-      EntityElasticRepository $esRepository,
-      EntitySQLRepository $sqlRepository
-  ) {
-      parent::__construct($elasticClient, $attributeManager);
-      $this->esRepository = $esRepository;
-      $this->sqlRepository = $sqlRepository;
-  }
+        Client $elasticClient,
+        AttributeManager $attributeManager,
+        EntityRepository $repository,
+        EntityElasticRepository $eRepository
+    ) {
+        parent::__construct($elasticClient, $attributeManager);
+        $this->repository = $repository;
+        $this->eRepository = $eRepository;
+    }
 
     /**
      * Parse value for database input
@@ -90,14 +92,17 @@ class RelationFieldHandler extends AbstractFieldHandler
                 'id' => $value['id']
             ];
 
-            if (!config('cb.elastic.indexing')) {
+            try {
                 $rawRelation = $this->client->get($params);
-                $source = $rawRelation['_source'];
-            } else {
-                $result = $this->sqlRepository->fetch($value['id']);
-                $source = $this->esRepository->parseEntityForES($result->toArray());
+            } catch(Missing404Exception $e) {
+                if (!Config::get('cb.elastic.indexing')) {
+                    throw $e;
+                }
+                $original = $this->repository->fetch($value['id']);
+                $inserted = $this->eRepository->create($original);
+                $rawRelation = $this->client->get($params);
             }
-
+            $source = $rawRelation['_source'];
             $data = [
                 'id' => intval($value['id']),
                 'type' => 'entity',
@@ -106,7 +111,7 @@ class RelationFieldHandler extends AbstractFieldHandler
             ];
             $value = $data;
         }
-        
+
         return $value;
     }
 

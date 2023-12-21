@@ -14,12 +14,14 @@ use stdClass;
 use Elasticsearch\Client;
 use Congraph\Core\Facades\Trunk;
 use Congraph\Eav\Facades\MetaData;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Congraph\Eav\Managers\AttributeManager;
 use Congraph\Core\Exceptions\NotFoundException;
-use Congraph\Eav\Repositories\EntityRepository as EntitySQLRepository;
 use Congraph\EntityElastic\Services\EntityFormater;
 use Congraph\EntityElastic\Fields\AbstractFieldHandler;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
+use Congraph\Eav\Repositories\EntityRepository;
 use Congraph\EntityElastic\Repositories\EntityRepository as EntityElasticRepository;
 
 /**
@@ -45,18 +47,18 @@ class NodeFieldHandler extends AbstractFieldHandler
     protected $formater;
 
     /**
-     * Entity ES Repository
+     * EAV Entity Repository
+     *
+     * @var \Congraph\EAV\Repositories\EntityRepository
+     */
+    protected $repository;
+
+    /**
+     * Elastic Entity Repository
      *
      * @var \Congraph\EntityElastic\Repositories\EntityRepository
      */
-    protected $esRepository;
-
-    /**
-     * Entity MySQL Repository
-     *
-     * @var \Congraph\Eav\Repositories\EntityRepository
-     */
-    protected $sqlRepository;
+    protected $eRepository;
 
     /**
      * Create new AbstractAttributeHandler
@@ -71,13 +73,13 @@ class NodeFieldHandler extends AbstractFieldHandler
         Client $elasticClient,
         AttributeManager $attributeManager,
         EntityFormater $entityFormater,
-        EntityElasticRepository $esRepository,
-        EntitySQLRepository $sqlRepository
+        EntityRepository $repository,
+        EntityElasticRepository $eRepository
     ) {
         parent::__construct($elasticClient, $attributeManager);
         $this->formater = $entityFormater;
-        $this->esRepository = $esRepository;
-        $this->sqlRepository = $sqlRepository;
+        $this->repository = $repository;
+        $this->eRepository = $eRepository;
     }
 
 
@@ -100,13 +102,18 @@ class NodeFieldHandler extends AbstractFieldHandler
                 'id' => $value['id']
             ];
             $source = null;
-            if (!config('cb.elastic.indexing')) {
+
+            try {
                 $rawRelation = $this->client->get($params);
-                $source = $rawRelation['_source'];
-            } else {
-                $result = $this->sqlRepository->fetch($value['id']);
-                $source = $this->esRepository->parseEntityForES($result->toArray());
+            } catch(Missing404Exception $e) {
+                if (!Config::get('cb.elastic.indexing')) {
+                    throw $e;
+                }
+                $original = $this->repository->fetch($value['id']);
+                $inserted = $this->eRepository->create($original);
+                $rawRelation = $this->client->get($params);
             }
+            $source = $rawRelation['_source'];
 
 
             $value = $this->parseNode($source);

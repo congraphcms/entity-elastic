@@ -15,9 +15,9 @@ use Congraph\EntityElastic\Repositories\EntityRepositoryContract;
 
 /**
  * EntityGetCommand class
- * 
+ *
  * Command for getting entities
- * 
+ *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @package 	congraph/entity-elastic
@@ -29,9 +29,9 @@ class EntityGetCommand extends RepositoryCommand
 
     /**
 	 * Create new EntityGetCommand
-	 * 
+	 *
 	 * @param Congraph\EntityElastic\Repositories\EntityRepositoryContract $repository
-	 * 
+	 *
 	 * @return void
 	 */
 	public function __construct(EntityRepositoryContract $repository)
@@ -41,8 +41,8 @@ class EntityGetCommand extends RepositoryCommand
 
 	/**
 	 * Handle RepositoryCommand
-	 * 
-	 * 
+	 *
+	 *
 	 * @return Congraph/Core/Repositories/Collection
 	 */
 	public function handle()
@@ -54,7 +54,7 @@ class EntityGetCommand extends RepositoryCommand
 			(!empty($this->params['sort']))?$this->params['sort']:[],
 			(!empty($this->params['include']))?$this->params['include']:[],
 			(!empty($this->params['locale']))?$this->params['locale']:null,
-			(!empty($this->params['status']))?$command->params['status']:null
+			(!empty($this->params['status']))?$this->params['status']:null
 		);
 	}
 }

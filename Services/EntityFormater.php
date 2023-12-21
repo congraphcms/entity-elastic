@@ -75,6 +75,46 @@ class EntityFormater
         $this->attributeManager = $attributeManager;
     }
 
+    /**
+     * Prepare model as body of ES document
+     * 
+     * @param  Model|Array $model
+     * @return Array document body
+     */
+    public function prepareEntityModel($model): Array {
+        // body of ES document
+        $body = [];
+
+        // fields placeholder
+        $fields = [];
+
+        // if model is from EAV Repository (has ID and rest of generated fields)
+        if ($model instanceof Model) {
+            $body['id'] = $model->id;
+            $body['created_at'] = 
+                $result->created_at->tz('UTC')->getTimestamp();
+            $body['updated_at'] = 
+                $result->updated_at->tz('UTC')->getTimestamp();
+            $body['entity_type_id'] = $result->entity_type_id;
+            $body['attribute_set_id'] = $result->attribute_set_id;
+            $fields = $result->toArray()['fields'];
+        
+        // generate mandatory fields
+        } else {
+            $body['created_at'] = gmdate("U");
+            $body['updated_at'] = gmdate("U");
+            $body['entity_type_id'] = $model['entity_type_id'];
+            $body['attribute_set_id'] = $model['attribute_set_id'];
+            if (! empty($model['fields']) && is_array($model['fields'])) {
+                $fields = $model['fields'];
+            }
+        }
+
+        
+
+
+    }
+
 
     public function formatEntities($result, $status, $locale, $localeCodes)
     {
