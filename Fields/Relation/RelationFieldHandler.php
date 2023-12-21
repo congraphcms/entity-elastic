@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * This file is part of the congraph/entity-elastic package.
  *
@@ -15,6 +15,12 @@ use Congraph\Eav\Managers\AttributeManager;
 use Elasticsearch\ClientBuilder;
 use Congraph\Eav\Facades\MetaData;
 use Congraph\Core\Facades\Trunk;
+use Elasticsearch\Client;
+use Congraph\Eav\Repositories\EntityRepository;
+use Congraph\EntityElastic\Repositories\EntityRepository as EntityElasticRepository;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use stdClass;
 
 /**
@@ -31,6 +37,40 @@ use stdClass;
  */
 class RelationFieldHandler extends AbstractFieldHandler
 {
+
+    /**
+     * EAV Entity Repository
+     *
+     * @var \Congraph\EAV\Repositories\EntityRepository
+     */
+    protected $repository;
+
+    /**
+     * Elastic Entity Repository
+     *
+     * @var \Congraph\EntityElastic\Repositories\EntityRepository
+     */
+    protected $eRepository;
+
+    /**
+     * Create new AbstractAttributeHandler
+     *
+     * @param Illuminate\Database\Connection 			$db
+     * @param Congraph\Eav\Managers\AttributeManager 	$attributeManager
+     * @param string 									$table
+     *
+     * @return void
+     */
+    public function __construct(
+        Client $elasticClient,
+        AttributeManager $attributeManager,
+        EntityRepository $repository,
+        EntityElasticRepository $eRepository
+    ) {
+        parent::__construct($elasticClient, $attributeManager);
+        $this->repository = $repository;
+        $this->eRepository = $eRepository;
+    }
 
     /**
      * Parse value for database input
@@ -51,7 +91,16 @@ class RelationFieldHandler extends AbstractFieldHandler
                 'id' => $value['id']
             ];
 
-            $rawRelation = $this->client->get($params);
+            try {
+                $rawRelation = $this->client->get($params);
+            } catch(Missing404Exception $e) {
+                if (!Config::get('cb.elastic.indexing')) {
+                    throw $e;
+                }
+                $original = $this->repository->fetch($value['id']);
+                $inserted = $this->eRepository->create($original);
+                $rawRelation = $this->client->get($params);
+            }
             $source = $rawRelation['_source'];
             $data = [
                 'id' => intval($value['id']),
@@ -61,7 +110,7 @@ class RelationFieldHandler extends AbstractFieldHandler
             ];
             $value = $data;
         }
-        
+
         return $value;
     }
 

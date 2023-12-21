@@ -154,7 +154,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         } catch (NotFoundException $e) {
             return;
         }
-        
+
         $this->delete($command->id);
     }
 
@@ -237,37 +237,30 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
      */
     public function create($model)
     {
+        if ((!$model instanceof Model)) {
+            throw new \Exception('NOT A MODEL');
+        }
         $params = [];
         $params['index'] = $this->indexName;
 
         $body = [];
 
-        if ($model instanceof Model) {
-            $body['created_at'] = $model->created_at->tz('UTC')->getTimestamp();
-            $body['updated_at'] = $model->updated_at->tz('UTC')->getTimestamp();
-            $model = $model->toArray();
-        } else {
-            $body['created_at'] = array_key_exists('created_at', $model)
-                ? $model['created_at']
-                : gmdate("U");
+        $body['created_at'] = $model->created_at->tz('UTC')->getTimestamp();
+        $body['updated_at'] = $model->updated_at->tz('UTC')->getTimestamp();
+        $model = $model->toArray();
+        $fields = [];
 
-            $body['updated_at'] = array_key_exists('updated_at', $model)
-                ? $model['updated_at']
-                : $body['created_at'];
-        }
-
-        if (array_key_exists('id', $model)) {
-            $params['id'] = $body['id'] = $model['id'];
-        }
+        // if (array_key_exists('id', $model)) {
+        $params['id'] = $body['id'] = $model['id'];
+        // }
 
         if (array_key_exists('fields', $model) && is_array($model['fields'])) {
-            $params['id'] = $body['id'] = $model['id'];
             $fields = $model['fields'];
         }
 
         $body['entity_type_id'] = $model['entity_type_id'];
         $body['attribute_set_id'] = $model['attribute_set_id'];
-        
+
         $body['fields'] = [];
         $body['status'] = [];
 
@@ -286,12 +279,12 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         }
 
         $attributeSet = MetaData::getAttributeSetById($body['attribute_set_id']);
-        
+
         foreach ($attributeSet['attributes'] as $setAttribute) {
             $attribute = MetaData::getAttributeById($setAttribute->id);
             $code = $attribute->code;
             $fieldHandler = $this->fieldHandlerFactory->make($attribute->field_type);
-            
+
             if (!$attribute->localized) {
                 if (array_key_exists($code, $fields)) {
                     $value = $fields[$code];
@@ -312,7 +305,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
                         $body['fields'][$code . '__' . $l->code] = $value;
                         continue;
                     }
-                    
+
                     $value = $attribute->default_value;
                     $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $model, null);
                     $body['fields'][$code . '__' . $l->code] = $value;
@@ -335,7 +328,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         $entityType = MetaData::getEntityTypeById($body['entity_type_id']);
         $body['localized'] = !!$entityType->localized;
         $body['localized_workflow'] = !!$entityType->localized_workflow;
-        
+
 
         if (isset($status)) {
             if (is_array($status)) {
@@ -452,7 +445,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             if (!array_key_exists($code, $fields)) {
                 continue;
             }
-            
+
             if (!$attribute->localized || $locale) {
                 $fieldName = $code;
                 if ($attribute->localized) {
@@ -569,7 +562,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             }
         }
 
-        
+
 
         if ($changed) {
             // update updated_at
@@ -762,7 +755,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
         return true;
     }
-    
+
 
     // ----------------------------------------------------------------------------------------------
     // GETTERS
@@ -845,9 +838,9 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         if ($doSorting) {
             $query = $this->querySorting($query, $sort, $locale, $localeCodes);
         }
-        
 
-        
+
+
 
         $result = $this->client->search($query);
         // foreach ($result['hits']['hits'] as $value) {
@@ -872,7 +865,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         $public = false;
         $fulltextSearch = null;
         $doSorting = true;
-        
+
 
 
         foreach ($filters as $key => $filter) {
@@ -892,7 +885,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
                 $fieldFilters[$code] = $filter;
                 continue;
             }
-            
+
             if (!is_array($filter)) {
                 $query = $this->addTermQuery($query, $key, $filter);
                 continue;
@@ -1008,7 +1001,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
                         $nodeFields[$nodeBoostKey] = [];
                     }
                 }
-                
+
 
                 if (!$attribute->localized) {
                     $fields[$boostKey][] = 'fields.' . $attribute->code;
@@ -1143,7 +1136,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
             return $query;
         }
-        
+
         if (!is_array($statusFilter)) {
             $nested = $this->addTermQuery($nested, 'status.status', $statusFilter);
             $nested = $this->addTermQuery($nested, 'status.state', 'active');
@@ -1225,7 +1218,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         ];
         $result->setMeta($meta);
         $result->load((isset($params[4]))?$params[4]:[]);
-        
+
         return $result;
     }
 
@@ -1245,7 +1238,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         return array($locale, $localeCodes);
     }
 
-    
+
 
     // public function onEntityTypeCreated($command, $result)
     // {

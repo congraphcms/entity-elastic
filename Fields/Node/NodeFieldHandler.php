@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * This file is part of the congraph/entity-elastic package.
  *
@@ -12,11 +12,15 @@ namespace Congraph\EntityElastic\Fields\Node;
 
 use Congraph\EntityElastic\Fields\AbstractFieldHandler;
 use Congraph\Eav\Managers\AttributeManager;
+use Congraph\Eav\Repositories\EntityRepository;
+use Congraph\EntityElastic\Repositories\EntityRepository as EntityElasticRepository;
 use Congraph\EntityElastic\Services\EntityFormater;
 use Elasticsearch\Client;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Congraph\Eav\Facades\MetaData;
 use Congraph\Core\Facades\Trunk;
 use Congraph\Core\Exceptions\NotFoundException;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 
@@ -43,6 +47,20 @@ class NodeFieldHandler extends AbstractFieldHandler
     protected $formater;
 
     /**
+     * EAV Entity Repository
+     *
+     * @var \Congraph\EAV\Repositories\EntityRepository
+     */
+    protected $repository;
+
+    /**
+     * Elastic Entity Repository
+     *
+     * @var \Congraph\EntityElastic\Repositories\EntityRepository
+     */
+    protected $eRepository;
+
+    /**
      * Create new AbstractAttributeHandler
      *
      * @param Illuminate\Database\Connection 			$db
@@ -54,10 +72,14 @@ class NodeFieldHandler extends AbstractFieldHandler
     public function __construct(
         Client $elasticClient,
         AttributeManager $attributeManager,
-        EntityFormater $entityFormater
+        EntityFormater $entityFormater,
+        EntityRepository $repository,
+        EntityElasticRepository $eRepository
     ) {
         parent::__construct($elasticClient, $attributeManager);
         $this->formater = $entityFormater;
+        $this->repository = $repository;
+        $this->eRepository = $eRepository;
     }
 
 
@@ -80,13 +102,22 @@ class NodeFieldHandler extends AbstractFieldHandler
                 'id' => $value['id']
             ];
 
-            $rawRelation = $this->client->get($params);
+            try {
+                $rawRelation = $this->client->get($params);
+            } catch(Missing404Exception $e) {
+                if (!Config::get('cb.elastic.indexing')) {
+                    throw $e;
+                }
+                $original = $this->repository->fetch($value['id']);
+                $inserted = $this->eRepository->create($original);
+                $rawRelation = $this->client->get($params);
+            }
             $source = $rawRelation['_source'];
 
-            
+
             $value = $this->parseNode($source);
         }
-        
+
         return $value;
     }
 
@@ -335,7 +366,7 @@ class NodeFieldHandler extends AbstractFieldHandler
 
         $rawDocuments = $this->client->search($query);
 
-        
+
 
         $params = [
             'index' => $this->indexName,
@@ -370,7 +401,7 @@ class NodeFieldHandler extends AbstractFieldHandler
                         $value = $newValue;
                         $changed = true;
                     }
-                    
+
                     continue;
                 }
 

@@ -126,7 +126,9 @@ class FieldsServiceProvider extends ServiceProvider
 		$this->app->singleton('Congraph\EntityElastic\Fields\Relation\RelationFieldHandler', function ($app) {
 			return new \Congraph\EntityElastic\Fields\Relation\RelationFieldHandler(
 				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+				$app->make('Congraph\Eav\Managers\AttributeManager'),
+				$app->make('Congraph\Eav\Repositories\EntityRepository'),
+				$app->make('Congraph\EntityElastic\Repositories\EntityRepository')
 			);
 		});
 		$this->app->singleton('Congraph\EntityElastic\Fields\Select\SelectFieldHandler', function ($app) {
@@ -157,7 +159,9 @@ class FieldsServiceProvider extends ServiceProvider
 			return new \Congraph\EntityElastic\Fields\Node\NodeFieldHandler(
 				$app->make('Elasticsearch\Client'),
 				$app->make('Congraph\Eav\Managers\AttributeManager'),
-				$app->make('Congraph\EntityElastic\Services\EntityFormater')
+				$app->make('Congraph\EntityElastic\Services\EntityFormater'),
+				$app->make('Congraph\Eav\Repositories\EntityRepository'),
+				$app->make('Congraph\EntityElastic\Repositories\EntityRepository')
 			);
 		});
 	}
