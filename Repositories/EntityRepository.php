@@ -133,7 +133,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     public function onEntityCreated($command, $result)
     {
 
-        $this->create($command->params, $result);
+        $this->create($result);
     }
 
     public function onEntityUpdated($command, $result)
@@ -141,7 +141,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         try {
             $result = $this->fetchRaw($command->id);
         } catch (NotFoundException $e) {
-            $this->create($command->params, $result);
+            $this->create($result);
             return;
         }
         $this->update($command->id, $command->params, $result);
@@ -358,6 +358,9 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
         foreach ($localeCodes as $lc) {
             if (is_array($point)) {
+                if (!array_key_exists($lc, $point)) {
+                    continue;
+                }
                 $s = $point[$lc]->status;
             } else {
                 $s = $point->status;
@@ -583,143 +586,6 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         $entity = $this->fetch($id, [], $locale_id);
         // return new document
         return $entity;
-    }
-
-    public function parseEntityForES(array $entity) {
-        $body = [];
-
-        // get system values
-        $body['id'] = $entity['id'];
-        $body['created_at'] = Carbon::parse($entity['created_at'])
-                                    ->tz('UTC')
-                                    ->getTimestamp();
-
-        $body['updated_at'] = Carbon::parse($entity['updated_at'])
-                                    ->tz('UTC')
-                                    ->getTimestamp();
-        $body['entity_type_id'] = $entity['entity_type_id'];
-        $body['attribute_set_id'] = $entity['attribute_set_id'];
-
-        // get fields
-        $fields = $entity['fields'];
-
-        $body['fields'] = [];
-        $body['status'] = [];
-
-        $locale = false;
-        $localeCodes = [null];
-        $locale_id = null;
-
-        if (! empty($entity['locale'])) {
-            list($locale, $localeCodes) = $this->parseLocale($entity['locale']);
-            $locale_id = $locale->id;
-        }
-
-        $status = null;
-        if (! empty($entity['status'])) {
-            $status = $entity['status'];
-        }
-
-        $attributeSet = MetaData::getAttributeSetById($entity['attribute_set_id']);
-
-        foreach ($attributeSet['attributes'] as $setAttribute) {
-            $attribute = MetaData::getAttributeById($setAttribute->id);
-            $code = $attribute->code;
-            $fieldHandler = $this->fieldHandlerFactory->make($attribute->field_type);
-
-            if (!$attribute->localized) {
-                if (array_key_exists($code, $fields)) {
-                    $value = $fields[$code];
-                } else {
-                    $value = $attribute->default_value;
-                }
-
-                $value = $fieldHandler->prepareForElastic($value, $attribute, $locale_id, $entity, null);
-                $body['fields'][$code] = $value;
-                continue;
-            }
-
-            foreach (MetaData::getLocales() as $l) {
-                if ($locale) {
-                    if ($locale->id == $l->id) {
-                        $value = (array_key_exists($code, $fields))?$fields[$code]:$attribute->default_value;
-                        $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $entity, null);
-                        $body['fields'][$code . '__' . $l->code] = $value;
-                        continue;
-                    }
-
-                    $value = $attribute->default_value;
-                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $entity, null);
-                    $body['fields'][$code . '__' . $l->code] = $value;
-                    continue;
-                }
-
-                if (array_key_exists($code, $fields) && array_key_exists($l->code, $fields[$code])) {
-                    $value = $fields[$code][$l->code];
-                    $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $entity, null);
-                    $body['fields'][$code . '__' . $l->code] = $value;
-                    continue;
-                }
-
-                $value = $attribute->default_value;
-                $value = $fieldHandler->prepareForElastic($value, $attribute, $l->id, $entity, null);
-                $body['fields'][$code . '__' . $l->code] = $value;
-            }
-        }
-
-        $entityType = MetaData::getEntityTypeById($body['entity_type_id']);
-        $body['localized'] = !!$entityType->localized;
-        $body['localized_workflow'] = !!$entityType->localized_workflow;
-
-
-        if (isset($status)) {
-            if (is_array($status)) {
-                $point = [];
-                foreach ($status as $loc => $value) {
-                    $point[$loc] = MetaData::getWorkflowPointByStatus($value);
-                }
-            } else {
-                $point = MetaData::getWorkflowPointByStatus($status);
-            }
-        } else {
-            $point = MetaData::getWorkflowPointById($entityType->default_point->id);
-        }
-
-        $localeCodes = [];
-        if (! $entityType->localized_workflow) {
-            $localeCodes[] = null;
-        } else {
-            if (empty($locale)) {
-                foreach (MetaData::getLocales() as $l) {
-                    $localeCodes[] = $l->code;
-                }
-            } else {
-                $localeCodes[] = $locale->code;
-            }
-        }
-
-        foreach ($localeCodes as $lc) {
-            if (is_array($point)) {
-                if (empty($point[$lc])) {
-                    continue;
-                }
-                $s = $point[$lc]->status;
-            } else {
-                $s = $point->status;
-            }
-            $statusObj = [
-                'status' => $s,
-                'locale' => $lc,
-                'state' => 'active',
-                'scheduled_at' => null,
-                'created_at' => $body['created_at'],
-                'updated_at' => $body['updated_at']
-            ];
-
-            $body['status'][] = $statusObj;
-        }
-
-        return $body;
     }
 
     /**

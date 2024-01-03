@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * This file is part of the congraph/eav package.
  *
@@ -19,6 +19,7 @@ use Illuminate\Database\Connection;
 use Congraph\Core\Exceptions\BadRequestException;
 use Congraph\Eav\Facades\MetaData;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Elasticsearch\Client;
 use Congraph\Core\Exceptions\NotFoundException;
 use \Exception;
@@ -108,7 +109,7 @@ class CompoundFieldHandler extends AbstractFieldHandler
 					break;
 				case 'field':
 					// somewhat sketchy (locales and stuff)
-					
+
 					// get field value
 					$attribute = MetaData::getAttributeById($input->value);
 					$code = $attribute->code;
@@ -208,7 +209,6 @@ class CompoundFieldHandler extends AbstractFieldHandler
 			// throw new NotFoundException(['Entity not found.']);
 			return;
 		}
-
 		$attributeSet = MetaData::getAttributeSetById($entity['_source']['attribute_set_id']);
 		foreach ($attributeSet->attributes as $setAttribute) {
 			$attribute = MetaData::getAttributeById($setAttribute->id);

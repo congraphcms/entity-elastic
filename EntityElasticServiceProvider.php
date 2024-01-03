@@ -14,11 +14,11 @@ use Illuminate\Support\ServiceProvider;
 
 /**
  * EntityElasticServiceProvider service provider for entity-elastic package
- * 
+ *
  * It will register all manager to app container
- * 
+ *
  * @uses   		Illuminate\Support\ServiceProvider
- * 
+ *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @package 	congraph/entity-elastic
@@ -29,7 +29,7 @@ class EntityElasticServiceProvider extends ServiceProvider {
 
 	/**
 	* Register
-	* 
+	*
 	* @return void
 	*/
 	public function register() {
@@ -40,7 +40,7 @@ class EntityElasticServiceProvider extends ServiceProvider {
 
 	/**
 	 * Boot
-	 * 
+	 *
 	 * @return void
 	 */
 	public function boot() {
@@ -52,10 +52,14 @@ class EntityElasticServiceProvider extends ServiceProvider {
 
 	/**
 	 * Register Service Providers for this package
-	 * 
+	 *
 	 * @return void
 	 */
-	protected function registerServiceProviders(){
+	protected function registerServiceProviders() {
+
+        if(!config('cb.eav.using_elastic')) {
+            return;
+        }
 
 		// Fields
 		// -----------------------------------------------------------------------------
@@ -77,9 +81,9 @@ class EntityElasticServiceProvider extends ServiceProvider {
 		// -----------------------------------------------------------------------------
 		$this->app->register('Congraph\EntityElastic\Commands\CommandsServiceProvider');
 
-		
 
-		
+
+
 	}
 
 }
