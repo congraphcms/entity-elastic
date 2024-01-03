@@ -853,6 +853,9 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         // die();
 
         $total = $result['hits']['total'];
+        if (is_array($total)) {
+            $total = $total['value'];
+        }
 
         $result = $this->formater->formatEntities($result, $status, $locale, $localeCodes);
 
