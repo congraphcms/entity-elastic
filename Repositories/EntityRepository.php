@@ -242,6 +242,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         }
         $params = [];
         $params['index'] = $this->indexName;
+        $params['refresh'] = true;
 
         $body = [];
 
@@ -410,6 +411,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     {
         $params = [];
         $params['index'] = $this->indexName;
+        $params['refresh'] = true;
         $params['id'] = $id;
 
         // fetch raw document from database
@@ -601,6 +603,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     {
         $params = [];
         $params['index'] = $this->indexName;
+        $params['refresh'] = true;
         $params['id'] = $id;
 
         // get the entity
@@ -624,6 +627,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     {
         $params = [];
         $params['index'] = $this->indexName;
+        $params['refresh'] = true;
         $params['id'] = $id;
 
         $changed = false;
@@ -686,6 +690,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         if ($attribute->localized) {
             foreach (MetaData::getLocales() as $locale) {
                 $query = $this->createEmptyQuery($this->indexName);
+                $query['refresh'] = true;
                 unset($query['body']['size']);
                 $query['body']['script'] = [];
                 // $nested = $this->createNestedQuery('fields');
@@ -699,6 +704,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             }
         } else {
             $query = $this->createEmptyQuery($this->indexName);
+            $query['refresh'] = true;
             unset($query['body']['size']);
             $query['body']['script'] = [];
             // $nested = $this->createNestedQuery('fields');
@@ -727,6 +733,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         $this->refreshIndex();
 
         $query = $this->createEmptyQuery($this->indexName);
+        $query['refresh'] = true;
         unset($query['body']['size']);
         $query = $this->addTermQuery($query, 'attribute_set_id', $attributeSet->id);
         $this->client->deleteByQuery($query);
@@ -749,6 +756,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         $this->refreshIndex();
 
         $query = $this->createEmptyQuery($this->indexName);
+        $query['refresh'] = true;
         unset($query['body']['size']);
         $query = $this->addTermQuery($query, 'entity_type_id', $entityType->id);
         $this->client->deleteByQuery($query);
