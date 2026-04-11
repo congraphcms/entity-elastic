@@ -54,12 +54,12 @@
     "require": {
         "php": "^8.3 || ^8.4 || ^8.5",
         "illuminate/database": "^13.0",
-        "congraph/core": "^1.1 || dev-main || dev-master",
-        "congraph/contracts": "^1.1 || dev-main || dev-master",
-        "congraph/filesystem": "^1.1 || dev-main || dev-master",
-        "congraph/locales": "^1.1 || dev-main || dev-master",
-        "congraph/workflows": "^1.1 || dev-main || dev-master",
-        "congraph/eav": "^1.1 || dev-main || dev-master",
+        "congraph/core": "^2.0 || dev-main || dev-master",
+        "congraph/contracts": "^2.0 || dev-main || dev-master",
+        "congraph/filesystem": "^2.0 || dev-main || dev-master",
+        "congraph/locales": "^2.0 || dev-main || dev-master",
+        "congraph/workflows": "^2.0 || dev-main || dev-master",
+        "congraph/eav": "^2.0 || dev-main || dev-master",
         "opensearch-project/opensearch-php": "^2.3 || ^3.0",
         "guzzlehttp/guzzle": "^7.5"
     },
