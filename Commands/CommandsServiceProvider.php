@@ -57,12 +57,7 @@ class CommandsServiceProvider extends ServiceProvider implements DeferrableProvi
 	* @return void
 	*/
 	public function registerCommands() {
-		$this->app->bind(IndexAllCommand::class, function($app){
-			return new IndexAllCommand(
-				$app->make('Congraph\Contracts\Eav\EntityRepositoryContract'),
-				$app->make(EntityElasticRepositoryContract::class)
-			);
-		});
+		$this->app->bind(IndexAllCommand::class, fn () => new IndexAllCommand());
 
 		$this->app->bind(EntityFetchCommand::class, function($app){
 			return new EntityFetchCommand($app->make(EntityRepository::class));

@@ -11,7 +11,6 @@
 namespace Congraph\EntityElastic;
 
 use Congraph\EntityElastic\Commands\CommandsServiceProvider;
-use Congraph\EntityElastic\Console\Commands\IndexAllCommand;
 use Congraph\EntityElastic\Fields\FieldsServiceProvider;
 use Congraph\EntityElastic\Repositories\RepositoriesServiceProvider;
 use Congraph\EntityElastic\Services\ServicesServiceProvider;
@@ -53,10 +52,6 @@ class EntityElasticServiceProvider extends ServiceProvider {
 		$this->publishes([
 			__DIR__.'/config/config.php' => config_path('cb.elastic.php'),
 			__DIR__.'/config/eav.php' => config_path('cb.eav.php'),
-		]);
-
-		$this->commands([
-			IndexAllCommand::class,
 		]);
 	}
 

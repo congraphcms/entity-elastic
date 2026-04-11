@@ -14,6 +14,7 @@ use Congraph\Contracts\Eav\EntityRepositoryContract;
 use Congraph\EntityElastic\Repositories\EntityRepositoryContract as EntityElasticRepositoryContract;
 use Congraph\Core\Repositories\Collection;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Throwable;
 
@@ -30,20 +31,8 @@ final class IndexAllCommand extends Command
     /**
      * @var \Congraph\Contracts\Eav\EntityRepositoryContract
      */
-    private EntityRepositoryContract $repository;
-
-    /**
-     * @var \Congraph\EntityElastic\Repositories\EntityRepositoryContract
-     */
-    private EntityElasticRepositoryContract $elasticRepository;
-
-    public function __construct(
-        EntityRepositoryContract $repo,
-        EntityElasticRepositoryContract $elasticRepository
-    ) {
-        $this->repository = $repo;
-        $this->elasticRepository = $elasticRepository;
-
+    public function __construct()
+    {
         parent::__construct();
     }
 
@@ -64,7 +53,7 @@ final class IndexAllCommand extends Command
                 }
 
                 foreach ($result as $entity) {
-                    $this->elasticRepository->create($entity);
+                    $this->elasticRepository()->create($entity);
                     $bar->advance();
                 }
 
@@ -97,6 +86,16 @@ final class IndexAllCommand extends Command
     }
 
     private function getBatch(int $page = 0): Collection {
-        return $this->repository->get([], $page * self::BATCH_SIZE, self::BATCH_SIZE, ['created_at', 'id'], [], null, null);
+        return $this->repository()->get([], $page * self::BATCH_SIZE, self::BATCH_SIZE, ['created_at', 'id'], [], null, null);
+    }
+
+    private function repository(): EntityRepositoryContract
+    {
+        return App::make(EntityRepositoryContract::class);
+    }
+
+    private function elasticRepository(): EntityElasticRepositoryContract
+    {
+        return App::make(EntityElasticRepositoryContract::class);
     }
 }
