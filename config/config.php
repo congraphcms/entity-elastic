@@ -13,14 +13,14 @@ return array(
 
     /**
      * You can specify one of several different connections when building an
-     * Elasticsearch client.
+     * search client.
      *
      * Here you may specify which of the connections below you wish to use
      * as your default connection when building an client. Of course you may
      * use create several clients at once, each with different configurations.
      */
 
-    'default_connection' => env('ES_DEFAULT_CONNECTION', 'local'),
+    'default_connection' => env('OPENSEARCH_DEFAULT_CONNECTION', env('ES_DEFAULT_CONNECTION', 'local')),
 
     /**
      * These are the connection parameters used when building a client.
@@ -29,17 +29,17 @@ return array(
     'connections' => [
 
         'local' => [
-            'hosts' => explode(',', env('ES_HOSTS', 'localhost')),
+            'hosts' => explode(',', env('OPENSEARCH_HOSTS', env('ES_HOSTS', 'localhost:9200'))),
         ],
 
         'bonsai' => [
-            'hosts' => explode(',', env('ES_BONSAI_HOSTS', 'localhost')),
+            'hosts' => explode(',', env('OPENSEARCH_BONSAI_HOSTS', env('ES_BONSAI_HOSTS', 'localhost:9200'))),
         ],
 
         'elastic' => [
-            'host' => env('ES_ELASTIC_HOST', 'localhost'),
-            'api_id' => env('ES_ELASTIC_API_ID', ''),
-            'api_key' => env('ES_ELASTIC_API_KEY', ''),
+            'host' => env('OPENSEARCH_ELASTIC_HOST', env('ES_ELASTIC_HOST', 'localhost')),
+            'api_id' => env('OPENSEARCH_ELASTIC_API_ID', env('ES_ELASTIC_API_ID', '')),
+            'api_key' => env('OPENSEARCH_ELASTIC_API_KEY', env('ES_ELASTIC_API_KEY', '')),
         ]
     ],
 
@@ -166,7 +166,7 @@ return array(
                 ],
                 'fields' => [
                     'type' => 'object',
-                    'properties' => [
+                    'properties' => (object) [
                         // 'attribute1__en_US' => [
                         //     'type' => 'text'
                         // ],

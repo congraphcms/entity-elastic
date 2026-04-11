@@ -7,7 +7,6 @@ use Congraph\Eav\Commands\Attributes\AttributeFetchCommand;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
-use Elasticsearch\ClientBuilder;
 
 require_once(__DIR__ . '/../TestCase.php');
 
@@ -19,10 +18,9 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		
+				
 
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->assertTrue($repo instanceof Congraph\EntityElastic\Repositories\EntityRepository);
 
 		$this->assertTrue($repo->indexExists(Config::get('cb.elastic.index_prefix') . 'entities'));
@@ -30,8 +28,7 @@ class EntityRepositoryTest extends TestCase
 
 	public function testFetch() {
 		fwrite(STDOUT, __METHOD__ . "\n");
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(1);
@@ -47,11 +44,11 @@ class EntityRepositoryTest extends TestCase
 		$this->assertArrayHasKey('created_at', $result->toArray());
 		$this->assertArrayHasKey('updated_at', $result->toArray());
 
-		$this->assertArraySubset([
-			"id" => "1",
-			"type" => "entity",
-			"status" => [
-				"en_US" => "published",
+			$this->assertArraySubset([
+				"id" => 1,
+				"type" => "entity",
+				"status" => [
+					"en_US" => "published",
 				"fr_FR" => "published"
 			],
 			"fields" => [
@@ -80,11 +77,11 @@ class EntityRepositoryTest extends TestCase
 		$this->assertArrayHasKey('created_at', $result->toArray());
 		$this->assertArrayHasKey('updated_at', $result->toArray());
 
-		$this->assertArraySubset([
-			"id" => "1",
-			"type" => "entity",
-			"status" => "published",
-			"fields" => [
+			$this->assertArraySubset([
+				"id" => 1,
+				"type" => "entity",
+				"status" => "published",
+				"fields" => [
 				"attribute2" => "value2",
 				"attribute1" => "value1",
 				"attribute3" => "value3-en"
@@ -106,10 +103,10 @@ class EntityRepositoryTest extends TestCase
 		$this->assertArrayHasKey('created_at', $result->toArray());
 		$this->assertArrayHasKey('updated_at', $result->toArray());
 
-		$this->assertArraySubset([
-			"id" => "2",
-			"type" => "entity",
-			"status" => "public",
+			$this->assertArraySubset([
+				"id" => 2,
+				"type" => "entity",
+				"status" => "public",
 			"fields" => [
 				"attribute2" => "value22",
 				"attribute1" => "value12"
@@ -132,11 +129,11 @@ class EntityRepositoryTest extends TestCase
 		$this->assertArrayHasKey('created_at', $result->toArray());
 		$this->assertArrayHasKey('updated_at', $result->toArray());
 
-		$this->assertArraySubset([
-			"id" => "3",
-			"type" => "entity",
-			"status" => [
-				"en_US" => "published"
+			$this->assertArraySubset([
+				"id" => 3,
+				"type" => "entity",
+				"status" => [
+					"en_US" => "published"
 			],
 			"fields" => [
 				"attribute2" => "value22",
@@ -156,8 +153,7 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$this->expectException(\Congraph\Core\Exceptions\NotFoundException::class);
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(133);
@@ -167,8 +163,7 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$this->expectException(\Congraph\Core\Exceptions\NotFoundException::class);
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(1, [], null, 'sr_RS');
@@ -180,8 +175,7 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 		$this->expectException(\Congraph\Core\Exceptions\NotFoundException::class);
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->fetch(2, [], null, 'trashed');
@@ -193,8 +187,7 @@ class EntityRepositoryTest extends TestCase
 	public function testGet()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -217,8 +210,7 @@ class EntityRepositoryTest extends TestCase
 	public function testGetSort()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -257,8 +249,7 @@ class EntityRepositoryTest extends TestCase
 	public function testGetPaging()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -310,8 +301,7 @@ class EntityRepositoryTest extends TestCase
 	public function testGetLocaleFilter()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 
@@ -335,8 +325,7 @@ class EntityRepositoryTest extends TestCase
 	public function testGetStatusFilter()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -423,8 +412,7 @@ class EntityRepositoryTest extends TestCase
 	public function testGetFiltering()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -620,8 +608,7 @@ class EntityRepositoryTest extends TestCase
 	public function testGetFieldFiltering()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
@@ -795,8 +782,7 @@ class EntityRepositoryTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -854,8 +840,7 @@ class EntityRepositoryTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -902,8 +887,7 @@ class EntityRepositoryTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -952,8 +936,7 @@ class EntityRepositoryTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -985,8 +968,7 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$params = [
@@ -1010,8 +992,7 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$params = [
@@ -1031,8 +1012,7 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$params = [
@@ -1055,8 +1035,7 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$params = [
@@ -1082,8 +1061,7 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->delete(1);
@@ -1098,15 +1076,13 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
-		$repo->refreshIndex();
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
-		$command = $app->make(AttributeFetchCommand::class);
-		$command->setId(1);
-		$attribute = $bus->dispatch($command);
+			$repo->refreshIndex();
+			
+			$command = $this->app->make(AttributeFetchCommand::class);
+			$command->setId(1);
+			$attribute = $this->dispatch($command);
 
 		$result = $repo->deleteByAttribute($attribute);
 		$repo->refreshIndex();
@@ -1123,17 +1099,15 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$repo->refreshIndex();
 
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
-		$command = $app->make(AttributeFetchCommand::class);
-		$command->setId(3);
-		$attribute = $bus->dispatch($command);
+			
+			$command = $this->app->make(AttributeFetchCommand::class);
+			$command->setId(3);
+			$attribute = $this->dispatch($command);
 
 		$result = $repo->deleteByAttribute($attribute);
 
@@ -1166,15 +1140,13 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
-		$repo->refreshIndex();
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
-		$command = $app->make(AttributeSetFetchCommand::class);
-		$command->setId(1);
-		$attributeSet = $bus->dispatch($command);
+			$repo->refreshIndex();
+			
+			$command = $this->app->make(AttributeSetFetchCommand::class);
+			$command->setId(1);
+			$attributeSet = $this->dispatch($command);
 
 		$result = $repo->deleteByAttributeSet($attributeSet);
 		$repo->refreshIndex();
@@ -1191,15 +1163,13 @@ class EntityRepositoryTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
-		$repo->refreshIndex();
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
-		$command = $app->make(EntityTypeFetchCommand::class);
-		$command->setId(1);
-		$entityType = $bus->dispatch($command);
+			$repo->refreshIndex();
+			
+			$command = $this->app->make(EntityTypeFetchCommand::class);
+			$command->setId(1);
+			$entityType = $this->dispatch($command);
 
 		$result = $repo->deleteByEntityType($entityType);
 		$repo->refreshIndex();

@@ -12,6 +12,7 @@ namespace Congraph\EntityElastic\Repositories;
 
 use Carbon\Carbon;
 use Congraph\Contracts\Eav\FieldHandlerFactoryContract;
+use Congraph\Core\Bus\CommandDispatcher;
 use Congraph\Core\Exceptions\Exception;
 use Congraph\Core\Exceptions\NotFoundException;
 use Congraph\Core\Exceptions\BadRequestException;
@@ -25,10 +26,12 @@ use Congraph\Eav\Managers\AttributeManager;
 use Congraph\EntityElastic\Traits\ElasticQueryBuilderTrait;
 use Congraph\EntityElastic\Services\EntityFormater;
 
+use Congraph\Eav\Commands\Entities\EntityCreateCommand;
 use Congraph\Eav\Facades\MetaData;
 
 
-use Elasticsearch\Client;
+use OpenSearch\Client;
+use OpenSearch\Common\Exceptions\Missing404Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
@@ -78,9 +81,9 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     protected $formater;
 
     /**
-     * Elasticsearch client
+     * OpenSearch client
      *
-     * @var \Elasticsearch\Client
+     * @var \OpenSearch\Client
      */
     protected $client;
 
@@ -93,7 +96,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
     /**
      * Create new EntityRepository
      *
-     * @param Elasticsearch\ClientBuilder $elasticClientBuilder
+     * @param \OpenSearch\Client $elasticClient
      * @param Congraph\Eav\Handlers\AttributeHandlerFactoryContract $attributeHandlerFactory
      * @param Congraph\Eav\Managers\AttributeManager $attributeManager
      * @param Congraph\EntityElastic\Services\EntityFormater $entityFormater
@@ -237,8 +240,23 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
      */
     public function create($model)
     {
-        if ((!$model instanceof Model)) {
-            throw new \Exception('NOT A MODEL');
+        if (is_array($model)) {
+            $command = app(EntityCreateCommand::class);
+            $command->setParams($model);
+
+            /** @var \Congraph\Core\Repositories\Model $created */
+            $created = app(CommandDispatcher::class)->dispatch($command);
+
+            return $this->fetch(
+                $created->id,
+                [],
+                $created->locale ?? ($model['locale'] ?? null),
+                null
+            );
+        }
+
+        if (!$model instanceof Model) {
+            throw new \InvalidArgumentException('EntityRepository::create expects an entity model or create params array.');
         }
         $params = [];
         $params['index'] = $this->indexName;
@@ -335,6 +353,36 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             if (is_array($status)) {
                 $point = [];
                 foreach ($status as $loc => $value) {
+                    if (is_array($value) || $value instanceof \ArrayAccess) {
+                        $state = $value['state'] ?? null;
+                        $localeCode = $value['locale'] ?? null;
+                        $statusValue = $value['status'] ?? null;
+
+                        if ($state !== null && $state !== 'active') {
+                            continue;
+                        }
+
+                        if ($statusValue === null) {
+                            continue;
+                        }
+
+                        $point[$localeCode] = MetaData::getWorkflowPointByStatus($statusValue);
+                        continue;
+                    }
+
+                    if ($value instanceof \stdClass) {
+                        if (isset($value->state) && $value->state !== 'active') {
+                            continue;
+                        }
+
+                        if (!isset($value->status)) {
+                            continue;
+                        }
+
+                        $point[$value->locale ?? null] = MetaData::getWorkflowPointByStatus($value->status);
+                        continue;
+                    }
+
                     $point[$loc] = MetaData::getWorkflowPointByStatus($value);
                 }
             } else {
@@ -814,7 +862,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
 
         try {
             $result = $this->client->get($query);
-        } catch (\Elasticsearch\Common\Exceptions\Missing404Exception $e) {
+        } catch (Missing404Exception $e) {
             throw new NotFoundException(['Entity not found.']);
         }
 

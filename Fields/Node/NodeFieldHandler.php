@@ -11,7 +11,7 @@
 namespace Congraph\EntityElastic\Fields\Node;
 
 use stdClass;
-use Elasticsearch\Client;
+use OpenSearch\Client;
 use Congraph\Core\Facades\Trunk;
 use Congraph\Eav\Facades\MetaData;
 use Illuminate\Support\Facades\Config;
@@ -20,7 +20,7 @@ use Congraph\Eav\Managers\AttributeManager;
 use Congraph\Core\Exceptions\NotFoundException;
 use Congraph\EntityElastic\Services\EntityFormater;
 use Congraph\EntityElastic\Fields\AbstractFieldHandler;
-use Elasticsearch\Common\Exceptions\Missing404Exception;
+use OpenSearch\Common\Exceptions\Missing404Exception;
 use Congraph\Eav\Repositories\EntityRepository;
 use Congraph\EntityElastic\Repositories\EntityRepository as EntityElasticRepository;
 

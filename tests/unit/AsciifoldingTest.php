@@ -4,7 +4,6 @@ use Congraph\Core\Exceptions\ValidationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
-use Elasticsearch\ClientBuilder;
 
 require_once(__DIR__ . '/../TestCase.php');
 
@@ -15,7 +14,6 @@ class AsciifoldingTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		// $app = $this->createApplication();
 		$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 

@@ -1,224 +1,183 @@
 <?php
 
-use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
-use Congraph\Core\Exceptions\ValidationException;
-use Symfony\Component\VarDumper\VarDumper as Dumper;
+require_once __DIR__ . '/database/seeders/ClearDB.php';
+require_once __DIR__ . '/database/seeders/EavDbSeeder.php';
+require_once __DIR__ . '/database/seeders/ElasticIndexSeeder.php';
+require_once __DIR__ . '/database/seeders/FileDbSeeder.php';
+require_once __DIR__ . '/database/seeders/helpers.php';
+require_once __DIR__ . '/database/seeders/LocaleDbSeeder.php';
+require_once __DIR__ . '/database/seeders/WorkflowDbSeeder.php';
+
+use Congraph\Core\Bus\CommandDispatcher;
+use Congraph\Core\CoreServiceProvider;
+use Congraph\Eav\EavServiceProvider;
+use Congraph\Eav\Services\MetaDataService;
+use Congraph\EntityElastic\EntityElasticServiceProvider;
+use Congraph\Filesystem\FilesystemServiceProvider;
+use Congraph\Locales\LocalesServiceProvider;
+use Congraph\Workflows\WorkflowsServiceProvider;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Config;
-use Elasticsearch\ClientBuilder;
-use GuzzleHttp\Client;
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
-
-require_once(__DIR__ . '/database/seeders/EavDbSeeder.php');
-require_once(__DIR__ . '/database/seeders/LocaleDbSeeder.php');
-require_once(__DIR__ . '/database/seeders/FileDbSeeder.php');
-require_once(__DIR__ . '/database/seeders/WorkflowDbSeeder.php');
-require_once(__DIR__ . '/database/seeders/ClearDB.php');
-require_once(__DIR__ . '/database/seeders/ElasticIndexSeeder.php');
-
+use Illuminate\Support\Facades\Storage;
+use OpenSearch\Client;
+use PHPUnit\Framework\Assert;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
-    use ArraySubsetAsserts;
-    // ----------------------------------------
-    // ENVIRONMENT
-    // ----------------------------------------
+	protected Database\Seeders\ElasticIndexSeeder $elasticSeeder;
 
-    protected function getPackageProviders($app)
+	protected function getPackageProviders($app)
 	{
 		return [
-			'Congraph\Core\CoreServiceProvider',
-			'Congraph\Locales\LocalesServiceProvider',
-			'Congraph\Eav\EavServiceProvider',
-			'Congraph\Filesystem\FilesystemServiceProvider',
-			'Congraph\Workflows\WorkflowsServiceProvider',
-			'Congraph\EntityElastic\EntityElasticServiceProvider'
+			CoreServiceProvider::class,
+			LocalesServiceProvider::class,
+			FilesystemServiceProvider::class,
+			WorkflowsServiceProvider::class,
+			EavServiceProvider::class,
+			EntityElasticServiceProvider::class,
 		];
 	}
 
-    protected function getEnvironmentSetUp($app)
-    {
-        
-        parent::getEnvironmentSetUp($app);
-    }
-
-	/**
-     * Resolve application core configuration implementation.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     *
-     * @return void
-     */
-    protected function resolveApplicationConfiguration($app)
-    {
-		// make sure, our .env file is loaded
-        $app->useEnvironmentPath(__DIR__.'/..');
-		$app->useStoragePath(realpath(__DIR__.'./storage/'));
-        $app->bootstrapWith([LoadEnvironmentVariables::class]);
-        parent::resolveApplicationConfiguration($app);
-    }
-
-    /**
-	 * Define environment setup.
-	 *
-	 * @param  \Illuminate\Foundation\Application  $app
-	 *
-	 * @return void
-	 */
 	protected function defineEnvironment($app)
 	{
+		$driver = env('DB_CONNECTION', 'sqlite');
+
+		$connection = [
+			'driver' => $driver,
+			'prefix' => '',
+		];
+
+		if ($driver === 'sqlite') {
+			$connection['database'] = env('DB_DATABASE', ':memory:');
+			$connection['foreign_key_constraints'] = true;
+		} else {
+			$connection['host'] = env('DB_HOST', '127.0.0.1');
+			$connection['port'] = env('DB_PORT', $driver === 'pgsql' ? '5432' : '3306');
+			$connection['database'] = env('DB_DATABASE', 'congraph_test');
+			$connection['username'] = env('DB_USERNAME', 'congraph');
+			$connection['password'] = env('DB_PASSWORD', 'congraph');
+			$connection['charset'] = 'utf8';
+			$connection['prefix_indexes'] = true;
+			$connection['schema'] = env('DB_SCHEMA', 'public');
+			$connection['sslmode'] = env('DB_SSLMODE', 'prefer');
+
+			if ($driver === 'mysql') {
+				$connection['charset'] = 'utf8mb4';
+				$connection['collation'] = 'utf8mb4_unicode_ci';
+			}
+		}
+
 		$app['config']->set('database.default', 'testbench');
-		$app['config']->set('database.connections.testbench', [
-			'driver'   	=> 'mysql',
-			'host'      => '127.0.0.1',
-			'port'		=> '3306',
-			'database'	=> 'congraph_testbench',
-			'username'  => 'root',
-			'password'  => '',
-			'charset'   => 'utf8',
-			'collation' => 'utf8_unicode_ci',
-			'prefix'    => '',
-		]);
-
+		$app['config']->set('database.connections.testbench', $connection);
 		$app['config']->set('cache.default', 'file');
-
 		$app['config']->set('cache.stores.file', [
-			'driver'	=> 'file',
-			'path'   	=> realpath(__DIR__ . '/../storage/cache/'),
+			'driver' => 'file',
+			'path' => realpath(__DIR__ . '/storage/cache/') ?: __DIR__ . '/storage/cache',
 		]);
-
 		$app['config']->set('filesystems.default', 'local');
-
 		$app['config']->set('filesystems.disks.local', [
-			'driver'	=> 'local',
-			'root'   	=> realpath(__DIR__ . '/../storage/'),
+			'driver' => 'local',
+			'root' => realpath(__DIR__ . '/storage/') ?: __DIR__ . '/storage',
 		]);
-
+		$app['config']->set('cb.eav.using_elastic', true);
+		$app['config']->set('cb.elastic.connections.local.hosts', explode(',', env('OPENSEARCH_HOSTS', env('ES_HOSTS', 'localhost:9200'))));
 	}
 
-    	// ----------------------------------------
-    // DATABASE
-    // ----------------------------------------
+	protected function defineDatabaseMigrations()
+	{
+		$this->loadMigrationsFrom(realpath(__DIR__ . '/../database/migrations'));
+		$this->loadMigrationsFrom(realpath(__DIR__ . '/../../eav/database/migrations'));
+		$this->loadMigrationsFrom(realpath(__DIR__ . '/../../filesystem/database/migrations'));
+		$this->loadMigrationsFrom(realpath(__DIR__ . '/../../locales/database/migrations'));
+		$this->loadMigrationsFrom(realpath(__DIR__ . '/../../workflows/database/migrations'));
 
-    /**
-     * Define database migrations.
-     *
-     * @return void
-     */
-    protected function defineDatabaseMigrations()
-    {
+		$this->artisan('migrate', ['--database' => 'testbench'])->run();
+	}
 
-		/**
-		 * Elastic Migrations
-		 */
-        $this->loadMigrationsFrom(realpath(__DIR__.'/../../database/migrations'));
-
-        $this->artisan('migrate', ['--database' => 'testbench'])->run();
-
-		/**
-		 * EAV Migrations
-		 */
-		$this->loadMigrationsFrom(realpath(__DIR__.'/../../vendor/Congraph/EAV/database/migrations'));
-
-        $this->artisan('migrate', ['--database' => 'testbench'])->run();
-
-
-		/**
-		 * FileSystem Migrations
-		 */
-		$this->loadMigrationsFrom(realpath(__DIR__.'/../../vendor/Congraph/Filesystem/database/migrations'));
-
-        $this->artisan('migrate', ['--database' => 'testbench'])->run();
-
-
-		/**
-		 * Locales Migrations
-		 */
-		$this->loadMigrationsFrom(realpath(__DIR__.'/../../vendor/Congraph/Locales/database/migrations'));
-
-        $this->artisan('migrate', ['--database' => 'testbench'])->run();
-
-
-		/**
-		 * Workflows Migrations
-		 */
-		$this->loadMigrationsFrom(realpath(__DIR__.'/../../vendor/Congraph/Workflows/database/migrations'));
-
-        $this->artisan('migrate', ['--database' => 'testbench'])->run();
-
-        $this->beforeApplicationDestroyed(function () {
-			/**
-			 * Elastic Migrations
-			 */
-			$this->loadMigrationsFrom(realpath(__DIR__.'/../../database/migrations'));
-            $this->artisan('migrate:reset', ['--database' => 'testbench'])->run();
-
-			/**
-			 * EAV Migrations
-			 */
-			$this->loadMigrationsFrom(realpath(__DIR__.'/../../vendor/Congraph/EAV/database/migrations'));
-            $this->artisan('migrate:reset', ['--database' => 'testbench'])->run();
-
-			/**
-			 * FileSystem Migrations
-			 */
-			$this->loadMigrationsFrom(realpath(__DIR__.'/../../vendor/Congraph/Filesystem/database/migrations'));
-            $this->artisan('migrate:reset', ['--database' => 'testbench'])->run();
-
-			/**
-			 * Locales Migrations
-			 */
-			$this->loadMigrationsFrom(realpath(__DIR__.'/../../vendor/Congraph/Locales/database/migrations'));
-            $this->artisan('migrate:reset', ['--database' => 'testbench'])->run();
-
-			/**
-			 * Workflows Migrations
-			 */
-			$this->loadMigrationsFrom(realpath(__DIR__.'/../../vendor/Congraph/Workflows/database/migrations'));
-            $this->artisan('migrate:reset', ['--database' => 'testbench'])->run();
-        });
-    }
-
-	// ----------------------------------------
-    // SETUP
-    // ----------------------------------------
-
-	public function setUp(): void
+	protected function setUp(): void
 	{
 		parent::setUp();
 
-		
-		$this->artisan('db:seed', [
-			'--class' => 'EavDbSeeder'
-		]);
+		foreach ($this->seeders() as $seeder) {
+			$this->artisan('db:seed', ['--class' => $seeder]);
+		}
 
-		$this->artisan('db:seed', [
-			'--class' => 'LocaleDbSeeder'
-		]);
+		$this->resetMetaDataCache();
 
-		$this->artisan('db:seed', [
-			'--class' => 'FileDbSeeder'
-		]);
+		Storage::deleteDirectory('files');
+		Storage::deleteDirectory('uploads');
+		Storage::makeDirectory('files');
+		Storage::makeDirectory('uploads');
+		Storage::copy('temp/test.jpg', 'files/test.jpg');
+		Storage::copy('temp/test.jpg', 'files/test2.jpg');
+		Storage::copy('temp/test.jpg', 'uploads/test.jpg');
 
-		$this->artisan('db:seed', [
-			'--class' => 'WorkflowDbSeeder'
-		]);
-
-		$this->d = new Dumper();
-
-        $client = $this->app->make('Elasticsearch\Client');
-		$this->elasticSeeder = 
-            new Database\Seeders\ElasticIndexSeeder($client);
+		$this->elasticSeeder = new Database\Seeders\ElasticIndexSeeder($this->app->make(Client::class));
 	}
 
-	public function tearDown(): void
+	protected function tearDown(): void
 	{
-		$this->artisan('db:seed', [
-			'--class' => 'ClearDB'
-		]);
-		DB::disconnect();
+		foreach ($this->cleanupSeeders() as $seeder) {
+			$this->artisan('db:seed', ['--class' => $seeder]);
+		}
 
 		parent::tearDown();
+	}
+
+	protected function seeders(): array
+	{
+		return [
+			Database\Seeders\EavDbSeeder::class,
+			Database\Seeders\LocaleDbSeeder::class,
+			Database\Seeders\FileDbSeeder::class,
+			Database\Seeders\WorkflowDbSeeder::class,
+		];
+	}
+
+	protected function cleanupSeeders(): array
+	{
+		return [
+			Database\Seeders\ClearDB::class,
+		];
+	}
+
+	protected function dispatch(object $command): mixed
+	{
+		return $this->app->make(CommandDispatcher::class)->dispatch($command);
+	}
+
+	protected function resetMetaDataCache(): void
+	{
+		foreach (['attributes', 'attributeSets', 'entityTypes', 'workflows', 'workflowPoints', 'locales'] as $key) {
+			Cache::forget($key);
+		}
+
+		$reflection = new ReflectionClass(MetaDataService::class);
+
+		foreach (['attributes', 'attributeSets', 'entityTypes', 'workflows', 'workflowPoints', 'locales'] as $property) {
+			$refProperty = $reflection->getProperty($property);
+			$refProperty->setAccessible(true);
+			$refProperty->setValue(null, null);
+		}
+
+		$this->app->forgetInstance(MetaDataService::class);
+		$this->app->forgetInstance('Congraph\Eav\Services\MetaDataService');
+	}
+
+	protected function assertArraySubset(array $subset, array $array, string $path = 'root'): void
+	{
+		foreach ($subset as $key => $expected) {
+			Assert::assertArrayHasKey($key, $array, "Missing key [$path.$key]");
+
+			$actual = $array[$key];
+
+			if (is_array($expected)) {
+				Assert::assertIsArray($actual, "Expected array at [$path.$key]");
+				$this->assertArraySubset($expected, $actual, "$path.$key");
+				continue;
+			}
+
+			Assert::assertSame($expected, $actual, "Mismatch at [$path.$key]");
+		}
 	}
 }

@@ -8,7 +8,6 @@ use Congraph\Filesystem\Commands\Files\FileDeleteCommand;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
-use Elasticsearch\ClientBuilder;
 
 require_once(__DIR__ . '/../TestCase.php');
 
@@ -28,8 +27,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -79,8 +77,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -130,8 +127,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -199,8 +195,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -248,11 +243,11 @@ class FieldsTest extends TestCase
 		// $this->d->dump($array);
 
 		// $this->assertTrue(is_int($result->id));
-		$this->assertArraySubset([
-			'fields' => [
-				'test_multiselect_attribute' => null
-			]
-		], $array);
+			$this->assertArraySubset([
+				'fields' => [
+					'test_multiselect_attribute' => []
+				]
+			], $array);
 	}
 
 	public function testIntegerField()
@@ -268,8 +263,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -319,8 +313,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -370,8 +363,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -423,8 +415,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -476,8 +467,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -543,19 +533,18 @@ class FieldsTest extends TestCase
 		$entityWithFile = $repo->create($params);
 		$repo->refreshIndex();
 
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
-		$command = $app->make(FileDeleteCommand::class);
+		
+		$command = $this->app->make(FileDeleteCommand::class);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithFile->id);
 		$this->assertFalse(isset($changedEntity->fields->test_asset_attribute));
 
-		$command = $app->make(FileDeleteCommand::class);
+		$command = $this->app->make(FileDeleteCommand::class);
 		$command->setId(2);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 	}
 
@@ -575,8 +564,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -631,11 +619,11 @@ class FieldsTest extends TestCase
 		// $this->d->dump($array);
 
 		// $this->assertTrue(is_int($result->id));
-		$this->assertArraySubset([
-			'fields' => [
-				'test_assetcollection_attribute' => null
-			]
-		], $array);
+			$this->assertArraySubset([
+				'fields' => [
+					'test_assetcollection_attribute' => []
+				]
+			], $array);
 
 		// file remove handler
 		$params = [
@@ -652,11 +640,10 @@ class FieldsTest extends TestCase
 		$entityWithFile = $repo->create($params);
 		$repo->refreshIndex();
 
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
-		$command = $app->make(FileDeleteCommand::class);
+		
+		$command = $this->app->make(FileDeleteCommand::class);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithFile->id);
@@ -668,9 +655,9 @@ class FieldsTest extends TestCase
 			$this->assertNotEquals(1, $value['id']);
 		}
 
-		$command = $app->make(FileDeleteCommand::class);
+		$command = $this->app->make(FileDeleteCommand::class);
 		$command->setId(2);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithFile->id);
@@ -692,8 +679,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -759,19 +745,18 @@ class FieldsTest extends TestCase
 		$entityWithRelation = $repo->create($params);
 		$repo->refreshIndex();
 
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
-		$command = $app->make(EntityDeleteCommand::class);
+		
+		$command = $this->app->make(EntityDeleteCommand::class);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithRelation->id);
 		$this->assertFalse(isset($changedEntity->fields->test_relation_attribute));
 
-		$command = $app->make(EntityDeleteCommand::class);
+		$command = $this->app->make(EntityDeleteCommand::class);
 		$command->setId(2);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 	}
 
@@ -791,8 +776,7 @@ class FieldsTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -847,11 +831,11 @@ class FieldsTest extends TestCase
 		// $this->d->dump($array);
 
 		// $this->assertTrue(is_int($result->id));
-		$this->assertArraySubset([
-			'fields' => [
-				'test_relationcollection_attribute' => null
-			]
-		], $array);
+			$this->assertArraySubset([
+				'fields' => [
+					'test_relationcollection_attribute' => []
+				]
+			], $array);
 
 		// file remove handler
 		$params = [
@@ -868,11 +852,10 @@ class FieldsTest extends TestCase
 		$entityWithRelation = $repo->create($params);
 		$repo->refreshIndex();
 
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
-		$command = $app->make(EntityDeleteCommand::class);
+		
+		$command = $this->app->make(EntityDeleteCommand::class);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithRelation->id);
@@ -884,9 +867,9 @@ class FieldsTest extends TestCase
 			$this->assertNotEquals(1, $value['id']);
 		}
 
-		$command = $app->make(EntityDeleteCommand::class);
+		$command = $this->app->make(EntityDeleteCommand::class);
 		$command->setId(2);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		$changedEntity = $repo->fetch($entityWithRelation->id);

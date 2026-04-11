@@ -10,7 +10,13 @@
 
 namespace Congraph\EntityElastic\Validators;
 
+use Congraph\Contracts\Eav\FieldValidatorFactoryContract;
+use Congraph\EntityElastic\Commands\Entities\EntityFetchCommand;
+use Congraph\EntityElastic\Commands\Entities\EntityGetCommand;
+use Congraph\EntityElastic\Repositories\EntityRepository;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Bus\Dispatcher;
+use Congraph\Eav\Managers\AttributeManager;
 
 use Congraph\EntityElastic\Validators\Entities\EntityFetchValidator;
 use Congraph\EntityElastic\Validators\Entities\EntityGetValidator;
@@ -59,13 +65,11 @@ class ValidatorsServiceProvider extends ServiceProvider {
 		$mappings = [
 			
 			// Entities
-			'Congraph\EntityElastic\Commands\Entities\EntityFetchCommand' => 
-				'Congraph\EntityElastic\Validators\Entities\EntityFetchValidator@validate',
-			'Congraph\EntityElastic\Commands\Entities\EntityGetCommand' => 
-				'Congraph\EntityElastic\Validators\Entities\EntityGetValidator@validate',
+			EntityFetchCommand::class => EntityFetchValidator::class . '@validate',
+			EntityGetCommand::class => EntityGetValidator::class . '@validate',
 		];
 
-		$this->app->make('Illuminate\Contracts\Bus\Dispatcher')->mapValidators($mappings);
+		$this->app->make(Dispatcher::class)->mapValidators($mappings);
 	}
 
 	/**
@@ -78,15 +82,15 @@ class ValidatorsServiceProvider extends ServiceProvider {
 
 		// Entities
 		
-		$this->app->bind('Congraph\EntityElastic\Validators\Entities\EntityFetchValidator', function($app){
+		$this->app->bind(EntityFetchValidator::class, function($app){
 			return new EntityFetchValidator(
-				$app->make('Congraph\EntityElastic\Repositories\EntityRepository')
+				$app->make(EntityRepository::class)
 			);
 		});
-		$this->app->bind('Congraph\EntityElastic\Validators\Entities\EntityGetValidator', function($app){
+		$this->app->bind(EntityGetValidator::class, function($app){
 			return new EntityGetValidator(
-				$app->make('Congraph\Eav\Managers\AttributeManager'),
-				$app->make('Congraph\Contracts\Eav\FieldValidatorFactoryContract')
+				$app->make(AttributeManager::class),
+				$app->make(FieldValidatorFactoryContract::class)
 			);
 		});
 	}
@@ -100,11 +104,8 @@ class ValidatorsServiceProvider extends ServiceProvider {
 	public function provides()
 	{
 		return [
-
-			// Entities
-			'Congraph\EntityElastic\Validators\Entities\EntityFetchValidator',
-			'Congraph\EntityElastic\Validators\Entities\EntityGetValidator'
-
+			EntityFetchValidator::class,
+			EntityGetValidator::class,
 		];
 	}
 }

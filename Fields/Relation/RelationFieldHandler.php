@@ -10,15 +10,14 @@
 
 namespace Congraph\EntityElastic\Fields\Relation;
 
-use Elasticsearch\Client;
+use OpenSearch\Client;
 use Congraph\EntityElastic\Fields\AbstractFieldHandler;
 use Congraph\Eav\Managers\AttributeManager;
-use Elasticsearch\ClientBuilder;
 use Congraph\Eav\Facades\MetaData;
 use Congraph\Core\Facades\Trunk;
 use Congraph\Eav\Repositories\EntityRepository;
 use Congraph\EntityElastic\Repositories\EntityRepository as EntityElasticRepository;
-use Elasticsearch\Common\Exceptions\Missing404Exception;
+use OpenSearch\Common\Exceptions\Missing404Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use stdClass;

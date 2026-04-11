@@ -12,7 +12,6 @@ use Congraph\Eav\Commands\EntityTypes\EntityTypeDeleteCommand;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
-use Elasticsearch\ClientBuilder;
 
 require_once(__DIR__ . '/../TestCase.php');
 
@@ -23,9 +22,7 @@ class EavEventsHandlersTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+						$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
 		$params = [
 			'entity_type' => ['id' => 1],
@@ -38,9 +35,9 @@ class EavEventsHandlersTest extends TestCase
 			]
 		];
 		
-		$command = $app->make(EntityCreateCommand::class);
+		$command = $this->app->make(EntityCreateCommand::class);
 		$command->setParams($params);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 
 		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
 		$this->assertTrue(is_int($result->id));
@@ -71,9 +68,9 @@ class EavEventsHandlersTest extends TestCase
 		
 		try
 		{
-			$command = $app->make(EntityCreateCommand::class);
+			$command = $this->app->make(EntityCreateCommand::class);
 		$command->setParams($params);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		}
 		catch(\Exception $e)
 		{
@@ -107,9 +104,7 @@ class EavEventsHandlersTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+						$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
 		$params = [
 			'fields' => [
@@ -119,10 +114,10 @@ class EavEventsHandlersTest extends TestCase
 			]
 		];
 		
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		
 		
 		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
@@ -152,18 +147,16 @@ class EavEventsHandlersTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+						$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
 		$params = [
 			'status' => 'draft'
 		];
 		
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		
 		
 		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
@@ -191,10 +184,10 @@ class EavEventsHandlersTest extends TestCase
 			'status' => 'published'
 		];
 		
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		
 		
 		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
@@ -227,10 +220,10 @@ class EavEventsHandlersTest extends TestCase
 			'locale' => 'en_US'
 		];
 		
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		
 		
 		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
@@ -257,10 +250,10 @@ class EavEventsHandlersTest extends TestCase
 			'locale' => 'en_US'
 		];
 		
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		
 		
 		$this->assertTrue($result instanceof Congraph\Core\Repositories\Model);
@@ -286,12 +279,10 @@ class EavEventsHandlersTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
-		$command = $app->make(EntityDeleteCommand::class);
+						$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		$command = $this->app->make(EntityDeleteCommand::class);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 
 		$this->assertEquals(1, $result->id);
 		// $this->d->dump($result);
@@ -312,13 +303,11 @@ class EavEventsHandlersTest extends TestCase
 	public function testDeleteAttributeSet()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
-		$app = $this->createApplication();
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+						$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
-		$command = $app->make(AttributeSetDeleteCommand::class);
+		$command = $this->app->make(AttributeSetDeleteCommand::class);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 
 		$this->assertEquals(1, $result->id);
 		// $this->d->dump($result);
@@ -336,13 +325,11 @@ class EavEventsHandlersTest extends TestCase
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
 
-		$app = $this->createApplication();
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+						$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 
-		$command = $app->make(EntityTypeDeleteCommand::class);
+		$command = $this->app->make(EntityTypeDeleteCommand::class);
 		$command->setId(1);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 
 		$this->assertEquals(1, $result->id);
 		// $this->d->dump($result);

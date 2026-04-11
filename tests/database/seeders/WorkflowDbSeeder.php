@@ -33,7 +33,7 @@ class WorkflowDbSeeder extends Seeder {
 
 	public function run()
 	{
-		DB::table('workflows')->truncate();
+		reset_table('workflows');
 		DB::table('workflows')->insert([
 			[
 				'name' => 'Default',
@@ -49,7 +49,7 @@ class WorkflowDbSeeder extends Seeder {
 			]
 		]);
 
-		DB::table('workflow_points')->truncate();
+		reset_table('workflow_points');
 		DB::table('workflow_points')->insert([
 			[
 				'workflow_id' => 1,
@@ -105,7 +105,7 @@ class WorkflowDbSeeder extends Seeder {
 			],
 		]);
 
-		DB::table('workflow_steps')->truncate();
+		reset_table('workflow_steps');
 		DB::table('workflow_steps')->insert([
 			[
 				'workflow_id' => 2,

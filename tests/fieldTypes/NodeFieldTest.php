@@ -8,7 +8,6 @@ use Congraph\Filesystem\Commands\Files\FileDeleteCommand;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
-use Elasticsearch\ClientBuilder;
 
 require_once(__DIR__ . '/../TestCase.php');
 
@@ -29,8 +28,7 @@ class NodeFieldTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -67,16 +65,14 @@ class NodeFieldTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
+		
+		$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
-		$command = $app->make(EntityCreateCommand::class);
+		$command = $this->app->make(EntityCreateCommand::class);
 		$command->setParams($params);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$array = $result->toArray();
 		// $this->d->dump($array);
 
@@ -110,10 +106,10 @@ class NodeFieldTest extends TestCase
 			]
 		];
 
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId($result->id);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		// $result = $repo->update($result->id, $params);

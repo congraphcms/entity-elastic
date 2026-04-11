@@ -10,7 +10,12 @@
 
 namespace Congraph\EntityElastic\Repositories;
 
+use Congraph\Contracts\Core\ObjectResolverContract;
+use Congraph\EntityElastic\Fields\FieldHandlerFactory;
+use Congraph\EntityElastic\Services\EntityFormater;
+use Congraph\Eav\Managers\AttributeManager;
 use Illuminate\Support\ServiceProvider;
+use OpenSearch\Client;
 
 /**
  * RepositoriesServiceProvider service provider for managers
@@ -27,13 +32,6 @@ use Illuminate\Support\ServiceProvider;
  */
 class RepositoriesServiceProvider extends ServiceProvider
 {
-
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
 
     /**
      * Boot
@@ -78,18 +76,22 @@ class RepositoriesServiceProvider extends ServiceProvider
      */
     public function registerRepositories()
     {
-        $this->app->singleton('Congraph\EntityElastic\Repositories\EntityRepository', function ($app) {
-            // var_dump('Contract for attribute repository resolving...');
+        $this->app->singleton(EntityRepository::class, function ($app) {
             return new EntityRepository(
-                $app->make('Elasticsearch\Client'),
-                $app->make('Congraph\EntityElastic\Fields\FieldHandlerFactory'),
-                $app->make('Congraph\Eav\Managers\AttributeManager'),
-                $app->make('Congraph\EntityElastic\Services\EntityFormater')
+                $app->make(Client::class),
+                $app->make(FieldHandlerFactory::class),
+                $app->make(AttributeManager::class),
+                $app->make(EntityFormater::class)
             );
         });
 
         $this->app->alias(
-            'Congraph\EntityElastic\Repositories\EntityRepository',
+            EntityRepository::class,
+            EntityRepositoryContract::class
+        );
+
+        $this->app->alias(
+            EntityRepository::class,
             'Congraph\EntityElastic\Repositories\EntityRepositoryContract'
         );
     }
@@ -105,7 +107,7 @@ class RepositoriesServiceProvider extends ServiceProvider
             // 'entity' => 'Congraph\EntityElastic\Repositories\EntityElasticRepository',
         ];
 
-        $this->app->make('Congraph\Contracts\Core\ObjectResolverContract')->maps($mappings);
+        $this->app->make(ObjectResolverContract::class)->maps($mappings);
     }
 
     /**
@@ -116,7 +118,8 @@ class RepositoriesServiceProvider extends ServiceProvider
     public function provides()
     {
         return [
-            'Congraph\EntityElastic\Repositories\EntityRepository',
+            EntityRepository::class,
+            EntityRepositoryContract::class,
             'Congraph\EntityElastic\Repositories\EntityRepositoryContract'
         ];
     }

@@ -21,8 +21,6 @@ use Congraph\Eav\Facades\MetaData;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use Elasticsearch\Client;
-use Elasticsearch\ClientBuilder;
 use stdClass;
 
 /**

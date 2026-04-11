@@ -10,7 +10,7 @@
 
 namespace Congraph\EntityElastic\Services;
 
-use Elasticsearch\Client;
+use OpenSearch\Client;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Arr;
 

@@ -35,75 +35,75 @@ class ClearDB extends Seeder {
 	{
 		if (Schema::hasTable('entity_types'))
 		{
-			DB::table('entity_types')->truncate();
+			reset_table('entity_types');
 		}
 		if (Schema::hasTable('attributes'))
 		{
-			DB::table('attributes')->truncate();
+			reset_table('attributes');
 		}
 		if (Schema::hasTable('attribute_options'))
 		{
-			DB::table('attribute_options')->truncate();
+			reset_table('attribute_options');
 		}
 		if (Schema::hasTable('attribute_sets'))
 		{
-			DB::table('attribute_sets')->truncate();
+			reset_table('attribute_sets');
 		}
 		if (Schema::hasTable('set_attributes'))
 		{
-			DB::table('set_attributes')->truncate();
+			reset_table('set_attributes');
 		}
 		if (Schema::hasTable('entities'))
 		{
-			DB::table('entities')->truncate();
+			reset_table('entities');
 		}
 		if (Schema::hasTable('entity_statuses'))
 		{
-			DB::table('entity_statuses')->truncate();
+			reset_table('entity_statuses');
 		}
 		if (Schema::hasTable('attribute_values_varchar'))
 		{
-			DB::table('attribute_values_varchar')->truncate();
+			reset_table('attribute_values_varchar');
 		}
 		if (Schema::hasTable('attribute_values_fulltext'))
 		{
-			DB::table('attribute_values_fulltext')->truncate();
+			reset_table('attribute_values_fulltext');
 		}
 		if (Schema::hasTable('attribute_values_text'))
 		{
-			DB::table('attribute_values_text')->truncate();
+			reset_table('attribute_values_text');
 		}
 		if (Schema::hasTable('attribute_values_integer'))
 		{
-			DB::table('attribute_values_integer')->truncate();
+			reset_table('attribute_values_integer');
 		}
 		if (Schema::hasTable('attribute_values_decimal'))
 		{
-			DB::table('attribute_values_decimal')->truncate();
+			reset_table('attribute_values_decimal');
 		}
 		if (Schema::hasTable('attribute_values_datetime'))
 		{
-			DB::table('attribute_values_datetime')->truncate();
+			reset_table('attribute_values_datetime');
 		}
 		if (Schema::hasTable('files'))
 		{
-			DB::table('files')->truncate();
+			reset_table('files');
 		}
 		if (Schema::hasTable('locales'))
 		{
-			DB::table('locales')->truncate();
+			reset_table('locales');
 		}
 		if (Schema::hasTable('workflows'))
 		{
-			DB::table('workflows')->truncate();
+			reset_table('workflows');
 		}
 		if (Schema::hasTable('workflow_points'))
 		{
-			DB::table('workflow_points')->truncate();
+			reset_table('workflow_points');
 		}
 		if (Schema::hasTable('workflow_steps'))
 		{
-			DB::table('workflow_steps')->truncate();
+			reset_table('workflow_steps');
 		}
 	}
 

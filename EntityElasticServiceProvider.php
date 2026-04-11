@@ -10,6 +10,12 @@
 
 namespace Congraph\EntityElastic;
 
+use Congraph\EntityElastic\Commands\CommandsServiceProvider;
+use Congraph\EntityElastic\Console\Commands\IndexAllCommand;
+use Congraph\EntityElastic\Fields\FieldsServiceProvider;
+use Congraph\EntityElastic\Repositories\RepositoriesServiceProvider;
+use Congraph\EntityElastic\Services\ServicesServiceProvider;
+use Congraph\EntityElastic\Validators\ValidatorsServiceProvider;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -48,6 +54,10 @@ class EntityElasticServiceProvider extends ServiceProvider {
 			__DIR__.'/config/config.php' => config_path('cb.elastic.php'),
 			__DIR__.'/config/eav.php' => config_path('cb.eav.php'),
 		]);
+
+		$this->commands([
+			IndexAllCommand::class,
+		]);
 	}
 
 	/**
@@ -56,30 +66,25 @@ class EntityElasticServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	protected function registerServiceProviders() {
-
-        if(!config('cb.eav.using_elastic')) {
-            return;
-        }
-
 		// Fields
 		// -----------------------------------------------------------------------------
-		$this->app->register('Congraph\EntityElastic\Fields\FieldsServiceProvider');
+		$this->app->register(FieldsServiceProvider::class);
 
 		// Services
 		// -----------------------------------------------------------------------------
-		$this->app->register('Congraph\EntityElastic\Services\ServicesServiceProvider');
+		$this->app->register(ServicesServiceProvider::class);
 
 		// Validators
 		// -----------------------------------------------------------------------------
-		$this->app->register('Congraph\EntityElastic\Validators\ValidatorsServiceProvider');
+		$this->app->register(ValidatorsServiceProvider::class);
 
 		// Repositories
 		// -----------------------------------------------------------------------------
-		$this->app->register('Congraph\EntityElastic\Repositories\RepositoriesServiceProvider');
+		$this->app->register(RepositoriesServiceProvider::class);
 
 		// Commands
 		// -----------------------------------------------------------------------------
-		$this->app->register('Congraph\EntityElastic\Commands\CommandsServiceProvider');
+		$this->app->register(CommandsServiceProvider::class);
 
 
 

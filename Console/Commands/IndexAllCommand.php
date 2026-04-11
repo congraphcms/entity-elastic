@@ -11,14 +11,16 @@
 namespace Congraph\EntityElastic\Console\Commands;
 
 use Congraph\Contracts\Eav\EntityRepositoryContract;
+use Congraph\EntityElastic\Repositories\EntityRepositoryContract as EntityElasticRepositoryContract;
 use Congraph\Core\Repositories\Collection;
-use Elasticsearch\Client;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 use Throwable;
 
 
 final class IndexAllCommand extends Command
 {
+    private const BATCH_SIZE = 10;
 
     /**
      * @var string
@@ -28,26 +30,57 @@ final class IndexAllCommand extends Command
     /**
      * @var \Congraph\Contracts\Eav\EntityRepositoryContract
      */
-    private $repository;
+    private EntityRepositoryContract $repository;
+
+    /**
+     * @var \Congraph\EntityElastic\Repositories\EntityRepositoryContract
+     */
+    private EntityElasticRepositoryContract $elasticRepository;
 
     public function __construct(
-        EntityRepositoryContract $repo
+        EntityRepositoryContract $repo,
+        EntityElasticRepositoryContract $elasticRepository
     ) {
         $this->repository = $repo;
+        $this->elasticRepository = $elasticRepository;
 
         parent::__construct();
     }
 
     public function handle(): int
     {
-
+        Config::set('cb.elastic.indexing', true);
         try {
-            $result = $this->getBatch();
-            $total = $result->getMeta('total');
-            $count = $result->getMeta('count');
-            $this->info("Fetched {$count} of {$total} records");
+            $page = 0;
+            $bar = null;
+
+            while (true) {
+                $result = $this->getBatch($page);
+                $total = (int) $result->getMeta('total');
+                $count = (int) $result->getMeta('count');
+
+                if ($bar === null) {
+                    $bar = $this->output->createProgressBar($total);
+                }
+
+                foreach ($result as $entity) {
+                    $this->elasticRepository->create($entity);
+                    $bar->advance();
+                }
+
+                if ($count === 0 || ($page + 1) * self::BATCH_SIZE >= $total) {
+                    break;
+                }
+
+                $page++;
+            }
+
+            if ($bar !== null) {
+                $bar->finish();
+                $this->newLine();
+            }
         } catch (Throwable $e) {
-            $this->writeln();
+            $this->newLine();
             $this->error(
                 sprintf(
                     'Error: %s.',
@@ -55,14 +88,15 @@ final class IndexAllCommand extends Command
                 )
             );
 
-            return self::FAILURE;
+            throw $e;
+        } finally {
+            Config::set('cb.elastic.indexing', false);
         }
 
         return self::SUCCESS;
     }
 
     private function getBatch(int $page = 0): Collection {
-        $filter = []; $offset = 0; $limit = 0; $sort = []; $include = []; $locale = null; $status = null;
-        return $this->repository->get([], $page * 10, 10, ['id'], [], null, null);
+        return $this->repository->get([], $page * self::BATCH_SIZE, self::BATCH_SIZE, ['created_at', 'id'], [], null, null);
     }
 }

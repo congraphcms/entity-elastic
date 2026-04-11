@@ -9,26 +9,69 @@
     ],
     "repositories": [
         {
-            "type": "vcs",
-            "url": "https://github.com/nikolaplavsic/phpunit-arraysubset-asserts.git"
+            "type": "path",
+            "url": "../core",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "../contracts",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "../filesystem",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "../locales",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "../workflows",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "../eav",
+            "options": {
+                "symlink": true
+            }
         }
     ],
     "require": {
-        "php": "^8.2",
-        "illuminate/database": "^11",
-        "congraph/core": "^1.1",
-        "congraph/contracts": "^1.1",
-        "congraph/filesystem": "^1.1",
-        "congraph/locales": "^1.1",
-        "congraph/workflows": "^1.1",
-        "congraph/eav": "^1.1",
-        "elasticsearch/elasticsearch": "7.17.*",
+        "php": "^8.3 || ^8.4 || ^8.5",
+        "illuminate/database": "^13.0",
+        "congraph/core": "^1.1 || dev-main || dev-master",
+        "congraph/contracts": "^1.1 || dev-main || dev-master",
+        "congraph/filesystem": "^1.1 || dev-main || dev-master",
+        "congraph/locales": "^1.1 || dev-main || dev-master",
+        "congraph/workflows": "^1.1 || dev-main || dev-master",
+        "congraph/eav": "^1.1 || dev-main || dev-master",
+        "opensearch-project/opensearch-php": "^2.3 || ^3.0",
         "guzzlehttp/guzzle": "^7.5"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.0",
-        "orchestra/testbench": "^8.0",
-        "dms/phpunit-arraysubset-asserts": "dev-master"
+        "mockery/mockery": "^1.6.12",
+        "phpunit/phpunit": "^12.0",
+        "orchestra/testbench": "11.x-dev"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:pgsql": "bash ../../tools/test-postgres-package.sh .",
+        "test:opensearch": "bash ../../tools/test-opensearch-package.sh ."
     },
     "autoload": {
         "psr-4": {
@@ -36,6 +79,7 @@
         }
     },
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "config": {
         "allow-plugins": {
             "php-http/discovery": true

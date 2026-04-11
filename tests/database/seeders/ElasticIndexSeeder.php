@@ -10,9 +10,7 @@
 
 namespace Database\Seeders;
 
-use Elasticsearch\ClientBuilder;
 use Illuminate\Support\Facades\Config;
-use Elasticsearch\Common\Exceptions\NoNodesAvailableException;
 
 /**
  * ElasticIndexSeeder

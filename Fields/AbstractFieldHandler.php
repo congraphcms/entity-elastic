@@ -15,7 +15,7 @@ use Congraph\Core\Traits\ErrorManagerTrait;
 use Congraph\Eav\Managers\AttributeManager;
 
 use Congraph\EntityElastic\Traits\ElasticQueryBuilderTrait;
-use Elasticsearch\Client;
+use OpenSearch\Client;
 use Illuminate\Support\Facades\Config;
 
 /**
@@ -39,9 +39,9 @@ abstract class AbstractFieldHandler
 	use ElasticQueryBuilderTrait;
 
 	/**
-     * Elasticsearch client
+     * OpenSearch client
      *
-     * @var \Elasticsearch\Client
+     * @var \OpenSearch\Client
      */
     protected $client;
 

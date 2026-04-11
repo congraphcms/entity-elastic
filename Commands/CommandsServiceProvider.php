@@ -10,7 +10,11 @@
 
 namespace Congraph\EntityElastic\Commands;
 
+use Congraph\EntityElastic\Console\Commands\IndexAllCommand;
+use Congraph\EntityElastic\Repositories\EntityRepository;
+use Congraph\EntityElastic\Repositories\EntityRepositoryContract as EntityElasticRepositoryContract;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Support\DeferrableProvider;
 
 use Congraph\EntityElastic\Commands\Entities\EntityFetchCommand;
 use Congraph\EntityElastic\Commands\Entities\EntityGetCommand;
@@ -28,14 +32,14 @@ use Congraph\EntityElastic\Commands\Entities\EntityGetCommand;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-class CommandsServiceProvider extends ServiceProvider {
+class CommandsServiceProvider extends ServiceProvider implements DeferrableProvider {
 
-	/**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-	protected $defer = true;
+	public function boot()
+	{
+		$this->commands([
+			IndexAllCommand::class,
+		]);
+	}
 
 
 	/**
@@ -53,13 +57,19 @@ class CommandsServiceProvider extends ServiceProvider {
 	* @return void
 	*/
 	public function registerCommands() {
+		$this->app->bind(IndexAllCommand::class, function($app){
+			return new IndexAllCommand(
+				$app->make('Congraph\Contracts\Eav\EntityRepositoryContract'),
+				$app->make(EntityElasticRepositoryContract::class)
+			);
+		});
 
 		$this->app->bind(EntityFetchCommand::class, function($app){
-			return new EntityFetchCommand($app->make('Congraph\EntityElastic\Repositories\EntityRepository'));
+			return new EntityFetchCommand($app->make(EntityRepository::class));
 		});
 
 		$this->app->bind(EntityGetCommand::class, function($app){
-			return new EntityGetCommand($app->make('Congraph\EntityElastic\Repositories\EntityRepository'));
+			return new EntityGetCommand($app->make(EntityRepository::class));
 		});
 	}
 
@@ -71,9 +81,9 @@ class CommandsServiceProvider extends ServiceProvider {
 	public function provides()
 	{
 		return [
-			// EAV Elastic
-			'Congraph\EntityElastic\Commands\Entities\EntityFetchCommand',
-			'Congraph\EntityElastic\Commands\Entities\EntityGetCommand'
+			IndexAllCommand::class,
+			EntityFetchCommand::class,
+			EntityGetCommand::class,
 		];
 	}
 }

@@ -20,7 +20,8 @@ use Congraph\Core\Exceptions\BadRequestException;
 use Congraph\Eav\Facades\MetaData;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
-use Elasticsearch\Client;
+use OpenSearch\Client;
+use OpenSearch\Common\Exceptions\Missing404Exception;
 use Congraph\Core\Exceptions\NotFoundException;
 use \Exception;
 
@@ -117,42 +118,42 @@ class CompoundFieldHandler extends AbstractFieldHandler
 
 					$fieldValue = null;
 					$takeFromEntity = true;
-					if (array_key_exists('fields', $params) && is_array($params['fields']) && array_key_exists($code, $params['fields'])) {
-						// var_dump('calculate from params - ' . $localeCode . ' - ' . $locale);
-						// var_dump($params['fields'][$code]);
-						if ($localeCode && is_array($params['fields'][$code]) && array_key_exists($localeCode, $params['fields'][$code])) {
-							// var_dump('localized params');
-							$fieldValue = $params['fields'][$code][$localeCode];
-							$takeFromEntity = false;
-						} else {
-							// var_dump('flat params');
-							$fieldValue = $params['fields'][$code];
-							$takeFromEntity = false;
+						if (array_key_exists('fields', $params) && is_array($params['fields']) && array_key_exists($code, $params['fields'])) {
+							// var_dump('calculate from params - ' . $localeCode . ' - ' . $locale);
+							// var_dump($params['fields'][$code]);
+							if ($localeCode && is_array($params['fields'][$code]) && array_key_exists($localeCode, $params['fields'][$code])) {
+								// var_dump('localized params');
+								$fieldValue = $params['fields'][$code][$localeCode];
+								$takeFromEntity = false;
+							} else {
+								// var_dump('flat params');
+								$fieldValue = $params['fields'][$code];
+								$takeFromEntity = false;
+							}
 						}
-					}
 
-					if ($entity && $takeFromEntity) {
+						if ($entity && $takeFromEntity) {
 						// var_dump('calculate from entity - ' . $localeCode . ' - ' . $locale);
 						if ($localized && $localeCode) {
 							$code = $code . '__' . $localeCode;
 						}
-						if (array_key_exists($code, $entity['_source']['fields'])) {
-							$fieldValue = $entity['_source']['fields'][$code];
+							if (array_key_exists($code, $entity['_source']['fields'])) {
+								$fieldValue = $entity['_source']['fields'][$code];
+							}
 						}
-					}
 
-					$provisionalValue = $fieldValue;
-					break;
-				case 'operator':
-					switch ($input->value) {
-						case 'CONCAT':
-							$remainingInputs = array_slice($inputs, 0, count($inputs) - 1 - $key);
-							$fieldValue = $this->calculate($remainingInputs, $locale, $params, $entity);
-							// var_dump('CONCAT values');
-							// var_dump($fieldValue);
-							// var_dump($provisionalValue);
-							return $fieldValue . $provisionalValue;
-							break;
+						$provisionalValue = $this->normalizeCalculatedValue($fieldValue, $localeCode);
+						break;
+					case 'operator':
+						switch ($input->value) {
+							case 'CONCAT':
+								$remainingInputs = array_slice($inputs, 0, count($inputs) - 1 - $key);
+								$fieldValue = $this->calculate($remainingInputs, $locale, $params, $entity);
+								// var_dump('CONCAT values');
+								// var_dump($fieldValue);
+								// var_dump($provisionalValue);
+								return $this->normalizeCalculatedValue($fieldValue, $localeCode) . $this->normalizeCalculatedValue($provisionalValue, $localeCode);
+								break;
 
 						default:
 							throw new BadRequestException('Invalid compound field operator');
@@ -166,6 +167,27 @@ class CompoundFieldHandler extends AbstractFieldHandler
 		}
 
 		return $provisionalValue;
+	}
+
+	protected function normalizeCalculatedValue($value, $localeCode = false)
+	{
+		if (!is_array($value)) {
+			return $value;
+		}
+
+		if ($localeCode && array_key_exists($localeCode, $value)) {
+			return $this->normalizeCalculatedValue($value[$localeCode], false);
+		}
+
+		foreach ($value as $candidate) {
+			$normalized = $this->normalizeCalculatedValue($candidate, false);
+
+			if ($normalized !== null && $normalized !== '') {
+				return $normalized;
+			}
+		}
+
+		return null;
 	}
 
 	protected function getExpectedValue($value, $attribute)
@@ -205,7 +227,7 @@ class CompoundFieldHandler extends AbstractFieldHandler
 
 		try {
 			$entity = $this->client->get($query);
-		} catch (\Elasticsearch\Common\Exceptions\Missing404Exception $e) {
+		} catch (Missing404Exception $e) {
 			// throw new NotFoundException(['Entity not found.']);
 			return;
 		}
@@ -260,7 +282,7 @@ class CompoundFieldHandler extends AbstractFieldHandler
 
 		try {
 			$entity = $this->client->get($query);
-		} catch (\Elasticsearch\Common\Exceptions\Missing404Exception $e) {
+		} catch (Missing404Exception $e) {
 			throw new NotFoundException(['Entity not found.']);
 		}
 

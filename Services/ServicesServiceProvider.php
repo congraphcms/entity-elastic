@@ -10,9 +10,10 @@
 
 namespace Congraph\EntityElastic\Services;
 
+use Congraph\EntityElastic\Fields\FieldHandlerFactory;
 use Illuminate\Support\ServiceProvider;
-use Elasticsearch\Client;
 use Illuminate\Contracts\Container\Container;
+use OpenSearch\Client;
 
 /**
  * ServicesServiceProvider service provider for services
@@ -28,13 +29,6 @@ use Illuminate\Contracts\Container\Container;
  * @version  	0.1.0-alpha
  */
 class ServicesServiceProvider extends ServiceProvider {
-
-	/**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-	protected $defer = true;
 
 	/**
 	 * Boot
@@ -81,7 +75,7 @@ class ServicesServiceProvider extends ServiceProvider {
             return new ESFactory();
         });
 
-        $app->singleton('cb.elastic', function($app) {
+		$app->singleton('cb.elastic', function($app) {
             return new ESManager($app, $app['cb.elastic.factory']);
         });
 
@@ -93,26 +87,12 @@ class ServicesServiceProvider extends ServiceProvider {
 
 
 
-		$this->app->singleton('Congraph\EntityElastic\Services\EntityFormater', function($app) {
-			// var_dump('Contract for attribute repository resolving...');
+		$this->app->singleton(EntityFormater::class, function($app) {
 			return new EntityFormater(
-				$app->make('Congraph\EntityElastic\Fields\FieldHandlerFactory'),
+				$app->make(FieldHandlerFactory::class),
 				$app->make('Congraph\Eav\Managers\AttributeManager')
 			);
 		});
 	}
-
-	/**
-	 * Get the services provided by the provider.
-	 *
-	 * @return array
-	 */
-	public function provides()
-	{
-		return [
-			'Congraph\EntityElastic\Services\EntityFormater',
-		];
-	}
-
 
 }

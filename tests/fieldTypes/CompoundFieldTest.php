@@ -28,8 +28,7 @@ class CompoundFieldTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -68,8 +67,7 @@ class CompoundFieldTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
 		$this->elasticSeeder->up();
 
 		$result = $repo->create($params);
@@ -151,17 +149,15 @@ class CompoundFieldTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
+		
+		$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		
 		$this->elasticSeeder->up();
 		$repo->refreshIndex();
 
-		$command = $app->make(EntityCreateCommand::class);
+		$command = $this->app->make(EntityCreateCommand::class);
 		$command->setParams($params);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$array = $result->toArray();
 		// $this->d->dump($array);
 
@@ -192,10 +188,10 @@ class CompoundFieldTest extends TestCase
 			]
 		];
 
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId($result->id);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		// $result = $repo->update($result->id, $params);
@@ -240,15 +236,13 @@ class CompoundFieldTest extends TestCase
 			]
 		];
 
-		$app = $this->createApplication();
-
-		$repo = $app->make('Congraph\EntityElastic\Repositories\EntityRepository');
-		$bus = $app->make('Congraph\Core\Bus\CommandDispatcher');
-
+		
+		$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		
 		$repo->refreshIndex();
-		$command = $app->make(EntityCreateCommand::class);
+		$command = $this->app->make(EntityCreateCommand::class);
 		$command->setParams($params);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$array = $result->toArray();
 		// $this->d->dump($array);
 
@@ -287,10 +281,10 @@ class CompoundFieldTest extends TestCase
 				'test_compound_text1_attribute' => 'changed'
 			]
 		];
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId($result->id);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		// $result = $repo->update($result->id, $params);
@@ -329,10 +323,10 @@ class CompoundFieldTest extends TestCase
 			]
 		];
 
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId($result->id);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		// $result = $repo->update($result->id, $params);
@@ -368,10 +362,10 @@ class CompoundFieldTest extends TestCase
 			]
 		];
 
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId($result->id);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		// $result = $repo->update($result->id, $params);
@@ -424,10 +418,10 @@ class CompoundFieldTest extends TestCase
 			]
 		];
 
-		$command = $app->make(EntityUpdateCommand::class);
+		$command = $this->app->make(EntityUpdateCommand::class);
 		$command->setParams($params);
 		$command->setId($result->id);
-		$result = $bus->dispatch($command);
+		$result = $this->dispatch($command);
 		$repo->refreshIndex();
 
 		// $result = $repo->update($result->id, $params);

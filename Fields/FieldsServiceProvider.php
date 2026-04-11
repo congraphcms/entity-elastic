@@ -10,7 +10,23 @@
 
 namespace Congraph\EntityElastic\Fields;
 
+use Congraph\EntityElastic\Fields\Asset\AssetFieldHandler;
+use Congraph\EntityElastic\Fields\Boolean\BooleanFieldHandler;
+use Congraph\EntityElastic\Fields\Datetime\DatetimeFieldHandler;
+use Congraph\EntityElastic\Fields\Decimal\DecimalFieldHandler;
+use Congraph\EntityElastic\Fields\Integer\IntegerFieldHandler;
+use Congraph\EntityElastic\Fields\Location\LocationFieldHandler;
+use Congraph\EntityElastic\Fields\Node\NodeFieldHandler;
+use Congraph\EntityElastic\Fields\Relation\RelationFieldHandler;
+use Congraph\EntityElastic\Fields\Select\SelectFieldHandler;
+use Congraph\EntityElastic\Fields\Text\TextFieldHandler;
+use Congraph\EntityElastic\Fields\Textarea\TextareaFieldHandler;
+use Congraph\EntityElastic\Repositories\EntityRepository as ElasticEntityRepository;
+use Congraph\EntityElastic\Services\EntityFormater;
+use Congraph\Eav\Managers\AttributeManager;
+use Congraph\Eav\Repositories\EntityRepository;
 use Illuminate\Support\ServiceProvider;
+use OpenSearch\Client;
 
 /**
  * FieldsServiceProvider service provider for handlers
@@ -27,13 +43,6 @@ use Illuminate\Support\ServiceProvider;
  */
 class FieldsServiceProvider extends ServiceProvider
 {
-
-	/**
-	 * Indicates if loading of the provider is deferred.
-	 *
-	 * @var bool
-	 */
-	protected $defer = true;
 
 	/**
 	 * Boot
@@ -78,10 +87,10 @@ class FieldsServiceProvider extends ServiceProvider
 	protected function registerFactories()
 	{
 		$this->app
-			->singleton('Congraph\EntityElastic\Fields\FieldHandlerFactory', function ($app) {
+			->singleton(FieldHandlerFactory::class, function ($app) {
 				return new FieldHandlerFactory(
 					$app['app'],
-					$app->make('Congraph\Eav\Managers\AttributeManager')
+					$app->make(AttributeManager::class)
 				);
 			});
 	}
@@ -93,75 +102,75 @@ class FieldsServiceProvider extends ServiceProvider
 	 */
 	protected function registerFieldHandlers()
 	{
-		$this->app->singleton('Congraph\EntityElastic\Fields\Asset\AssetFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Asset\AssetFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+		$this->app->singleton(AssetFieldHandler::class, function ($app) {
+			return new AssetFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Boolean\BooleanFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Boolean\BooleanFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+		$this->app->singleton(BooleanFieldHandler::class, function ($app) {
+			return new BooleanFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Datetime\DatetimeFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Datetime\DatetimeFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+		$this->app->singleton(DatetimeFieldHandler::class, function ($app) {
+			return new DatetimeFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Decimal\DecimalFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Decimal\DecimalFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+		$this->app->singleton(DecimalFieldHandler::class, function ($app) {
+			return new DecimalFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Integer\IntegerFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Integer\IntegerFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+		$this->app->singleton(IntegerFieldHandler::class, function ($app) {
+			return new IntegerFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Relation\RelationFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Relation\RelationFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager'),
-				$app->make('Congraph\Eav\Repositories\EntityRepository'),
-				$app->make('Congraph\EntityElastic\Repositories\EntityRepository')
+		$this->app->singleton(RelationFieldHandler::class, function ($app) {
+			return new RelationFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class),
+				$app->make(EntityRepository::class),
+				$app->make(ElasticEntityRepository::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Select\SelectFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Select\SelectFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+		$this->app->singleton(SelectFieldHandler::class, function ($app) {
+			return new SelectFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Text\TextFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Text\TextFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+		$this->app->singleton(TextFieldHandler::class, function ($app) {
+			return new TextFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Textarea\TextareaFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Textarea\TextareaFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+		$this->app->singleton(TextareaFieldHandler::class, function ($app) {
+			return new TextareaFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Location\LocationFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Location\LocationFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager')
+		$this->app->singleton(LocationFieldHandler::class, function ($app) {
+			return new LocationFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class)
 			);
 		});
-		$this->app->singleton('Congraph\EntityElastic\Fields\Node\NodeFieldHandler', function ($app) {
-			return new \Congraph\EntityElastic\Fields\Node\NodeFieldHandler(
-				$app->make('Elasticsearch\Client'),
-				$app->make('Congraph\Eav\Managers\AttributeManager'),
-				$app->make('Congraph\EntityElastic\Services\EntityFormater'),
-				$app->make('Congraph\Eav\Repositories\EntityRepository'),
-				$app->make('Congraph\EntityElastic\Repositories\EntityRepository')
+		$this->app->singleton(NodeFieldHandler::class, function ($app) {
+			return new NodeFieldHandler(
+				$app->make(Client::class),
+				$app->make(AttributeManager::class),
+				$app->make(EntityFormater::class),
+				$app->make(EntityRepository::class),
+				$app->make(ElasticEntityRepository::class)
 			);
 		});
 	}
@@ -173,7 +182,7 @@ class FieldsServiceProvider extends ServiceProvider
 	public function provides()
 	{
 		$provides = [
-			'Congraph\EntityElastic\Fields\FieldHandlerFactory'
+			FieldHandlerFactory::class
 		];
 
 		$field_types = $this->app['config']->get('cb.eav');

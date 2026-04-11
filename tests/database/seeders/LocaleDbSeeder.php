@@ -33,7 +33,7 @@ class LocaleDbSeeder extends Seeder {
 
 	public function run()
 	{
-		DB::table('locales')->truncate();
+		reset_table('locales');
 		DB::table('locales')->insert([
 			[
 				'code' => 'en_US',
