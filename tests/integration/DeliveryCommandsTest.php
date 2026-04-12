@@ -98,4 +98,20 @@ class DeliveryCommandsTest extends TestCase
 
 	}
 
+	public function testGetEntitiesSupportsPrefixFulltextSearch()
+	{
+		fwrite(STDOUT, __METHOD__ . "\n");
+
+						$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
+		$repo->refreshIndex();
+
+		$command = $this->app->make(EntityGetCommand::class);
+		$command->setParams(['filter' => ['s' => 'value3-e'], 'locale' => 'en_US']);
+		$result = $this->dispatch($command);
+
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
+		$this->assertGreaterThan(0, count($result));
+	}
+
 }

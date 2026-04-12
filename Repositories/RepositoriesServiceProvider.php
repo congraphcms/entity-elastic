@@ -61,12 +61,15 @@ class RepositoriesServiceProvider extends ServiceProvider
      */
     protected function registerListeners()
     {
-        $this->app['events']->listen('cb.after.entity.create', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityCreated', 100);
-        $this->app['events']->listen('cb.after.entity.update', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityUpdated', 100);
-        $this->app['events']->listen('cb.after.entity.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityDeleted', 100);
-        $this->app['events']->listen('cb.after.attribute.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onAttributeDeleted', 100);
-        $this->app['events']->listen('cb.after.attribute.set.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onAttributeSetDeleted', 100);
-        $this->app['events']->listen('cb.after.entity.type.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityTypeDeleted', 100);
+        // Run after app-level listeners so OpenSearch reflects the final persisted state.
+        $priority = -100;
+
+        $this->app['events']->listen('cb.after.entity.create', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityCreated', $priority);
+        $this->app['events']->listen('cb.after.entity.update', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityUpdated', $priority);
+        $this->app['events']->listen('cb.after.entity.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityDeleted', $priority);
+        $this->app['events']->listen('cb.after.attribute.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onAttributeDeleted', $priority);
+        $this->app['events']->listen('cb.after.attribute.set.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onAttributeSetDeleted', $priority);
+        $this->app['events']->listen('cb.after.entity.type.delete', 'Congraph\EntityElastic\Repositories\EntityRepository@onEntityTypeDeleted', $priority);
     }
 
     /**

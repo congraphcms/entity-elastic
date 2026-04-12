@@ -207,6 +207,28 @@ class EntityRepositoryTest extends TestCase
 		$this->assertTrue(!empty($result->toArray()));
 	}
 
+	public function testGetFilterByCreatedAtIsoDate()
+	{
+		fwrite(STDOUT, __METHOD__ . "\n");
+				$repo = $this->app->make('Congraph\EntityElastic\Repositories\EntityRepository');
+		$this->elasticSeeder->up();
+
+		$repo->refreshIndex();
+
+		$result = $repo->get(
+			/*$filter = */ 	['created_at' => ['gte' => '1970-01-01T00:00:00.000Z']],
+			/*$offset = */ 	null,
+			/*$limit = */  	null,
+			/*$sort = */   	null,
+			/*$include = */	[],
+			/*$locale = */	null,
+			/*$status = */	null
+		);
+
+		$this->assertTrue($result instanceof Congraph\Core\Repositories\Collection);
+		$this->assertGreaterThan(0, count($result->toArray()));
+	}
+
 	public function testGetSort()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");

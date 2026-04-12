@@ -29,7 +29,6 @@ use Congraph\EntityElastic\Services\EntityFormater;
 use Congraph\Eav\Commands\Entities\EntityCreateCommand;
 use Congraph\Eav\Facades\MetaData;
 
-
 use OpenSearch\Client;
 use OpenSearch\Common\Exceptions\Missing404Exception;
 use Illuminate\Support\Facades\Config;
@@ -948,6 +947,8 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
                 continue;
             }
 
+            $filter = $this->normalizeSystemFilterValue($key, $filter);
+
             if (!is_array($filter)) {
                 $query = $this->addTermQuery($query, $key, $filter);
                 continue;
@@ -972,6 +973,40 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         }
 
         return [$query, $doSorting];
+    }
+
+    protected function normalizeSystemFilterValue($key, $filter)
+    {
+        if (! in_array($key, ['created_at', 'updated_at'], true)) {
+            return $filter;
+        }
+
+        if (is_array($filter)) {
+            foreach ($filter as $operator => $value) {
+                $filter[$operator] = $this->normalizeTimestampValue($value);
+            }
+
+            return $filter;
+        }
+
+        return $this->normalizeTimestampValue($filter);
+    }
+
+    protected function normalizeTimestampValue($value)
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && preg_match('/^\d+$/', $value)) {
+            return (int) $value;
+        }
+
+        if (is_string($value) && trim($value) !== '') {
+            return Carbon::parse($value)->tz('UTC')->getTimestamp();
+        }
+
+        return $value;
     }
 
     protected function castCodesToIDs($codes, $type)
@@ -1095,7 +1130,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             $boost = floatval($boostKey);
             if (!empty($values)) {
                 $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'cross_fields', true, $boost * 1);
-                // $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
+                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
                 $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase', true, $boost * 3);
             }
         }
@@ -1104,7 +1139,7 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
             $boost = floatval($boostKey);
             if (!empty($values)) {
                 $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'cross_fields', true, $boost * 1);
-                // $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
+                $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase_prefix', true, $boost * 2);
                 $query = $this->addMultiMatchQuery($query, $values, $fulltextSearch, 'phrase', true, $boost * 3);
             }
         }
@@ -1290,14 +1325,56 @@ class EntityRepository implements EntityRepositoryContract //, UsesCache
         if (! is_null($locale)) {
             $locale = (MetaData::getLocaleById($locale))?MetaData::getLocaleById($locale):MetaData::getLocaleByCode($locale);
 
+            if (! is_object($locale) || ! isset($locale->code)) {
+                Log::warning('EntityElastic parseLocale failed to resolve locale metadata.', [
+                    'requested_locale' => $locale,
+                    'available_locales' => $this->describeLocales(MetaData::getLocales()),
+                ]);
+
+                throw new \InvalidArgumentException('Invalid locale metadata.');
+            }
+
             $localeCodes[] = $locale->code;
         } else {
             foreach (MetaData::getLocales() as $l) {
+                if (! is_object($l) || ! isset($l->code)) {
+                    Log::warning('EntityElastic parseLocale skipping malformed locale metadata entry.', [
+                        'locale_entry' => $l,
+                    ]);
+                    continue;
+                }
+
                 $localeCodes[] = $l->code;
             }
         }
 
         return array($locale, $localeCodes);
+    }
+
+    protected function describeLocales($locales): array
+    {
+        $description = [];
+
+        if (! is_iterable($locales)) {
+            return ['non_iterable'];
+        }
+
+        foreach ($locales as $locale) {
+            if (is_object($locale)) {
+                $description[] = [
+                    'type' => get_class($locale),
+                    'id' => $locale->id ?? null,
+                    'code' => $locale->code ?? null,
+                ];
+            } else {
+                $description[] = [
+                    'type' => gettype($locale),
+                    'value' => $locale,
+                ];
+            }
+        }
+
+        return $description;
     }
 
 
